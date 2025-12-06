@@ -1,0 +1,46 @@
+🌍 GEOPOL - Analyseur Géopolitique Intelligent
+Contact : ohenri.b@gmail.com / olivier.bellanza@ac-toulouse.fr (Un grand merci a DeepSeek et a Claude pour leur aide capitale). Système d'analyse avancée des flux médiatiques/sociaux, d'indicateurs géopolitiques avec IA pour la veille géopolitique. Tableau de bord ETR pour la veille stratégique. Analyse en temps réel des tendances géopolitiques avec IA intégrées (RoBERTa + Llama 3.2). Intégration de SpaCy pour NER (Named Entity Recognition)
+
+Seul outil pédagogique géopolitique open-source en français
+
+Concurrents : GDELT (anglais, complexe), MediaCloud (archivé)
+
+Approche Multi-Échelles: Du local (cartographie narrative) au global (rapports synthétiques) Correspond aux programmes scolaires (géopolitique en Term ES/L/S/sup.)
+
+🚀 Fonctionnalités Principales
+
+🔍 Analyse Sémantique Avancée
+RoBERTa pour l'analyse fine des sentiments et émotions
+Llama 3.2 pour la génération de rapports intelligents
+MAJ 27/11 ==> Le modele IA est egalement integre comme "assistant geopolitique" dans l'interface via fenetre flottante
+Classification automatique par thèmes géopolitiques configurables (utiliser llama.cpp avec modele gguf)
+Spacy pour le NER (recherche et construction des réseaux d'influences=> pays, villes, organisations, personnalités ((entities = nlp(article_text).ents))
+
+📊 Tableaux de Bord Interactifs
+Visualisation en temps réel des tendances
+Statistiques détaillées par thème et sentiment
+Évolution temporelle sur 30 jours
+Indicateurs macroéconomiques (français pour la version V.06pp, source Eurostat et scrap leger INSEE) "mode scolaire"
+Veille Economique en temps reel, et comparaison avec les pays de la zone Euros (utilise sources Eurostat, yFinance) "Mode etendu Recherche" MAJ3011=> Integration en cours Surveillance des indicateurs clés (VIX (indice de peur des marchés),Pétrole Brent (baromètre géopolitique),Or (valeur refuge),taux des bonds (sentiment risque),Devises refuges (A definir)), Corrélations géopolitiques (detec. de patterns exemple :"tensions_russes": ["RTSI", "Gazprom", "Rosneft"],"crise_moyen_orient": ["pétrole", "or", "VIX"])
+
+🌐 Agrégation Multi-Sources
+Flux RSS traditionnels
+Réseaux sociaux (Twitter via Nitter, Reddit)
+Archives historiques (Archive.org depuis 1945)
+Sources Economiques : INSEE, Eurostat, World Bank, yFinance
+WebSDR
+
+🤖 Intelligence Artificielle
+Détection d'anomalies et tendances émergentes
+Corroboration automatique entre sources (automatisée dans la V.0.6)
+Analyse bayésienne pour la confiance (automatisée dans la V.0.6)
+Génération de rapports d'analyses en PDF automatisés
+Affinage des résultats automatiques (-> Deeplearning)
+Fonctions d'Assistance IA 
+
+⚙️ Installation
+Prérequis
+Python 3.8+
+llama.cpp
+6GB RAM minimum (8GB pour IA rec. MINIMUM ====>Mistral 3.2 3b (Q4) 3/4 Go, RoBERTa 1/1,5 Go, Spacy 1/2 Go, serveur logiciel 2/2,5 Go)
+7GB espace disque (sans compter le modèle gguf et les donnees de vos traitements. Compter 15 Go d'espace disque pour un mois d'analyses sur 200/300 sources)
