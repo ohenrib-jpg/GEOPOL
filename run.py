@@ -88,16 +88,22 @@ def main():
         print("💡 Fermez d'autres applications et réessayez")
         return
     
-    # Démarrage de l'application
-    print(f"\n🌐 Application disponible sur: http://localhost:{port}")
-    print("📊 Base de données: rss_analyzer.db")
-    print("🛑 Pour arrêter: Ctrl+C")
-    print("-" * 50)
-    
+    # IMPORTATION CORRECTE de l'application
     try:
         from Flask.app_factory import create_app
         app = create_app()
+        
+        print(f"\n🌐 Application disponible sur: http://localhost:{port}")
+        print("📊 Base de données: rss_analyzer.db")
+        print("🛑 Pour arrêter: Ctrl+C")
+        print("-" * 50)
+        
+        # Démarrer l'application
         app.run(debug=True, host='0.0.0.0', port=port)
+        
+    except ImportError as e:
+        print(f"\n❌ Erreur d'importation: {e}")
+        print("💡 Vérifiez que le module Flask/app_factory.py existe")
     except Exception as e:
         print(f"\n❌ Erreur au démarrage: {e}")
         import traceback
