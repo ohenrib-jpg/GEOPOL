@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "id": "worldbank_gini",
+  "name": "Indice GINI (inégalités)",
+  "value": 31.8,
+  "previous_value": 31.2,
+  "change": 0.6,
+  "change_percent": 1.92,
+  "unit": "Points (0-100)",
+  "period": "2023",
+  "previous_period": "2022",
+  "source": "Banque Mondiale",
+  "description": "Coefficient de GINI - Mesure des inégalités de revenus",
+  "category": "inequality",
+  "reliability": "official",
+  "last_update": "2025-12-06T03:17:29.888450",
+  "interpretation": "Inégalités modérées",
+  "note": "Données Banque Mondiale"
+}
