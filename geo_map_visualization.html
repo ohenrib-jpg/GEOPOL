@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte Géopolitique - GEOPOL</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #333;
+            padding: 0;
+        }
+
+        .container {
+            padding: 10px;
+            max-width: 100%;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+            .header h1 {
+                color: #2563eb;
+                margin-bottom: 5px;
+                font-size: 1.4em;
+            }
+
+            .header p {
+                color: #666;
+                font-size: 0.9em;
+            }
+
+        .controls {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .control-group label {
+                font-weight: 600;
+                color: #555;
+                font-size: 0.9em;
+            }
+
+        select, button {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+            select:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+            button:hover {
+                background: #1d4ed8;
+                transform: translateY(-1px);
+            }
+
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        #map {
+            height: 400px;
+            border-radius: 8px;
+            border: 2px solid #f0f0f0;
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .patterns-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .pattern-item {
+            background: #f8f9fa;
+            border-left: 3px solid #2563eb;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+            .pattern-item:hover {
+                background: #e9ecef;
+                transform: translateX(3px);
+            }
+
+        .pattern-text {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .pattern-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .country-badge {
+            background: #2563eb;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 1em;
+            color: #2563eb;
+        }
+
+        .leaflet-popup-content {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.9em;
+        }
+
+        .popup-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .popup-info {
+            margin: 3px 0;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: space-between;
+            }
+
+            #map {
+                height: 300px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Cartographie Géopolitique</h1>
+            <p>Visualisation des patterns transnationaux et réseaux d'influence</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="dayRange">Période:</label>
+                <select id="dayRange">
+                    <option value="1">24h</option>
+                    <option value="3">3 jours</option>
+                    <option value="7" selected>7 jours</option>
+                    <option value="14">14 jours</option>
+                    <option value="30">30 jours</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="minCountries">Pays min:</label>
+                <input type="number" id="minCountries" min="2" max="10" value="2" style="width: 60px;">
+            </div>
+
+            <button onclick="loadData()">🔄 Actualiser</button>
+            <button onclick="exportData()">📥 Exporter</button>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="stats-panel">
+            <h2 style="color: #2563eb; margin-bottom: 15px; font-size: 1.2em;">📊 Statistiques</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPatterns">0</div>
+                    <div class="stat-label">Patterns</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="countriesCount">0</div>
+                    <div class="stat-label">Pays</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="strongestPattern">-</div>
+                    <div class="stat-label">Force max</div>
+                </div>
+            </div>
+
+            <h3 style="color: #555; margin-bottom: 10px; font-size: 1em;">🔍 Patterns Détectés</h3>
+            <div id="patternsList" class="patterns-list"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+    <script>
+        // Variables globales
+        let map, markers = {}, connections = [], currentData = null;
+        let currentDays = 7;
+
+        // Écouter les messages du parent
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'UPDATE_MAP_PARAMS') {
+                currentDays = event.data.days;
+                document.getElementById('dayRange').value = currentDays;
+                loadData();
+            }
+        });
+
+        // Initialiser la carte
+        function initMap() {
+            map = L.map('map').setView([50, 10], 4);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+        }
+
+        // Fonction de chargement des données
+        async function loadData() {
+            const days = document.getElementById('dayRange').value;
+            const minCountries = document.getElementById('minCountries').value;
+
+            document.getElementById('patternsList').innerHTML = '<div class="loading">⏳ Chargement...</div>';
+
+            try {
+                const response = await fetch(`/api/geo-narrative/patterns?days=${days}&min_countries=${minCountries}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Vérifier si c'est la réponse de la nouvelle route ou l'ancienne
+                    if (data.patterns !== undefined) {
+                        currentData = data.patterns;  // Nouveau format
+                    } else {
+                        currentData = data;  // Ancien format
+                    }
+
+                    updateMap(currentData);
+                    updateStats(currentData);
+                    updatePatternsList(currentData);
+                } else {
+                    throw new Error('Erreur API: ' + response.status);
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                // Données de démonstration
+                const mockData = generateMockData();
+                currentData = mockData;
+                updateMap(mockData);
+                updateStats(mockData);
+                updatePatternsList(mockData);
+            }
+        }
+
+        // Initialiser au chargement
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+            loadData();
+        });
+
+        // [Les autres fonctions restent identiques...]
+        function updateMap(data) {
+            // Nettoyer les marqueurs existants
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            connections.forEach(line => map.removeLayer(line));
+            markers = {};
+            connections = [];
+
+            // Compter les patterns par pays
+            const countryCounts = {};
+            data.forEach(pattern => {
+                pattern.countries.forEach(country => {
+                    countryCounts[country] = (countryCounts[country] || 0) + 1;
+                });
+            });
+
+            // Coordonnées des pays
+            const countryCoords = {
+                'FR': [46.2276, 2.2137], 'DE': [51.1657, 10.4515], 'UK': [55.3781, -3.4360],
+                'US': [37.0902, -95.7129], 'ES': [40.4637, -3.7492], 'IT': [41.8719, 12.5674],
+                'CN': [35.8617, 104.1954], 'JP': [36.2048, 138.2529], 'RU': [61.5240, 105.3188]
+            };
+
+            const countryNames = {
+                'FR': 'France', 'DE': 'Allemagne', 'UK': 'Royaume-Uni', 'US': 'États-Unis',
+                'ES': 'Espagne', 'IT': 'Italie', 'CN': 'Chine', 'JP': 'Japon', 'RU': 'Russie'
+            };
+
+            // Ajouter les marqueurs
+            Object.entries(countryCounts).forEach(([country, count]) => {
+                if (countryCoords[country]) {
+                    const coords = countryCoords[country];
+                    const size = 10 + (count * 3);
+
+                    const marker = L.circleMarker(coords, {
+                        radius: size,
+                        fillColor: '#2563eb',
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+
+                    const popupContent = `
+                            <div class="popup-title">${countryNames[country]}</div>
+                            <div class="popup-info"><strong>${count}</strong> patterns</div>
+                        `;
+
+                    marker.bindPopup(popupContent);
+                    markers[country] = marker;
+                }
+            });
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalPatterns').textContent = data.length;
+
+            const uniqueCountries = new Set();
+            data.forEach(pattern => {
+                pattern.countries.forEach(c => uniqueCountries.add(c));
+            });
+            document.getElementById('countriesCount').textContent = uniqueCountries.size;
+
+            if (data.length > 0) {
+                const strongest = data.reduce((max, p) =>
+                    (p.strength > max.strength) ? p : max, data[0]);
+                document.getElementById('strongestPattern').textContent = strongest.strength;
+            }
+        }
+
+        function updatePatternsList(data) {
+            const list = document.getElementById('patternsList');
+
+            if (data.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 py-4">Aucun pattern</div>';
+                return;
+            }
+
+            list.innerHTML = data.slice(0, 5).map(pattern => `
+                    <div class="pattern-item" onclick="highlightPattern('${pattern.pattern}')">
+                        <div class="pattern-text">"${pattern.pattern}"</div>
+                        <div class="pattern-meta">
+                            <span>🌍 ${pattern.countries.join(', ')}</span>
+                            <span class="country-badge">${pattern.strength}</span>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function generateMockData() {
+            return [
+                {
+                    pattern: "sanctions économiques contre",
+                    countries: ["FR", "DE", "UK", "US"],
+                    strength: 4
+                },
+                {
+                    pattern: "négociations de paix",
+                    countries: ["FR", "DE", "IT"],
+                    strength: 3
+                }
+            ];
+        }
+
+        function exportData() {
+            if (!currentData) return;
+            // Logique d'export...
+            console.log('Export des données:', currentData);
+        }
+    </script>
+</body>
+</html>

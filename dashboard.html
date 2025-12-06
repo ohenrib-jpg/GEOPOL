@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analytique | GEOPOL Analytics</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles Mission Control -->
+    <style>
+        /* DESIGN MISSION CONTROL - DASHBOARD */
+
+        /* Bandeau principal héroïque */
+        .mission-header {
+            background:
+                linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%),
+                url('{{ url_for("static", filename="space.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            height: 140px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #f59e0b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Effet radar animé */
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .radar-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent 0deg,
+                rgba(34, 197, 94, 0.1) 30deg,
+                transparent 60deg,
+                rgba(59, 130, 246, 0.1) 120deg,
+                transparent 150deg,
+                rgba(245, 158, 11, 0.1) 210deg,
+                transparent 240deg,
+                rgba(239, 68, 68, 0.1) 300deg,
+                transparent 330deg
+            );
+            animation: radar-sweep 8s linear infinite;
+            transform-origin: 0 0;
+        }
+
+        /* Typographie inspirée militaire */
+        .mission-title {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-weight: 800;
+            color: #f59e0b;
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(245, 158, 11, 0.4),
+                0 0 30px rgba(245, 158, 11, 0.2);
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+
+        .mission-title::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg,
+                rgba(245, 158, 11, 0.1) 0%,
+                rgba(132, 204, 22, 0.1) 50%,
+                rgba(6, 182, 212, 0.1) 100%);
+            filter: blur(15px);
+            z-index: -1;
+            border-radius: 10px;
+        }
+
+        .mission-subtitle {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Badges de statut */
+        .status-badge {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-online {
+            border-left: 3px solid #10b981;
+        }
+
+        .status-dashboard {
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* Bandeau défilant */
+        #tickerBanner {
+            background: linear-gradient(90deg,
+                rgba(15, 23, 42, 0.95) 0%,
+                rgba(30, 41, 59, 0.9) 50%,
+                rgba(15, 23, 42, 0.95) 100%);
+            border-top: 1px solid #334155;
+            border-bottom: 1px solid #334155;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .ticker-container {
+            display: inline-block;
+            animation: ticker 120s linear infinite;
+            padding-left: 100%;
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin: 0 40px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Cartes de données style "interface tactique" */
+        .data-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f59e0b, #84cc16, #06b6d4);
+        }
+
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Indicateurs animés */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse-indicator {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Cartes Stats spécifiques */
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Effets cosmiques subtils */
+        .cosmic-dots::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, rgba(59, 130, 246, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 30% 70%, rgba(34, 197, 94, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 70% 40%, rgba(245, 158, 11, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 90% 80%, rgba(239, 68, 68, 0.4) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Bouton d'arrêt amélioré */
+        .btn-shutdown {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-shutdown:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mission-header {
+                height: 100px;
+            }
+
+            .mission-title {
+                font-size: 1.5rem;
+            }
+
+            .ticker-container {
+                animation: ticker 60s linear infinite;
+            }
+        }
+
+        /* Animation de pulsation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- EN-TÊTE MISSION CONTROL - DASHBOARD -->
+    <header class="mission-header radar-effect cosmic-dots">
+        <div class="container mx-auto px-6 h-full flex items-center justify-between">
+            <!-- Logo et identité -->
+            <div class="flex items-center space-x-6">
+                <div class="relative group">
+                    <img src="{{ url_for('static', filename='logo.png') }}"
+                         alt="GEOPOL Analytics"
+                         class="h-16 w-auto object-contain drop-shadow-lg">
+                    <div class="absolute -inset-2 bg-blue-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300 -z-10"></div>
+                </div>
+
+                <div class="flex flex-col">
+                    <h1 class="mission-title text-4xl">DASHBOARD ANALYTIQUE</h1>
+                    <p class="mission-subtitle text-sm mt-1">
+                        <i class="fas fa-chart-bar mr-2 pulse-indicator"></i>
+                        Vue d'ensemble avec analyse RoBERTa 4 catégories
+                    </p>
+                </div>
+            </div>
+
+            <!-- Statuts et informations -->
+            <div class="flex flex-col space-y-2 items-end">
+                <div class="flex space-x-3">
+                    <div class="status-badge status-online flex items-center space-x-2">
+                        <i class="fas fa-circle text-green-500 text-xs"></i>
+                        <span>En ligne</span>
+                    </div>
+                    <div class="status-badge status-dashboard flex items-center space-x-2">
+                        <i class="fas fa-tachometer-alt text-blue-500 text-xs"></i>
+                        <span>Mode Analyse</span>
+                    </div>
+                </div>
+
+                <div class="text-slate-300 text-xs font-mono">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <i class="fas fa-robot text-blue-400"></i>
+                        <span>RoBERTa • 4 Catégories • Analyse en temps réel</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-brain text-purple-400"></i>
+                        <span>IA Géopolitique Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRE D'OUTILS -->
+    <nav class="bg-slate-800 border-b border-slate-700 shadow-lg">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center py-3">
+                <div>
+                    <div class="flex items-center space-x-4 text-slate-300 text-sm">
+                        <a href="/" class="hover:text-yellow-400 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>Retour Accueil
+                        </a>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-database text-green-400"></i>
+                            <span>Base active</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-bolt text-yellow-400"></i>
+                            <span>IA Opérationnelle</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <span id="currentTime" class="text-slate-300 font-mono text-sm"></span>
+                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- BANDEAU DÉFILANT -->
+    <div id="tickerBanner" class="py-2">
+        <div class="ticker-container">
+            <span class="ticker-item text-green-400">📊 ANALYSE EN TEMPS RÉEL</span>
+            <span class="ticker-item text-blue-300">🎯 RoBERTa 4 catégories: Positif, Neutre Positif, Neutre Négatif, Négatif</span>
+            <span class="ticker-item text-yellow-300">📈 Surveillance géopolitique active</span>
+            <span class="ticker-item text-purple-300">🔍 Analyse sentimentale avancée</span>
+            <span class="ticker-item text-green-400">🌍 Veille internationale</span>
+            <span class="ticker-item text-blue-300">📚 Base de données opérationnelle</span>
+            <span class="ticker-item text-yellow-300">⚡ Performance optimisée</span>
+            <span class="ticker-item text-purple-300">🧠 Intelligence Artificielle active</span>
+        </div>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Articles -->
+            <div class="data-card stat-card p-6" style="border-left-color: #3b82f6;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-600 font-medium">Total Articles</p>
+                        <p id="statTotalArticles" class="text-3xl font-bold text-slate-800 mt-2">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-newspaper text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Positifs -->
+            <div class="data-card stat-card p-6" style="border-left-color: #10b981;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-600 font-medium">Articles Positifs</p>
+                        <p id="statPositiveArticles" class="text-3xl font-bold text-green-600 mt-2">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-smile text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Négatifs -->
+            <div class="data-card stat-card p-6" style="border-left-color: #ef4444;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-600 font-medium">Articles Négatifs</p>
+                        <p id="statNegativeArticles" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-frown text-red-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thèmes Actifs -->
+            <div class="data-card stat-card p-6" style="border-left-color: #8b5cf6;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-600 font-medium">Thèmes Actifs</p>
+                        <p id="statActiveThemes" class="text-3xl font-bold text-purple-600 mt-2">0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-tags text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Sentiment Chart -->
+            <div class="data-card p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">
+                    <i class="fas fa-chart-pie mr-3 text-blue-600"></i>
+                    Distribution des Sentiments
+                </h2>
+                <div class="relative h-80">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <div class="mt-4 text-sm text-slate-600 space-y-2">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span><strong>Positif:</strong> Score > 0.3</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                        <span><strong>Neutre Positif:</strong> Score 0.05 à 0.3</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                        <span><strong>Neutre Négatif:</strong> Score -0.05 à -0.3</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span><strong>Négatif:</strong> Score < -0.3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme Chart -->
+            <div class="data-card p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">
+                    <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
+                    Articles par Thème
+                </h2>
+                <div class="relative h-80">
+                    <canvas id="themeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="data-card p-6 mb-8">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">
+                <i class="fas fa-timeline mr-3 text-green-600"></i>
+                Évolution Temporelle
+            </h2>
+            <div class="relative h-96">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Popular Themes -->
+        <div class="data-card p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">
+                <i class="fas fa-trophy mr-3 text-yellow-600"></i>
+                Thèmes Populaires
+            </h2>
+            <div id="popularThemes" class="space-y-3">
+                <div class="text-center py-8 text-slate-500">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton d'arrêt -->
+        <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+            <button id="shutdownBtn" class="btn-shutdown">
+                <i class="fas fa-power-off mr-2"></i>
+                Arrêt propre du système
+            </button>
+            <p class="text-sm text-slate-500 mt-2">
+                Sauvegarde toutes les données avant l'arrêt complet
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/shutdown.js') }}"></script>
+
+    <script>
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("📊 Dashboard Mission Control Initialisé");
+
+            // Mise à jour de l'heure
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const dateString = now.toLocaleDateString('fr-FR', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short'
+                });
+
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = `${dateString} • ${timeString}`;
+                }
+            }
+
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // Gestionnaire d'arrêt
+            const shutdownBtn = document.getElementById('shutdownBtn');
+            if (shutdownBtn) {
+                shutdownBtn.addEventListener('click', function () {
+                    if (confirm('⚠️ Voulez-vous vraiment arrêter le système ?\n\nToutes les données seront sauvegardées avant l\'arrêt.')) {
+                        const originalHTML = shutdownBtn.innerHTML;
+                        shutdownBtn.innerHTML = `
+                                <div class="flex items-center space-x-2">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                    <span>Sauvegarde en cours...</span>
+                                </div>
+                            `;
+                        shutdownBtn.disabled = true;
+
+                        // Appel API d'arrêt
+                        fetch('/api/shutdown', { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert('✅ Système arrêté avec succès');
+                                    window.location.href = '/';
+                                } else {
+                                    throw new Error(data.message || 'Erreur lors de l\'arrêt');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erreur arrêt:', error);
+                                alert('❌ Erreur lors de l\'arrêt du système');
+                                shutdownBtn.innerHTML = originalHTML;
+                                shutdownBtn.disabled = false;
+                            });
+                    }
+                });
+            }
+
+            // Initialiser les charts
+            setTimeout(() => {
+                if (typeof initDashboard === 'function') {
+                    initDashboard();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

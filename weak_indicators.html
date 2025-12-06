@@ -1,0 +1,1900 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Ticker défilant -->
+    <div class="mb-6">
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <div class="flex items-center">
+                <i class="fas fa-broadcast-tower text-yellow-400 mr-3"></i>
+                <div class="overflow-hidden whitespace-nowrap">
+                    <div class="inline-block animate-marquee">
+                        <span class="font-mono text-slate-300 text-sm">
+                            🛰️ SDR ACTIF • Fréquences: 2182 kHz (Urgence) • 121.5 MHz (Aéronautique) • 4625 kHz (Militaire) •
+                            📡 3 Serveurs Opérationnels • 🌍 Mode Surveillance Globale Activé •
+                            ⚠️ Dernière anomalie détectée: 4625 kHz •
+                            📊 Stockage: 1.4TB • Latence: 24ms
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton retour -->
+    <div class="mb-6">
+        <a href="/" class="inline-flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-blue px-4 py-2 rounded-lg transition-all duration-300 border border-slate-600 shadow-lg hover:shadow-xs">
+            <i class="fas fa-arrow-left"></i>
+            <span>Retour au Tableau de Bord</span>
+        </a>
+    </div>
+
+    <!-- Titre de page -->
+    <div class="mb-8">
+        <h1 class="text-xl font-bold text-slate-800 flex items-center">
+            <i class="fas fa-satellite-dish text-blue-500 mr-3"></i>
+            Surveillance - Indicateurs Stratégiques (SDR, Avis aux voyageurs, Alertes bourses)
+            <span class="ml-3 badge-new">rtl-SDR</span>
+        </h1>
+        <p class="text-slate-600 mt-2">
+            <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+            Système de surveillance de la disponibilité du réseau WebSDR (sans écoute)
+            Une perte de signal ou une indisponibilité sur zones critiques peut indiquer des activités suspectes.
+        </p>
+    </div>
+
+    <!-- Navigation par onglets -->
+    <div class="mb-8">
+        <div class="border-b border-slate-200">
+            <nav class="flex space-x-8">
+                <button id="tab-sdr" class="tab-button py-3 px-4 font-medium text-slate-700 border-b-2 border-blue-500 text-blue-600 flex items-center space-x-2">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>Moniteur SDR</span>
+                </button>
+                <button id="tab-travel" class="tab-button py-3 px-4 font-medium text-slate-600 hover:text-slate-800 flex items-center space-x-2">
+                    <i class="fas fa-plane"></i>
+                    <span>Avis aux Voyageurs</span>
+                </button>
+                <button id="tab-stock" class="tab-button py-3 px-4 font-medium text-slate-600 hover:text-slate-800 flex items-center space-x-2">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Suivi Personnalisé</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Contenu des onglets -->
+    <div id="tab-content">
+        <!-- Onglet 1: Moniteur SDR -->
+        <div id="content-sdr" class="tab-panel">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="data-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-3xl font-bold text-blue-600" id="total-frequencies">0</div>
+                            <div class="text-sm text-slate-600">Fréquences surveillées</div>
+                        </div>
+                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-wave-square text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500 flex items-center">
+                        <i class="fas fa-arrow-up text-green-500 mr-1"></i>
+                        <span>Scan actif en temps réel</span>
+                    </div>
+                </div>
+
+                <div class="data-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-3xl font-bold text-red-600" id="anomalies-detected">0</div>
+                            <div class="text-sm text-slate-600">Anomalies détectées</div>
+                        </div>
+                        <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500 flex items-center">
+                        <i class="fas fa-shield-alt text-yellow-500 mr-1"></i>
+                        <span>Seuil de sécurité: Moyen</span>
+                    </div>
+                </div>
+
+                <div class="data-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-3xl font-bold text-green-600" id="active-servers">0</div>
+                            <div class="text-sm text-slate-600">Serveurs actifs</div>
+                        </div>
+                        <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-server text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500 flex items-center">
+                        <span class="status-indicator status-online pulse-online mr-2"></span>
+                        <span>Tous les systèmes normaux</span>
+                    </div>
+                </div>
+
+                <div class="data-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-3xl font-bold text-purple-600" id="uptime">99.9%</div>
+                            <div class="text-sm text-slate-600">Disponibilité SDR</div>
+                        </div>
+                        <div class="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500 flex items-center">
+                        <i class="fas fa-bolt text-purple-500 mr-1"></i>
+                        <span>Performance optimale</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div id="data-status" class="mb-6">
+                <!-- Chargé dynamiquement -->
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- SDR Monitoring - Main Panel -->
+                <div class="lg:col-span-2">
+                    <div class="data-card p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                                <i class="fas fa-broadcast-tower text-blue-500 mr-3"></i>
+                                Tableau de Contrôle SDR
+                                <span class="ml-3 text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">LIVE</span>
+                            </h2>
+                            <div class="flex items-center space-x-3">
+                                <div class="relative">
+                                    <select id="server-select" class="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+                                        <option value="">Serveur principal</option>
+                                        <option value="europe">Europe - SDR-01</option>
+                                        <option value="na">Amérique du Nord - SDR-02</option>
+                                        <option value="asia">Asie - SDR-03</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-500 pointer-events-none"></i>
+                                </div>
+                                <button onclick="SDRMonitor.loadDashboard()" class="h-10 w-10 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors">
+                                    <i class="fas fa-sync text-slate-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Radar Grid Simulation -->
+                        <div class="radar-grid rounded-lg p-6 mb-6 border border-slate-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold text-slate-700">Carte des Signaux</h3>
+                                <div class="flex space-x-2">
+                                    <span class="text-xs px-3 py-1 bg-green-100 text-green-800 rounded-full">Normaux: 12</span>
+                                    <span class="text-xs px-3 py-1 bg-red-100 text-red-800 rounded-full">Anomalies: 3</span>
+                                </div>
+                            </div>
+
+                            <div id="sdr-dashboard">
+                                <div class="text-center py-16 text-slate-500">
+                                    <div class="inline-block relative">
+                                        <i class="fas fa-satellite text-4xl text-blue-500 mb-4"></i>
+                                        <div class="absolute inset-0 animate-ping bg-blue-500 rounded-full opacity-20"></div>
+                                    </div>
+                                    <p class="mt-4 font-medium">Initialisation du système SDR...</p>
+                                    <p class="text-sm mt-2">Connexion aux récepteurs radio</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fréquences Actives -->
+                        <div class="mt-6">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <i class="fas fa-frequency mr-2 text-purple-500"></i>
+                                Fréquences Surveillées
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="sdr-frequency active">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono">2182.0 kHz</span>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">EMERGENCY</span>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <div class="signal-meter flex-1 mr-3">
+                                            <div class="signal-level" style="width: 60%"></div>
+                                        </div>
+                                        <span class="text-xs text-slate-400">-45 dB</span>
+                                    </div>
+                                </div>
+
+                                <div class="sdr-frequency">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono">121.5 MHz</span>
+                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">AÉRONAUTIQUE</span>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <div class="signal-meter flex-1 mr-3">
+                                            <div class="signal-level" style="width: 40%"></div>
+                                        </div>
+                                        <span class="text-xs text-slate-400">-62 dB</span>
+                                    </div>
+                                </div>
+
+                                <div class="sdr-frequency alert">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono">4625.0 kHz</span>
+                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">MILITAIRE</span>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <div class="signal-meter flex-1 mr-3">
+                                            <div class="signal-level" style="width: 85%"></div>
+                                        </div>
+                                        <span class="text-xs text-red-500">ACTIVITÉ ÉLEVÉE</span>
+                                    </div>
+                                </div>
+
+                                <div class="sdr-frequency">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono">5732.0 kHz</span>
+                                        <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">DIPLOMATIQUE</span>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <div class="signal-meter flex-1 mr-3">
+                                            <div class="signal-level" style="width: 30%"></div>
+                                        </div>
+                                        <span class="text-xs text-slate-400">-70 dB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-8">
+                    <!-- Serveurs SDR -->
+                    <div class="data-card p-6">
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-server text-green-500 mr-3"></i>
+                            Statut des Serveurs
+                        </h3>
+                        <div id="sdr-servers-list" class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="status-indicator status-online pulse-online mr-3"></span>
+                                    <div>
+                                        <div class="font-medium">SDR-01 - Europe</div>
+                                        <div class="text-xs text-slate-500">Berlin, DE • 24°C</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-mono text-sm">87%</div>
+                                    <div class="text-xs text-slate-500">Charge CPU</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="status-indicator status-online pulse-online mr-3"></span>
+                                    <div>
+                                        <div class="font-medium">SDR-02 - Amérique du Nord</div>
+                                        <div class="text-xs text-slate-500">New York, US • 18°C</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-mono text-sm">92%</div>
+                                    <div class="text-xs text-slate-500">Charge CPU</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="status-indicator status-warning mr-3"></span>
+                                    <div>
+                                        <div class="font-medium">SDR-03 - Asie</div>
+                                        <div class="text-xs text-slate-500">Singapour, SG • 31°C</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-mono text-sm">64%</div>
+                                    <div class="text-xs text-slate-500">Charge CPU</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="SDRMonitor.loadServers()" class="mt-6 w-full py-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center text-slate-700 font-medium">
+                            <i class="fas fa-sync-alt mr-2"></i> Actualiser les statuts
+                        </button>
+                    </div>
+
+                    <!-- Configuration SDR -->
+                    <div class="data-card p-6">
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
+                            <i class="fas fa-sliders-h text-blue-500 mr-3"></i>
+                            Paramètres SDR
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-sm font-medium text-slate-700">Seuil d'anomalie</label>
+                                    <span class="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">Niveau 3</span>
+                                </div>
+                                <input type="range" min="1" max="5" value="3" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-200">
+                                <h4 class="font-medium text-slate-700 mb-3">Plages de Fréquences</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-bell text-red-500 mr-2"></i>
+                                            <span class="text-sm">Bandes d'urgence</span>
+                                        </div>
+                                        <span class="text-xs font-mono bg-red-100 text-red-800 px-2 py-1 rounded">ACTIVE</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-fighter-jet text-orange-500 mr-2"></i>
+                                            <span class="text-sm">Communications militaires</span>
+                                        </div>
+                                        <span class="text-xs font-mono bg-orange-100 text-orange-800 px-2 py-1 rounded">MONITOR</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-handshake text-purple-500 mr-2"></i>
+                                            <span class="text-sm">Trafic diplomatique</span>
+                                        </div>
+                                        <span class="text-xs font-mono bg-purple-100 text-purple-800 px-2 py-1 rounded">PASSIVE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet 2: Avis aux Voyageurs -->
+        <div id="content-travel" class="tab-panel hidden">
+            <div class="data-card p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                    <i class="fas fa-plane text-blue-500 mr-3"></i>
+                    Avis aux Voyageurs - Alertes Sécurité
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Alertes par région -->
+                    <div>
+                        <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                            Alertes Actives
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-red-500 bg-red-50 p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-red-800">Niveau 3 - Éviter tout voyage</span>
+                                    <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">URGENT</span>
+                                </div>
+                                <p class="text-sm text-red-700 mt-2">Ukraine - Zone de conflit actif</p>
+                                <div class="text-xs text-red-600 mt-2">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    Dernière mise à jour: Aujourd'hui 14:30
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-orange-500 bg-orange-50 p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-orange-800">Niveau 2 - Prudence renforcée</span>
+                                    <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">ALERTE</span>
+                                </div>
+                                <p class="text-sm text-orange-700 mt-2">Moyen-Orient - Tensions régionales</p>
+                                <div class="text-xs text-orange-600 mt-2">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    Dernière mise à jour: Hier 09:15
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-yellow-800">Niveau 1 - Vigilance normale</span>
+                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">INFO</span>
+                                </div>
+                                <p class="text-sm text-yellow-700 mt-2">Europe - Menace terroriste modérée</p>
+                                <div class="text-xs text-yellow-600 mt-2">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    Dernière mise à jour: 03/12/2024
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conseils généraux -->
+                    <div>
+                        <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                            <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                            Conseils de Sécurité
+                        </h3>
+                        <div class="bg-blue-50 rounded-lg p-5">
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-sm text-slate-700">Enregistrez-vous sur Ariane (Ministère des Affaires Étrangères)</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-sm text-slate-700">Constituez une copie numérique de vos documents</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-sm text-slate-700">Localisez l'ambassade/consulat le plus proche</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-sm text-slate-700">Évitez les rassemblements et manifestations</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-sm text-slate-700">Surveillez les médias locaux et les alertes officielles</span>
+                                </li>
+                            </ul>
+
+                            <div class="mt-6 pt-4 border-t border-blue-200">
+                                <h4 class="font-medium text-slate-700 mb-2">Ressources Utiles</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <a href="https://www.diplomatie.gouv.fr/fr/conseils-aux-voyageurs/" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
+                                        France Diplomatie
+                                    </a>
+                                    <a href="https://travel.state.gov" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
+                                        US Travel Advisories
+                                    </a>
+                                    <a href="https://www.gov.uk/foreign-travel-advice" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
+                                        UK Foreign Advice
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ONGLET 3: SUIVI PERSONNALISÉ (NOUVEAU) -->
+        <div id="content-stock" class="tab-panel hidden">
+            <div class="data-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-chart-line text-green-500 mr-3"></i>
+                        Suivi Personnalisé - Mes Instruments
+                    </h2>
+                    <button id="addInstrumentBtn" class="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Ajouter un Instrument</span>
+                    </button>
+                </div>
+
+                <!-- Barre de recherche et filtres -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="relative">
+                        <input type="text" id="searchInstruments" placeholder="Rechercher un instrument..."
+                               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="fas fa-search absolute right-3 top-3 text-slate-400"></i>
+                    </div>
+                    <select id="filterType" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tous les types</option>
+                        <option value="stock">Actions</option>
+                        <option value="index">Indices</option>
+                        <option value="currency">Devises</option>
+                        <option value="commodity">Matières premières</option>
+                        <option value="crypto">Cryptomonnaies</option>
+                    </select>
+                    <select id="filterAlert" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Toutes les alertes</option>
+                        <option value="active">Alertes actives</option>
+                        <option value="inactive">Alertes inactives</option>
+                        <option value="triggered">Récemment déclenchées</option>
+                    </select>
+                    <button id="refreshTracking" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        <span>Actualiser</span>
+                    </button>
+                </div>
+
+                <!-- Sous-onglets -->
+                <div class="border-b border-slate-200 mb-6">
+                    <nav class="flex space-x-8">
+                        <button id="tab-tracking-dashboard" class="tracking-tab py-3 px-4 font-medium text-blue-600 border-b-2 border-blue-500">
+                            Tableau de Bord
+                        </button>
+                        <button id="tab-tracking-instruments" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
+                            Mes Instruments
+                        </button>
+                        <button id="tab-tracking-alerts" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
+                            Gestion des Alertes
+                        </button>
+                        <button id="tab-tracking-notifications" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
+                            Notifications
+                            <span id="notificationBadge" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Contenu des sous-onglets -->
+                <div id="tracking-content">
+                    <!-- Sous-onglet 1: Tableau de bord -->
+                    <div id="tracking-dashboard" class="tracking-subpanel">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                            <div class="data-card p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="text-3xl font-bold text-blue-600" id="tracked-count">0</div>
+                                        <div class="text-sm text-slate-600">Instruments suivis</div>
+                                    </div>
+                                    <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-star text-blue-600 text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="data-card p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="text-3xl font-bold text-green-600" id="active-alerts-count">0</div>
+                                        <div class="text-sm text-slate-600">Alertes actives</div>
+                                    </div>
+                                    <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-bell text-green-600 text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="data-card p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="text-3xl font-bold text-red-600" id="triggered-today">0</div>
+                                        <div class="text-sm text-slate-600">Alertes déclenchées (24h)</div>
+                                    </div>
+                                    <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Graphique des variations -->
+                        <div class="data-card p-6 mb-8">
+                            <h3 class="font-semibold text-slate-700 mb-4">Variations des dernières 24h</h3>
+                            <div id="tracking-chart-container" class="h-64">
+                                <canvas id="trackingChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Liste des instruments en temps réel -->
+                        <div class="data-card p-6">
+                            <h3 class="font-semibold text-slate-700 mb-4">Données en Temps Réel</h3>
+                            <div id="realtime-data-container">
+                                <div class="text-center py-8 text-slate-500">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                                    <p>Chargement des données...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sous-onglet 2: Mes instruments -->
+                    <div id="tracking-instruments" class="tracking-subpanel hidden">
+                        <div id="instruments-list-container">
+                            <!-- Chargé dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Sous-onglet 3: Gestion des alertes -->
+                    <div id="tracking-alerts" class="tracking-subpanel hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Liste des alertes -->
+                            <div>
+                                <h3 class="font-semibold text-slate-700 mb-4">Mes Alertes Configurées</h3>
+                                <div id="alerts-list-container" class="space-y-4">
+                                    <!-- Chargé dynamiquement -->
+                                </div>
+                            </div>
+
+                            <!-- Formulaire d'ajout d'alerte -->
+                            <div class="data-card p-6">
+                                <h3 class="font-semibold text-slate-700 mb-4">Nouvelle Alerte</h3>
+                                <form id="addAlertForm" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Instrument</label>
+                                        <select id="alertInstrument" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Sélectionner un instrument</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Nom de l'alerte</label>
+                                        <input type="text" id="alertName" required placeholder="Ex: Hausse importante AAPL"
+                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                                        <select id="alertCondition" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="above">Dépasse</option>
+                                            <option value="below">Descend sous</option>
+                                            <option value="change_up">Hausse de plus de (%)</option>
+                                            <option value="change_down">Baisse de plus de (%)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Valeur/Seuil</label>
+                                        <input type="number" id="alertValue" required step="0.01" placeholder="0.00"
+                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div id="thresholdContainer" class="hidden">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Pourcentage (%)</label>
+                                        <input type="number" id="alertThreshold" step="0.1" min="0.1" max="100" value="5"
+                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="alertActive" checked class="rounded text-blue-600">
+                                            <span class="text-sm text-slate-700">Alerte active</span>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg transition-all duration-300">
+                                        Ajouter l'Alerte
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sous-onglet 4: Notifications -->
+                    <div id="tracking-notifications" class="tracking-subpanel hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-slate-700">Historique des Notifications</h3>
+                            <button id="markAllRead" class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg transition-colors">
+                                <i class="fas fa-check-double mr-1"></i>
+                                Tout marquer comme lu
+                            </button>
+                        </div>
+                        <div id="notifications-container" class="space-y-3">
+                            <!-- Chargé dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Status -->
+    <div class="mt-8 pt-6 border-t border-slate-200">
+        <div class="flex flex-col md:flex-row md:items-center justify-between text-sm text-slate-500">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <span class="status-indicator status-online pulse-online mr-2"></span>
+                    <span>SDR System: ONLINE</span>
+                </div>
+                <span class="hidden md:inline">•</span>
+                <div class="flex items-center">
+                    <i class="fas fa-database mr-2"></i>
+                    <span>Stockage: 1.4TB / 2.0TB</span>
+                </div>
+                <span class="hidden md:inline">•</span>
+                <div class="flex items-center">
+                    <i class="fas fa-network-wired mr-2"></i>
+                    <span>Latence: 24ms</span>
+                </div>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <span class="font-mono">SDR Command v2.3 • Dernière mise à jour: </span>
+                <span id="system-update-time" class="font-medium">Aujourd'hui 22:45 CET</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un instrument -->
+<div id="addInstrumentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md data-card">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Ajouter un Instrument</h3>
+                    <button id="closeInstrumentModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="addInstrumentForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Symbole*</label>
+                        <input type="text" id="instrumentSymbol" required placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
+                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-slate-500 mt-1">Utilisez les symboles Yahoo Finance</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nom*</label>
+                        <input type="text" id="instrumentName" required placeholder="Ex: Apple Inc."
+                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Type*</label>
+                        <select id="instrumentType" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="stock">Action</option>
+                            <option value="index">Indice</option>
+                            <option value="currency">Devise</option>
+                            <option value="commodity">Matière première</option>
+                            <option value="crypto">Cryptomonnaie</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea id="instrumentDescription" rows="3" placeholder="Description optionnelle..."
+                                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                    </div>
+                    <div class="flex items-center justify-between pt-4">
+                        <button type="button" id="cancelInstrument" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
+                            Ajouter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Système de notifications global -->
+<div id="globalNotifications" class="fixed bottom-4 right-4 z-50 space-y-3 max-w-sm">
+    <!-- Les notifications apparaissent ici dynamiquement -->
+</div>
+
+<style>
+    /* Styles supplémentaires pour la page weak_indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .status-online {
+        background-color: #10b981;
+    }
+
+    .status-offline {
+        background-color: #ef4444;
+    }
+
+    .status-warning {
+        background-color: #f59e0b;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        50% {
+            opacity: 0.7;
+            box-shadow: 0 0 20px currentColor;
+        }
+    }
+
+    .pulse-online {
+        animation: pulse-glow 2s ease-in-out infinite;
+        color: #10b981;
+    }
+
+    .sdr-frequency {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border: 1px solid #475569;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 4px 0;
+        color: #e2e8f0;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+        .sdr-frequency.active {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        }
+
+        .sdr-frequency.alert {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        }
+
+    .signal-meter {
+        background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .signal-level {
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .radar-grid {
+        background-image: radial-gradient(circle at center, transparent 0%, rgba(59, 130, 246, 0.05) 100%), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(0deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+        background-size: 100% 100%, 20px 20px, 20px 20px;
+    }
+
+    /* Animation pour le ticker */
+    @keyframes marquee {
+        0% {
+            transform: translateX(100%);
+        }
+
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    .animate-marquee {
+        display: inline-block;
+        animation: marquee 30s linear infinite;
+        white-space: nowrap;
+        padding-left: 100%;
+    }
+
+    /* Styles pour les notifications */
+    .notification-toast {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .notification-toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .notification-toast.info::before {
+            background: #3b82f6;
+        }
+
+        .notification-toast.warning::before {
+            background: #f59e0b;
+        }
+
+        .notification-toast.danger::before {
+            background: #ef4444;
+        }
+
+        .notification-toast.success::before {
+            background: #10b981;
+        }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
+
+    .notification-fadeout {
+        animation: fadeOut 0.5s ease-out forwards;
+    }
+
+    /* Styles pour les sous-onglets */
+    .tracking-subpanel {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Badge de notification */
+    .notification-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Gestion des onglets principaux
+        const tabs = document.querySelectorAll('.tab-button');
+        const panels = document.querySelectorAll('.tab-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                const target = this.id.replace('tab-', 'content-');
+
+                // Mettre à jour l'onglet actif
+                tabs.forEach(t => {
+                    t.classList.remove('border-blue-500', 'text-blue-600');
+                    t.classList.add('text-slate-600');
+                });
+                this.classList.add('border-blue-500', 'text-blue-600');
+                this.classList.remove('text-slate-600');
+
+                // Afficher le bon contenu
+                panels.forEach(panel => {
+                    panel.classList.add('hidden');
+                });
+                document.getElementById(target).classList.remove('hidden');
+
+                // Initialiser le suivi personnalisé si on clique dessus
+                if (target === 'content-stock' && typeof initTracking === 'function') {
+                    initTracking();
+                }
+            });
+        });
+
+        // Mise à jour de l'heure du système
+        function updateSystemTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            const lastUpdate = document.getElementById('last-update');
+            const systemUpdate = document.getElementById('system-update-time');
+
+            if (lastUpdate) lastUpdate.textContent = `${dateString} ${timeString}`;
+            if (systemUpdate) systemUpdate.textContent = `Aujourd'hui ${timeString} CET`;
+        }
+
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+
+        // Simulation de données SDR
+        const totalFreqElement = document.getElementById('total-frequencies');
+        const anomaliesElement = document.getElementById('anomalies-detected');
+        const serversElement = document.getElementById('active-servers');
+
+        function simulateSDRData() {
+            const totalFreq = Math.floor(Math.random() * 20) + 45;
+            const anomalies = Math.floor(Math.random() * 5);
+            const activeServers = Math.floor(Math.random() * 2) + 2;
+
+            if (totalFreqElement) totalFreqElement.textContent = totalFreq;
+            if (anomaliesElement) anomaliesElement.textContent = anomalies;
+            if (serversElement) serversElement.textContent = activeServers;
+
+            // Animation de mise à jour
+            [totalFreqElement, anomaliesElement, serversElement].forEach(el => {
+                if (el) {
+                    el.classList.add('animate-pulse');
+                    setTimeout(() => el.classList.remove('animate-pulse'), 500);
+                }
+            });
+        }
+
+        simulateSDRData();
+        setInterval(simulateSDRData, 10000); // Mise à jour toutes les 10 secondes
+
+        // Vérifier l'état des données
+        async function checkDataStatus() {
+            try {
+                const response = await fetch('/api/system/data-status');
+                const data = await response.json();
+                const statusDiv = document.getElementById('data-status');
+
+                if (!statusDiv) return;
+
+                let sourcesText = 'Données simulées';
+                if (data.sources) {
+                    if (Array.isArray(data.sources)) {
+                        sourcesText = data.sources.join(', ');
+                    } else if (typeof data.sources === 'object') {
+                        sourcesText = Object.values(data.sources).join(', ');
+                    }
+                }
+
+                if (data.real_mode) {
+                    statusDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                <div>
+                                    <h4 class="font-bold text-green-800">Mode RÉEL activé</h4>
+                                    <p class="text-green-700 text-sm">Données en temps réel - Sources: ${sourcesText}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-flask text-yellow-500 text-xl mr-3"></i>
+                                <div>
+                                    <h4 class="font-bold text-yellow-800">Mode SIMULATION</h4>
+                                    <p class="text-yellow-700 text-sm">Données de démonstration</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur lors de la vérification du statut:', error);
+            }
+        }
+
+        checkDataStatus();
+
+        // ===============================================
+        // GESTION DU SUIVI PERSONNALISÉ (Nouveau module)
+        // ===============================================
+
+        // Références aux éléments
+        const addInstrumentBtn = document.getElementById('addInstrumentBtn');
+        const addInstrumentModal = document.getElementById('addInstrumentModal');
+        const closeInstrumentModal = document.getElementById('closeInstrumentModal');
+        const cancelInstrument = document.getElementById('cancelInstrument');
+        const addInstrumentForm = document.getElementById('addInstrumentForm');
+        const trackingTabs = document.querySelectorAll('.tracking-tab');
+        const trackingSubpanels = document.querySelectorAll('.tracking-subpanel');
+        const refreshTrackingBtn = document.getElementById('refreshTracking');
+        const addAlertForm = document.getElementById('addAlertForm');
+        const alertCondition = document.getElementById('alertCondition');
+        const thresholdContainer = document.getElementById('thresholdContainer');
+        const markAllReadBtn = document.getElementById('markAllRead');
+        const notificationBadge = document.getElementById('notificationBadge');
+
+        // Variables d'état
+        let trackedInstruments = [];
+        let alerts = [];
+        let notifications = [];
+        let trackingChart = null;
+
+        // === INITIALISATION ===
+        function initTracking() {
+            loadTrackingData();
+            setupEventListeners();
+            startPolling();
+        }
+
+        function setupEventListeners() {
+            // Modal d'instrument
+            if (addInstrumentBtn) {
+                addInstrumentBtn.addEventListener('click', () => {
+                    addInstrumentModal.classList.remove('hidden');
+                    addInstrumentModal.classList.add('flex');
+                });
+            }
+
+            if (closeInstrumentModal) {
+                closeInstrumentModal.addEventListener('click', closeInstrumentModalFunc);
+            }
+
+            if (cancelInstrument) {
+                cancelInstrument.addEventListener('click', closeInstrumentModalFunc);
+            }
+
+            // Formulaire d'instrument
+            if (addInstrumentForm) {
+                addInstrumentForm.addEventListener('submit', handleAddInstrument);
+            }
+
+            // Sous-onglets tracking
+            trackingTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.id.replace('tab-tracking-', 'tracking-');
+
+                    // Mettre à jour les onglets
+                    trackingTabs.forEach(t => {
+                        t.classList.remove('border-blue-500', 'text-blue-600');
+                        t.classList.add('text-slate-600');
+                    });
+                    tab.classList.add('border-blue-500', 'text-blue-600');
+
+                    // Afficher le bon contenu
+                    trackingSubpanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    document.getElementById(target).classList.remove('hidden');
+
+                    // Charger les données spécifiques
+                    if (target === 'tracking-dashboard') {
+                        loadDashboardData();
+                    } else if (target === 'tracking-instruments') {
+                        loadInstrumentsList();
+                    } else if (target === 'tracking-alerts') {
+                        loadAlertsList();
+                        loadInstrumentsForAlerts();
+                    } else if (target === 'tracking-notifications') {
+                        loadNotifications();
+                    }
+                });
+            });
+
+            // Condition d'alerte
+            if (alertCondition) {
+                alertCondition.addEventListener('change', function () {
+                    if (this.value === 'change_up' || this.value === 'change_down') {
+                        thresholdContainer.classList.remove('hidden');
+                    } else {
+                        thresholdContainer.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Formulaire d'alerte
+            if (addAlertForm) {
+                addAlertForm.addEventListener('submit', handleAddAlert);
+            }
+
+            // Bouton refresh
+            if (refreshTrackingBtn) {
+                refreshTrackingBtn.addEventListener('click', loadTrackingData);
+            }
+
+            // Marquer toutes les notifications comme lues
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', markAllNotificationsRead);
+            }
+        }
+
+        // === FONCTIONS DE GESTION DES DONNÉES ===
+        async function loadTrackingData() {
+            try {
+                // Charger les instruments
+                const instrumentsResponse = await fetch('/api/financial-tracking/instruments');
+                if (instrumentsResponse.ok) {
+                    const data = await instrumentsResponse.json();
+                    trackedInstruments = data.instruments || [];
+                    updateTrackingCounts();
+                }
+
+                // Charger les données temps réel
+                loadDashboardData();
+
+                // Charger les notifications
+                loadNotifications();
+
+            } catch (error) {
+                console.error('Erreur chargement données tracking:', error);
+                showToast('Erreur de chargement des données', 'danger');
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Données temps réel
+                const response = await fetch('/api/financial-tracking/real-time-data');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateRealtimeData(data.data || []);
+                    updateTrackingChart(data.data || []);
+                }
+            } catch (error) {
+                console.error('Erreur chargement dashboard:', error);
+            }
+        }
+
+        async function loadInstrumentsList() {
+            try {
+                const response = await fetch('/api/financial-tracking/instruments');
+                if (response.ok) {
+                    const data = await response.json();
+                    renderInstrumentsList(data.instruments || []);
+                }
+            } catch (error) {
+                console.error('Erreur chargement instruments:', error);
+            }
+        }
+
+        async function loadAlertsList() {
+            try {
+                // Charger toutes les alertes
+                const alertsPromises = trackedInstruments.map(instrument =>
+                    fetch(`/api/financial-tracking/instruments/${instrument.id}/alerts`)
+                );
+
+                const responses = await Promise.all(alertsPromises);
+                alerts = [];
+
+                for (const response of responses) {
+                    if (response.ok) {
+                        const data = await response.json();
+                        alerts.push(...data.alerts);
+                    }
+                }
+
+                renderAlertsList(alerts);
+
+            } catch (error) {
+                console.error('Erreur chargement alertes:', error);
+            }
+        }
+
+        async function loadInstrumentsForAlerts() {
+            try {
+                const select = document.getElementById('alertInstrument');
+                select.innerHTML = '<option value="">Sélectionner un instrument</option>';
+
+                trackedInstruments.forEach(instrument => {
+                    const option = document.createElement('option');
+                    option.value = instrument.id;
+                    option.textContent = `${instrument.name} (${instrument.symbol})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erreur chargement instruments pour alertes:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/financial-tracking/notifications');
+                if (response.ok) {
+                    const data = await response.json();
+                    notifications = data.notifications || [];
+                    renderNotifications(notifications);
+                    updateNotificationBadge(data.unread_count || 0);
+                }
+            } catch (error) {
+                console.error('Erreur chargement notifications:', error);
+            }
+        }
+
+        // === FONCTIONS DE RENDU ===
+        function updateTrackingCounts() {
+            const trackedCount = document.getElementById('tracked-count');
+            const activeAlertsCount = document.getElementById('active-alerts-count');
+            const triggeredToday = document.getElementById('triggered-today');
+
+            if (trackedCount) trackedCount.textContent = trackedInstruments.length;
+
+            // Compter les alertes actives
+            const activeAlerts = alerts.filter(a => a.active);
+            if (activeAlertsCount) activeAlertsCount.textContent = activeAlerts.length;
+
+            // Compter les alertes déclenchées aujourd'hui
+            const today = new Date().toISOString().split('T')[0];
+            const todayAlerts = notifications.filter(n =>
+                n.created_at && n.created_at.includes(today)
+            );
+            if (triggeredToday) triggeredToday.textContent = todayAlerts.length;
+        }
+
+        function updateRealtimeData(data) {
+            const container = document.getElementById('realtime-data-container');
+            if (!container) return;
+
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-chart-line text-3xl mb-4"></i>
+                        <p>Aucun instrument suivi</p>
+                        <p class="text-sm mt-2">Ajoutez des instruments pour commencer le suivi</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-sm text-slate-600 border-b">
+                                <th class="pb-3">Instrument</th>
+                                <th class="pb-3">Prix</th>
+                                <th class="pb-3">Variation</th>
+                                <th class="pb-3">Volume</th>
+                                <th class="pb-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(item => {
+                const changeClass = item.current_data?.change_percent >= 0 ?
+                    'text-green-600' : 'text-red-600';
+                const changeIcon = item.current_data?.change_percent >= 0 ?
+                    'fa-arrow-up' : 'fa-arrow-down';
+
+                html += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="py-3">
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-sm text-slate-500">${item.symbol}</div>
+                        </td>
+                        <td class="py-3 font-medium">
+                            ${item.current_data?.current_price ? item.current_data.current_price.toFixed(2) : 'N/A'}
+                        </td>
+                        <td class="py-3">
+                            <div class="${changeClass} font-medium">
+                                <i class="fas ${changeIcon} mr-1"></i>
+                                ${item.current_data?.change_percent ? item.current_data.change_percent.toFixed(2) : '0.00'}%
+                            </div>
+                        </td>
+                        <td class="py-3 text-sm text-slate-600">
+                            ${item.current_data?.volume ? formatNumber(item.current_data.volume) : 'N/A'}
+                        </td>
+                        <td class="py-3">
+                            <button onclick="addAlertForInstrument(${item.id})"
+                                    class="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg transition-colors">
+                                <i class="fas fa-bell mr-1"></i>
+                                Alerte
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderInstrumentsList(instruments) {
+            const container = document.getElementById('instruments-list-container');
+            if (!container) return;
+
+            if (instruments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500">
+                        <i class="fas fa-star text-4xl mb-4"></i>
+                        <p class="text-lg font-medium">Aucun instrument suivi</p>
+                        <p class="mt-2">Commencez par ajouter un instrument à suivre</p>
+                        <button id="addFirstInstrument" class="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
+                            <i class="fas fa-plus mr-2"></i>
+                            Ajouter mon premier instrument
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('addFirstInstrument')?.addEventListener('click', () => {
+                    addInstrumentModal.classList.remove('hidden');
+                    addInstrumentModal.classList.add('flex');
+                });
+                return;
+            }
+
+            let html = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            `;
+
+            instruments.forEach(instrument => {
+                html += `
+                    <div class="data-card p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="font-bold text-lg text-slate-800">${instrument.name}</div>
+                                <div class="text-sm text-slate-500">${instrument.symbol}</div>
+                                <div class="text-xs text-slate-400 mt-1">${instrument.type}</div>
+                            </div>
+                            <button onclick="deleteInstrument(${instrument.id})"
+                                    class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
+                        ${instrument.description ? `<p class="text-sm text-slate-600 mb-4">${instrument.description}</p>` : ''}
+
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <div class="text-sm text-slate-500">
+                                <i class="far fa-calendar mr-1"></i>
+                                ${new Date(instrument.created_at).toLocaleDateString('fr-FR')}
+                            </div>
+                            <button onclick="loadAlertsForInstrument(${instrument.id})"
+                                    class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg transition-colors">
+                                Voir alertes
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderAlertsList(alerts) {
+            const container = document.getElementById('alerts-list-container');
+            if (!container) return;
+
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-bell-slash text-2xl mb-4"></i>
+                        <p>Aucune alerte configurée</p>
+                        <p class="text-sm mt-2">Configurez des alertes pour être notifié des variations</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            alerts.forEach(alert => {
+                const instrument = trackedInstruments.find(i => i.id === alert.instrument_id);
+                const statusClass = alert.active ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800';
+                const lastTriggered = alert.last_triggered ?
+                    new Date(alert.last_triggered).toLocaleString('fr-FR') : 'Jamais';
+
+                html += `
+                    <div class="data-card p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="font-medium text-slate-800">${alert.name}</div>
+                                <div class="text-sm text-slate-500">
+                                    ${instrument ? instrument.name + ' (' + instrument.symbol + ')' : 'Instrument inconnu'}
+                                </div>
+                            </div>
+                            <span class="text-xs ${statusClass} px-2 py-1 rounded-full">
+                                ${alert.active ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+
+                        <div class="text-sm text-slate-600 mb-3">
+                            Condition: ${getConditionText(alert.condition, alert.value, alert.threshold_percent)}
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs text-slate-500">
+                            <div>
+                                <i class="far fa-clock mr-1"></i>
+                                Dernier déclenchement: ${lastTriggered}
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="toggleAlert(${alert.id}, ${!alert.active})"
+                                        class="hover:text-blue-600">
+                                    <i class="fas fa-power-off"></i>
+                                </button>
+                                <button onclick="deleteAlert(${alert.id})"
+                                        class="hover:text-red-600">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifications-container');
+            if (!container) return;
+
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-bell text-2xl mb-4"></i>
+                        <p>Aucune notification</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            notifications.slice(0, 20).forEach(notif => {
+                const date = new Date(notif.created_at).toLocaleString('fr-FR');
+                const readClass = notif.read ? 'opacity-70' : 'bg-blue-50';
+                const severityClass = notif.severity === 'warning' ? 'border-l-4 border-yellow-500' :
+                    notif.severity === 'danger' ? 'border-l-4 border-red-500' : '';
+
+                html += `
+                    <div class="data-card p-4 ${readClass} ${severityClass}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="font-medium text-slate-800">${notif.message}</div>
+                                <div class="text-sm text-slate-500 mt-1">
+                                    ${notif.instrument_name ? notif.instrument_name + ' • ' : ''}
+                                    ${date}
+                                </div>
+                            </div>
+                            ${!notif.read ? `
+                                <button onclick="markNotificationRead(${notif.id})"
+                                        class="ml-3 text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateTrackingChart(data) {
+            const ctx = document.getElementById('trackingChart');
+            if (!ctx || data.length === 0) return;
+
+            if (trackingChart) {
+                trackingChart.destroy();
+            }
+
+            // Préparer les données
+            const labels = data.map(item => item.symbol);
+            const changes = data.map(item => item.current_data?.change_percent || 0);
+
+            const colors = changes.map(change =>
+                change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+            );
+
+            trackingChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Variation (%)',
+                        data: changes,
+                        backgroundColor: colors,
+                        borderColor: changes.map(change =>
+                            change >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `Variation: ${context.parsed.y.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // === GESTION DES ÉVÉNEMENTS ===
+        async function handleAddInstrument(e) {
+            e.preventDefault();
+
+            const symbol = document.getElementById('instrumentSymbol').value.trim();
+            const name = document.getElementById('instrumentName').value.trim();
+            const type = document.getElementById('instrumentType').value;
+            const description = document.getElementById('instrumentDescription').value.trim();
+
+            try {
+                const response = await fetch('/api/financial-tracking/instruments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        name: name,
+                        type: type,
+                        description: description
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeInstrumentModalFunc();
+                    showToast(`Instrument ${symbol} ajouté avec succès`, 'success');
+                    loadTrackingData();
+                } else {
+                    showToast(data.error || 'Erreur lors de l\'ajout', 'danger');
+                }
+            } catch (error) {
+                console.error('Erreur ajout instrument:', error);
+                showToast('Erreur réseau', 'danger');
+            }
+        }
+
+        async function handleAddAlert(e) {
+            e.preventDefault();
+
+            const instrumentId = document.getElementById('alertInstrument').value;
+            const name = document.getElementById('alertName').value.trim();
+            const condition = document.getElementById('alertCondition').value;
+            const value = parseFloat(document.getElementById('alertValue').value);
+            const threshold = parseFloat(document.getElementById('alertThreshold').value) || 5;
+            const active = document.getElementById('alertActive').checked;
+
+            if (!instrumentId) {
+                showToast('Veuillez sélectionner un instrument', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/financial-tracking/alerts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instrument_id: instrumentId,
+                        name: name,
+                        condition: condition,
+                        value: value,
+                        threshold_percent: threshold,
+                        active: active
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`Alerte "${name}" créée`, 'success');
+                    loadAlertsList();
+                    document.getElementById('addAlertForm').reset();
+                } else {
+                    showToast(data.error || 'Erreur lors de la création', 'danger');
+                }
+            } catch (error) {
+                console.error('Erreur ajout alerte:', error);
+                showToast('Erreur réseau', 'danger');
+            }
+        }
+
+        // === FONCTIONS UTILITAIRES ===
+        function closeInstrumentModalFunc() {
+            addInstrumentModal.classList.add('hidden');
+            addInstrumentModal.classList.remove('flex');
+            document.getElementById('addInstrumentForm').reset();
+        }
+
+        async function deleteInstrument(instrumentId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet instrument ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/financial-tracking/instruments/${instrumentId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Instrument supprimé', 'success');
+                    loadTrackingData();
+                } else {
+                    showToast(data.error || 'Erreur lors de la suppression', 'danger');
+                }
+            } catch (error) {
+                console.error('Erreur suppression instrument:', error);
+                showToast('Erreur réseau', 'danger');
+            }
+        }
+
+        async function toggleAlert(alertId, active) {
+            try {
+                // Cette fonction nécessiterait une route spécifique pour toggle
+                // Pour l'instant, on peut supprimer et recréer
+                alert('Fonctionnalité à implémenter');
+            } catch (error) {
+                console.error('Erreur toggle alerte:', error);
+            }
+        }
+
+        async function deleteAlert(alertId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/financial-tracking/alerts/${alertId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Alerte supprimée', 'success');
+                    loadAlertsList();
+                } else {
+                    showToast(data.error || 'Erreur lors de la suppression', 'danger');
+                }
+            } catch (error) {
+                console.error('Erreur suppression alerte:', error);
+                showToast('Erreur réseau', 'danger');
+            }
+        }
+
+        async function markNotificationRead(notificationId) {
+            try {
+                const response = await fetch(`/api/financial-tracking/notifications/${notificationId}/read`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch (error) {
+                console.error('Erreur marquer notification comme lue:', error);
+            }
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                // Marquer toutes les notifications non lues
+                const unread = notifications.filter(n => !n.read);
+                const promises = unread.map(n =>
+                    fetch(`/api/financial-tracking/notifications/${n.id}/read`, {
+                        method: 'POST'
+                    })
+                );
+
+                await Promise.all(promises);
+                loadNotifications();
+                showToast('Toutes les notifications marquées comme lues', 'success');
+            } catch (error) {
+                console.error('Erreur marquer toutes comme lues:', error);
+            }
+        }
+
+        function updateNotificationBadge(count) {
+            if (notificationBadge) {
+                if (count > 0) {
+                    notificationBadge.textContent = count;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('globalNotifications');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `notification-toast ${type}`;
+            toast.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="font-medium text-slate-800">${message}</div>
+                        <div class="text-sm text-slate-500 mt-1">${new Date().toLocaleTimeString('fr-FR')}</div>
+                    </div>
+                    <button class="ml-3 text-slate-400 hover:text-slate-600" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('notification-fadeout');
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        function getConditionText(condition, value, threshold) {
+            switch (condition) {
+                case 'above': return `Dépasse ${value}`;
+                case 'below': return `Descend sous ${value}`;
+                case 'change_up': return `Hausse > ${threshold}%`;
+                case 'change_down': return `Baisse > ${threshold}%`;
+                default: return condition;
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toString();
+        }
+
+        // === POLLING ===
+        function startPolling() {
+            // Vérifier les alertes toutes les minutes
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/api/financial-tracking/check-alerts');
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        // Afficher les nouvelles alertes déclenchées
+                        if (data.triggered_alerts && data.triggered_alerts.length > 0) {
+                            data.triggered_alerts.forEach(alert => {
+                                showToast(alert.message, 'warning');
+                            });
+
+                            // Mettre à jour les compteurs
+                            loadTrackingData();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur polling alertes:', error);
+                }
+            }, 60000); // Toutes les minutes
+        }
+
+        // Exposer certaines fonctions globalement
+        window.addAlertForInstrument = function (instrumentId) {
+            // Basculer vers l'onglet alertes et pré-remplir
+            document.getElementById('tab-tracking-alerts').click();
+            document.getElementById('alertInstrument').value = instrumentId;
+            document.getElementById('alertName').focus();
+        };
+
+        window.loadAlertsForInstrument = function (instrumentId) {
+            // Basculer vers l'onglet alertes
+            document.getElementById('tab-tracking-alerts').click();
+            // Filtrer les alertes pour cet instrument
+            const instrumentAlerts = alerts.filter(a => a.instrument_id === instrumentId);
+            renderAlertsList(instrumentAlerts);
+        };
+
+        window.markNotificationRead = markNotificationRead;
+        window.showToast = showToast;
+
+        console.log('🎯 Surveillance - Interface Initialisée');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Économique - Eurostat & INSEE & yFinance{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- En-tête -->
+    <div class="mb-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 mb-4">
+            <i class="fas fa-chart-line text-2xl text-white"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+            📊 Dashboard Économique France
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Données officielles Eurostat, INSEE et marchés financiers en temps réel
+        </p>
+        <div class="mt-4 flex justify-center space-x-4 text-sm text-gray-500 flex-wrap gap-2">
+            <span>🇪🇺 Eurostat API</span>
+            <span>🇫🇷 INSEE (scraping)</span>
+            <span>📈 Yahoo Finance</span>
+            <span>🎓 Usage: Éducation & Recherche</span>
+        </div>
+    </div>
+
+    <!-- ✅ CORRECTION : Statut système avec boutons sur la même ligne -->
+    <div id="systemStatus" class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-600 text-xl mr-3"></i>
+                <div>
+                    <h4 class="font-semibold text-green-800">Système opérationnel</h4>
+                    <p class="text-sm text-green-700">Eurostat, INSEE & yFinance connectés</p>
+                </div>
+            </div>
+            <!-- ✅ Boutons alignés horizontalement -->
+            <div class="flex flex-wrap gap-2 items-center">
+                <button id="refreshDataBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-sync-alt mr-2"></i>Actualiser
+                </button>
+                <button id="settingsBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-cog mr-2"></i>Paramètres
+                </button>
+                <button id="exportBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-download mr-2"></i>Exporter
+                </button>
+                <a href="https://ec.europa.eu/eurostat/fr/data/database" target="_blank"
+                   class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-external-link-alt mr-2"></i>Eurostat DB
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">_filtres</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                <select id="categoryFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">Toutes les catégories</option>
+                    <option value="macro">Macro-économie</option>
+                    <option value="employment">Emploi</option>
+                    <option value="prices">Prix</option>
+                    <option value="trade">Commerce</option>
+                    <option value="finance">Finance</option>
+                    <option value="inequality">Inégalités</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                <select id="sourceFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">Toutes les sources</option>
+                    <option value="Eurostat">Eurostat</option>
+                    <option value="INSEE">INSEE</option>
+                    <option value="Yahoo">Yahoo Finance</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fiabilité</label>
+                <select id="reliabilityFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">Tous les niveaux</option>
+                    <option value="official">Officiel</option>
+                    <option value="scraped">Scrapé</option>
+                    <option value="fallback">Fallback</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes -->
+    <div id="alertsContainer">
+        <!-- Les alertes seront insérées ici dynamiquement -->
+    </div>
+
+    <!-- ✅ Grille des indicateurs principaux (4 cartes : PIB, IPCH, Commerce, GINI) -->
+    <div id="indicatorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Cartes générées dynamiquement -->
+    </div>
+
+    <!-- Section indicateurs supplémentaires (INSEE) -->
+    <div id="supplementaryIndicatorsSection" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-star mr-2 text-yellow-500"></i>
+                Indicateurs INSEE (temps réel)
+            </h3>
+            <button class="toggle-section text-sm text-gray-500 hover:text-gray-700" data-section="supplementaryIndicators">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div id="supplementaryIndicatorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cartes INSEE -->
+        </div>
+    </div>
+
+    <!-- Graphique CAC 40 -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-chart-area mr-2 text-blue-500"></i>
+            Évolution CAC 40
+        </h3>
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+            <div id="cac40Info" class="text-sm text-gray-600">
+                Chargement...
+            </div>
+            <select id="periodSelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="1mo">1 mois</option>
+                <option value="3mo">3 mois</option>
+                <option value="6mo" selected>6 mois</option>
+                <option value="1y">1 an</option>
+                <option value="2y">2 ans</option>
+            </select>
+        </div>
+        <div class="h-80">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Indices internationaux -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-globe mr-2 text-purple-500"></i>
+            Indices internationaux
+        </h3>
+        <div id="internationalIndices" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Indices générés dynamiquement -->
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-table mr-2 text-green-500"></i>
+            Données détaillées
+        </h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Indicateur</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valeur</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variation</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Période</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiabilité</th>
+                    </tr>
+                </thead>
+                <tbody id="detailedTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Chargement des données...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
+        <p>Données fournies par Eurostat (API), INSEE (scraping page d'accueil) et Yahoo Finance</p>
+        <p class="mt-2">Usage éducatif et recherche - Dernière mise à jour : <span id="lastUpdate">--</span></p>
+        <div class="mt-3 flex justify-center space-x-4 flex-wrap gap-2">
+            <a href="https://ec.europa.eu/eurostat" target="_blank" class="text-blue-600 hover:underline">
+                <i class="fas fa-external-link-alt mr-1"></i>Eurostat
+            </a>
+            <a href="https://www.insee.fr" target="_blank" class="text-blue-600 hover:underline">
+                <i class="fas fa-external-link-alt mr-1"></i>INSEE
+            </a>
+            <a href="https://finance.yahoo.com" target="_blank" class="text-blue-600 hover:underline">
+                <i class="fas fa-external-link-alt mr-1"></i>Yahoo Finance
+            </a>
+            <a href="https://github.com/ohenrib-jpg/GEO" target="_blank" class="text-blue-600 hover:underline">
+                <i class="fab fa-github mr-1"></i>Code source
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Alertes -->
+<div id="alertsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center p-6 border-b">
+            <h3 class="text-xl font-bold text-gray-800">🔔 Alertes Actives</h3>
+            <button onclick="window.enhancedDashboard.closeAlertsModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="alertsModalContent" class="p-6">
+            <!-- Alertes détaillées -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Paramètres -->
+<div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center p-6 border-b">
+            <h3 class="text-xl font-bold text-gray-800">⚙️ Paramètres des indicateurs</h3>
+            <button class="text-gray-500 hover:text-gray-700" onclick="document.getElementById('settingsModal').classList.add('hidden')">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">Affichage</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded text-blue-600" checked>
+                            <span class="ml-2">Afficher les alertes</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded text-blue-600" checked>
+                            <span class="ml-2">Afficher les indices internationaux</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded text-blue-600" checked>
+                            <span class="ml-2">Afficher le tableau détaillé</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">Thème</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="radio" name="theme" class="rounded text-blue-600" value="light" checked>
+                            <span class="ml-2">Clair</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="theme" class="rounded text-blue-600" value="dark">
+                            <span class="ml-2">Sombre</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    Sauvegarder les préférences
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/indicators_dashboard_enhanced.js') }}"></script>
+{% endblock %}

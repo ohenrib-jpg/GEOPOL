@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="economic-indicators-container">
+    <!-- EN-TÊTE DU MODULE -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-line text-yellow-500 mr-3"></i>
+                    Indicateurs Économiques Internationaux
+                </h2>
+                <p class="text-gray-600 mt-2">
+                    Analyse en temps réel des marchés mondiaux, indicateurs macroéconomiques et sanctions
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="EconomicIndicators.refreshAll(event)"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Actualiser
+                </button>
+                <button onclick="EconomicIndicators.exportData()"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-download mr-2"></i>
+                    Exporter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION PAR ONGLETS -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+        <div class="flex border-b">
+            <button onclick="EconomicIndicators.switchTab('indices')"
+                    class="eco-tab active px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors border-b-2 border-yellow-500"
+                    data-tab="indices">
+                <i class="fas fa-chart-bar mr-2"></i>
+                Indices Boursiers
+            </button>
+            <button onclick="EconomicIndicators.switchTab('commodities')"
+                    class="eco-tab px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-tab="commodities">
+                <i class="fas fa-coins mr-2"></i>
+                Matières Premières
+            </button>
+            <button onclick="EconomicIndicators.switchTab('currencies')"
+                    class="eco-tab px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-tab="currencies">
+                <i class="fas fa-dollar-sign mr-2"></i>
+                Devises
+            </button>
+            <button onclick="EconomicIndicators.switchTab('worldbank')"
+                    class="eco-tab px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-tab="worldbank">
+                <i class="fas fa-globe mr-2"></i>
+                Banque Mondiale
+            </button>
+            <button onclick="EconomicIndicators.switchTab('sanctions')"
+                    class="eco-tab px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-tab="sanctions">
+                <i class="fas fa-gavel mr-2"></i>
+                Sanctions
+            </button>
+            <button onclick="EconomicIndicators.switchTab('brics')"
+                    class="eco-tab px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-tab="brics">
+                <i class="fas fa-flag mr-2"></i>
+                BRICS
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENU DES ONGLETS -->
+    <!-- INDICES BOURSIERS -->
+    <div id="tab-indices" class="eco-tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6" id="indices-grid">
+            <!-- Cartes générées dynamiquement -->
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Évolution Historique</h3>
+            <canvas id="indicesChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- MATIÈRES PREMIÈRES -->
+    <div id="tab-commodities" class="eco-tab-content hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6" id="commodities-grid">
+            <!-- Cartes générées dynamiquement -->
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Prix des Commodités</h3>
+            <canvas id="commoditiesChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- DEVISES -->
+    <div id="tab-currencies" class="eco-tab-content hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6" id="currencies-grid">
+            <!-- Cartes générées dynamiquement -->
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Taux de Change</h3>
+            <canvas id="currenciesChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- BANQUE MONDIALE -->
+    <div id="tab-worldbank" class="eco-tab-content hidden">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Recherche d'Indicateurs</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                    <select id="wb-country" multiple class="w-full p-2 border rounded">
+                        <option value="CN">🇨🇳 Chine</option>
+                        <option value="US">🇺🇸 États-Unis</option>
+                        <option value="BR">🇧🇷 Brésil</option>
+                        <option value="RU">🇷🇺 Russie</option>
+                        <option value="IN">🇮🇳 Inde</option>
+                        <option value="ZA">🇿🇦 Afrique du Sud</option>
+                        <option value="FR">🇫🇷 France</option>
+                        <option value="DE">🇩🇪 Allemagne</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Indicateur</label>
+                    <select id="wb-indicator" class="w-full p-2 border rounded">
+                        <option value="NY.GDP.MKTP.CD">PIB (USD courants)</option>
+                        <option value="FP.CPI.TOTL.ZG">Inflation (%)</option>
+                        <option value="SL.UEM.TOTL.ZS">Chômage (%)</option>
+                        <option value="NE.EXP.GNFS.ZS">Exportations (% PIB)</option>
+                        <option value="GC.DOD.TOTL.GD.ZS">Dette publique (% PIB)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Années</label>
+                    <input type="number" id="wb-years" value="5" min="1" max="10" class="w-full p-2 border rounded">
+                </div>
+            </div>
+            <button onclick="EconomicIndicators.fetchWorldBank()"
+                    class="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                <i class="fas fa-search mr-2"></i>
+                Rechercher
+            </button>
+        </div>
+        <div id="worldbank-results" class="bg-white rounded-lg shadow-md p-6">
+            <p class="text-gray-500 text-center py-8">Sélectionnez des critères et lancez une recherche</p>
+        </div>
+    </div>
+
+    <!-- SANCTIONS -->
+    <div id="tab-sanctions" class="eco-tab-content hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-red-100 text-sm">Total Sanctions</p>
+                        <h3 class="text-3xl font-bold mt-1" id="sanctions-total">-</h3>
+                    </div>
+                    <i class="fas fa-ban text-4xl text-red-200"></i>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-orange-100 text-sm">Pays Touchés</p>
+                        <h3 class="text-3xl font-bold mt-1" id="sanctions-countries">-</h3>
+                    </div>
+                    <i class="fas fa-globe-americas text-4xl text-orange-200"></i>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm">Types d'Entités</p>
+                        <h3 class="text-3xl font-bold mt-1" id="sanctions-types">-</h3>
+                    </div>
+                    <i class="fas fa-sitemap text-4xl text-purple-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Top 10 Pays</h3>
+                <canvas id="sanctionsCountryChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Par Type d'Entité</h3>
+                <canvas id="sanctionsTypeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Recherche de Sanctions</h3>
+                <button onclick="EconomicIndicators.fetchSanctions()"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Actualiser
+                </button>
+            </div>
+            <div id="sanctions-list" class="space-y-2">
+                <!-- Liste générée dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- BRICS -->
+    <div id="tab-brics" class="eco-tab-content hidden">
+        <div class="mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Indicateurs BRICS</h3>
+            <p class="text-gray-600">Brésil, Russie, Inde, Chine, Afrique du Sud</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">PIB (USD Milliards)</h3>
+                <canvas id="bricsGdpChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Inflation (%)</h3>
+                <canvas id="bricsInflationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Données Détaillées</h3>
+            <div id="brics-table" class="overflow-x-auto">
+                <!-- Table générée dynamiquement -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STYLES SPÉCIFIQUES -->
+<style>
+    .eco-tab.active {
+        border-bottom: 2px solid #f59e0b;
+        color: #f59e0b;
+        background-color: #fffbeb;
+    }
+
+    .indicator-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .indicator-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+    .indicator-value-up {
+        color: #10b981;
+    }
+
+    .indicator-value-down {
+        color: #ef4444;
+    }
+
+    .sanction-item {
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        background: #fef2f2;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+        .sanction-item:hover {
+            background: #fee2e2;
+            transform: translateX(4px);
+        }
+</style>
+
+<script src="{{ url_for('static', filename='js/economic-indicators.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof EconomicIndicators !== 'undefined') {
+            EconomicIndicators.init();
+            console.log('✅ EconomicIndicators initialisé');
+        } else {
+            console.error('❌ EconomicIndicators non chargé - vérifier le chemin du fichier');
+        }
+    });
+</script>
+{% endblock %}

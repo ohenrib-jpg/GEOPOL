@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réseaux Sociaux - GEOPOL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Styles pour les modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+            .modal.active {
+                display: block;
+            }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- En-tête -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                            <i class="fas fa-share-alt text-blue-600 mr-3"></i>
+                            Agrégateur de Réseaux Sociaux
+                        </h1>
+                        <p class="text-gray-600">
+                            Analyse des tendances émotionnelles et comparaison avec les médias traditionnels
+                        </p>
+                    </div>
+                    <a href="/" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-arrow-left mr-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Actions rapides - 4 COLONNES -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-download text-blue-600 mr-2"></i>
+                        Récupération
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Récupérer les derniers posts</p>
+                    <button onclick="SocialAggregatorManager.fetchRecentPosts()"
+                            id="fetchPostsBtn"
+                            class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        <i class="fas fa-download mr-2"></i>Récupérer
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                        Top Thèmes
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Les 5 thèmes du jour</p>
+                    <button onclick="SocialAggregatorManager.loadTopThemes()"
+                            class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                        <i class="fas fa-chart-line mr-2"></i>Voir les thèmes
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-balance-scale text-purple-600 mr-2"></i>
+                        Comparaison
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">RSS vs Social</p>
+                    <button onclick="SocialAggregatorManager.compareWithRSS()"
+                            class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
+                        <i class="fas fa-balance-scale mr-2"></i>Comparer
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-cog text-gray-600 mr-2"></i>
+                        Configuration
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Gérer les instances Nitter</p>
+                    <button onclick="InstanceManager.showInstancePanel()"
+                            class="w-full bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition">
+                        <i class="fas fa-cog mr-2"></i>Gérer les instances
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistiques en temps réel -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+                    Statistiques en temps réel
+                </h3>
+                <div id="stats-display" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-3 bg-blue-50 rounded">
+                        <div class="text-2xl font-bold text-blue-600" id="totalPosts">0</div>
+                        <div class="text-sm text-gray-600">Posts totaux</div>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded">
+                        <div class="text-2xl font-bold text-green-600" id="positivePosts">0</div>
+                        <div class="text-sm text-gray-600">Sentiment +</div>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded">
+                        <div class="text-2xl font-bold text-red-600" id="negativePosts">0</div>
+                        <div class="text-sm text-gray-600">Sentiment -</div>
+                    </div>
+                    <div class="text-center p-3 bg-purple-50 rounded">
+                        <div class="text-2xl font-bold text-purple-600" id="factorZ">0.00</div>
+                        <div class="text-sm text-gray-600">Facteur Z</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone de résultats pour les posts récents -->
+            <div id="recent-posts-result" class="mb-6"></div>
+
+            <!-- Zone de résultats pour les top thèmes -->
+            <div id="top-themes-result" class="mb-6"></div>
+
+            <!-- Zone de résultats pour la comparaison -->
+            <div id="comparison-result" class="mb-6"></div>
+
+            <!-- Informations -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                    <div>
+                        <h5 class="font-semibold text-blue-800">Sources de données</h5>
+                        <p class="text-sm text-blue-600">
+                            Les analyses sont basées sur Nitter (Twitter) et Reddit.
+                            Le Facteur Z mesure la dissonance entre médias traditionnels et réseaux sociaux.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE POUR GESTION DES INSTANCES -->
+    <div id="themeManagerModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="text-xl font-bold">Gestion des Instances</h2>
+                <button id="closeThemeManager" class="text-gray-500 hover:text-gray-700 text-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="themeManagerContent" class="modal-body">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay pour modal -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black opacity-50 z-40"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/social-aggregator.js"></script>
+    <script src="/static/js/instance-manager.js"></script>
+
+    <script>
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🌐 Page Réseaux Sociaux initialisée');
+
+            // Test de débogage
+            console.log('✅ ModalManager disponible:', typeof ModalManager);
+            console.log('✅ InstanceManager disponible:', typeof InstanceManager);
+            console.log('✅ SocialAggregatorManager disponible:', typeof SocialAggregatorManager);
+
+            // Test de la modal
+            const modal = document.getElementById('themeManagerModal');
+            const overlay = document.getElementById('overlay');
+            console.log('✅ Modal trouvée:', !!modal);
+            console.log('✅ Overlay trouvé:', !!overlay);
+
+            // Charger les statistiques au démarrage
+            if (typeof SocialAggregatorManager !== 'undefined') {
+                SocialAggregatorManager.loadStatistics();
+            }
+
+            // Configurer la fermeture de la modal
+            const closeBtn = document.getElementById('closeThemeManager');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    ModalManager.hideModal('themeManagerModal');
+                });
+            }
+
+            // Fermer la modal en cliquant sur l'overlay
+            if (overlay) {
+                overlay.addEventListener('click', function () {
+                    ModalManager.hideModal('themeManagerModal');
+                });
+            }
+        });
+
+        // Fonction de test manuel
+        function testModal() {
+            console.log('🧪 Test manuel de la modal');
+            ModalManager.showModal('themeManagerModal');
+        }
+    </script>
+</body>
+</html>

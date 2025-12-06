@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyseur de Spectre SDR - Géopolitique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- En-tête -->
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-satellite-dish text-blue-400 mr-3"></i>
+                Analyseur de Spectre SDR Géopolitique
+            </h1>
+            <p class="text-gray-400">Surveillance en temps réel des fréquences critiques</p>
+            <div id="data-status" class="mt-4"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Stats -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-blue-300">
+                    <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span>Fréquences surveillées</span>
+                        <span class="font-bold text-green-400" id="total-frequencies">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Anomalies détectées</span>
+                        <span class="font-bold text-red-400" id="anomalies-detected">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Serveurs actifs</span>
+                        <span class="font-bold text-yellow-400" id="active-servers">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contrôles -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-blue-300">
+                    <i class="fas fa-sliders-h mr-2"></i>Contrôles
+                </h3>
+                <div class="space-y-4">
+                    <button id="scan-all" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition">
+                        <i class="fas fa-search mr-2"></i>Scanner toutes les bandes
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button data-band="military" class="band-btn bg-red-700 hover:bg-red-800 text-white py-2 rounded">
+                            <i class="fas fa-fighter-jet mr-1"></i>Militaire
+                        </button>
+                        <button data-band="emergency" class="band-btn bg-orange-600 hover:bg-orange-700 text-white py-2 rounded">
+                            <i class="fas fa-life-ring mr-1"></i>Urgence
+                        </button>
+                        <button data-band="shortwave" class="band-btn bg-green-700 hover:bg-green-800 text-white py-2 rounded">
+                            <i class="fas fa-broadcast-tower mr-1"></i>Ondes courtes
+                        </button>
+                        <button data-band="utility" class="band-btn bg-purple-700 hover:bg-purple-800 text-white py-2 rounded">
+                            <i class="fas fa-tools mr-1"></i>Utilitaires
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fréquence rapide -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-blue-300">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Fréquence spécifique
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-2">Fréquence (kHz)</label>
+                        <input type="number" id="frequency-input" value="4625" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2">Bande passante (kHz)</label>
+                        <input type="number" id="bandwidth-input" value="5" min="1" max="20"
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white">
+                    </div>
+                    <button id="scan-frequency" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition">
+                        <i class="fas fa-bullseye mr-2"></i>Analyser cette fréquence
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique du spectre -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-blue-300">
+                    <i class="fas fa-wave-square mr-2"></i>Spectre en temps réel
+                </h3>
+                <div class="flex space-x-2">
+                    <button id="start-waterfall" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">
+                        <i class="fas fa-play mr-1"></i>Waterfall
+                    </button>
+                    <button id="stop-waterfall" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
+                        <i class="fas fa-stop mr-1"></i>Stop
+                    </button>
+                </div>
+            </div>
+            <div id="spectrum-plot" class="h-96"></div>
+        </div>
+
+        <!-- Résultats des scans -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bandes actives -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-blue-300">
+                    <i class="fas fa-satellite mr-2"></i>Bandes géopolitiques
+                </h3>
+                <div id="bands-results" class="space-y-4">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Anomalies récentes -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-red-300">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Anomalies détectées
+                </h3>
+                <div id="anomalies-list" class="space-y-3">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Console de log -->
+        <div class="mt-8 bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-yellow-300">
+                <i class="fas fa-terminal mr-2"></i>Console SDR
+            </h3>
+            <div id="sdr-console" class="h-48 overflow-y-auto bg-black rounded-lg p-4 font-mono text-sm">
+                <div class="text-green-400">>>> Initialisation de l'analyseur de spectre...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/sdr-spectrum-analyzer.js"></script>
+</body>
+</html>
