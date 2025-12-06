@@ -1,0 +1,163 @@
+# ============================================
+# GEOPOL ANALYTICS - REQUIREMENTS
+# Version 0.6PP avec Module Économique
+# ============================================
+
+# Core Flask Framework
+flask==3.0.0
+flask-cors==4.0.0
+werkzeug==3.0.1
+
+# Base de données
+sqlite3  # Intégré à Python
+
+# Traitement de données
+pandas==2.1.4
+numpy==1.26.2
+
+# Requêtes HTTP
+requests==2.31.0
+urllib3==2.1.0
+
+# Variables d'environnement
+python-dotenv==1.0.0
+
+# RSS & Web Scraping
+feedparser==6.0.10
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# ============================================
+# MODULE INDICATEURS ÉCONOMIQUES (NOUVEAU)
+# ============================================
+
+# Données financières en temps réel
+yfinance==0.2.33
+
+# Pour scraping avancé (optionnel, pour futures extensions)
+scrapy==2.11.0  # Pour banques centrales BRICS
+
+# ============================================
+# ANALYSE DE SENTIMENT & IA
+# ============================================
+
+# NLP & Analyse de sentiment
+transformers==4.36.1
+torch==2.1.2
+sentencepiece==0.1.99
+
+# Extraction d'entités géopolitiques
+spacy==3.7.2
+# Installer le modèle français : python -m spacy download fr_core_news_lg
+
+# Client IA Mistral/Llama
+# Utilise llama-cpp-python ou API externe
+
+# ============================================
+# VISUALISATION & GRAPHIQUES
+# ============================================
+
+# Graphiques backend (si nécessaire)
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Export de données
+openpyxl==3.1.2  # Pour Excel
+fpdf==1.7.2      # Pour PDF
+
+# ============================================
+# UTILITAIRES SYSTÈME
+# ============================================
+
+# Gestion des processus
+psutil==5.9.6
+
+# Dates et temps
+python-dateutil==2.8.2
+pytz==2023.3
+
+# ============================================
+# DÉPENDANCES OPTIONNELLES (Mode RÉEL)
+# ============================================
+
+# SDR (Software Defined Radio) - Optionnel
+# pyrtlsdr==0.2.93
+# numpy-quaternion==2022.4.3
+
+# APIs financières avancées - Optionnel
+# alpha-vantage==2.3.1
+# fredapi==0.5.1
+
+# ============================================
+# DÉVELOPPEMENT & TESTS
+# ============================================
+
+# Tests
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+
+# Qualité de code
+pylint==3.0.3
+black==23.12.1
+flake8==6.1.0
+
+# ============================================
+# NOTES D'INSTALLATION
+# ============================================
+
+# Installation de base :
+# pip install -r requirements.txt
+
+# Modèle SpaCy français :
+# python -m spacy download fr_core_news_lg
+
+# Pour le mode RÉEL (optionnel) :
+# Décommenter les dépendances dans la section OPTIONNELLES
+# Activer GEOPOL_REAL_MODE=true dans .env
+
+# ============================================
+# COMPATIBILITÉ
+# ============================================
+
+# Python 3.9+
+# Testé sur Python 3.9, 3.10, 3.11
+# Windows, Linux, macOS
+
+# ============================================
+# VERSIONS MINIMALES
+# ============================================
+
+# Flask >= 2.3.0
+# pandas >= 1.5.0
+# yfinance >= 0.2.0
+# transformers >= 4.30.0
+# spacy >= 3.5.0
+
+# ============================================
+# REMARQUES IMPORTANTES
+# ============================================
+
+# 1. yfinance utilise des APIs publiques sans clé
+# 2. Banque Mondiale : API ouverte, pas d'authentification
+# 3. OpenSanctions : Dataset public JSON
+# 4. Pour usage intensif : considérer des APIs premium
+
+# 5. Le module économique fonctionne sans clé API
+# 6. Toutes les données sont stockées en SQLite local
+
+# ============================================
+# MISES À JOUR RECOMMANDÉES
+# ============================================
+
+# Pour mettre à jour toutes les dépendances :
+# pip install --upgrade -r requirements.txt
+
+# Pour voir les versions installées :
+# pip list
+
+# Pour créer un environnement virtuel :
+# python -m venv venv
+# source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate     # Windows
+# pip install -r requirements.txt

@@ -1,0 +1,30 @@
+GEO/
+├── app.py
+├── run.py
+├── requirements.txt
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   └── dashboard.html
+|   └── autres templates html
+├── static/
+│   └── js/
+│       ├── app.js
+│       ├── themes.js
+│       ├── articles.js
+│       ├── feeds.js
+│       ├── dashboard.js
+│       └── settings.js
+|       └── autres extensions en .js
+└── Flask/
+    ├── __init__.py
+    ├── app_factory.py
+    ├── config.py
+    ├── database.py
+    ├── theme_analyzer.py
+    ├── theme_manager.py
+    ├── sentiment_analyzer.py
+    ├── rss_manager.py
+    └── routes.py
+    └── advanced_routes.py
+    └── autres extensions en .py

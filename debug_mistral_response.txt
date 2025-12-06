@@ -1,0 +1,32 @@
+=== RÉPONSE BRUTE ===
+**1. Événements majeurs de la semaine**
+
+* Les frappes américaines dans les Caraïbes ont dominé l'actualité internationale, avec des tensions montantes entre Cuba et les États-Unis ([RFI](https://www.rfi.fr/fr/podcasts/journal-ha%C3%AFti-am%C3%A9ricaines/podcast), [RMC](https://rmc.bfmtv.com/rss/actualites/)).
+* La situation en Ukraine a continué à évoluer, avec des conséquences politiques et militaires ([RMC](https://rmc.bfmtv.com/rss/actualites/), [RFI](https://www.rfi.fr/fr/en-bref/rss)).
+
+**2. Tendances significatives**
+
+* Des stratégies d'intimidation et de manipulation des informations ont été observées dans plusieurs pays, notamment en Afrique du Sud ([RFI](https://www.rfi.fr/fr/tag/afrique-du-sud/rss)).
+* Le bilan des inondations et des glissements de terrain en Sri Lanka a atteint 607 morts ([RFI](https://www.rfi.fr/fr/en-bref/rss)).
+
+**3. Analyse géopolitique**
+
+* Les événements en Ukraine et dans les Caraïbes ont mis en relief des équilibres de pouvoir et des relations internationales complexes, avec des réactions variées des communautés internationales ([RFI](https://www.rfi.fr/fr/podcasts/revue-de-presse-internationale/podcast), [Le Figaro](https://www.lefigaro.fr/rss/figaro_actualites.xml)).
+* La corruption et la fraude ont été mis en évidence dans l'unité militaire britannique au Kenya, entraînant des réactions du Parlement local ([RFI](https://www.rfi.fr/fr/afrique/rss)).
+
+**4. Perspectives et agenda**
+
+* À suivre : les conséquences politiques et économiques des événements en Ukraine et dans les Caraïbes, ainsi que l'évolution de la situation en Sri Lanka (inondations et glissements de terrain) et en Afrique du Sud (manipulation des informations).
+* À surveiller : les réactions des communautés internationales aux événements en Ukraine et dans les Caraïbes, ainsi que l'évolution de la situation en Corée du Nord.
+
+=== RÉPONSE NETTOYÉE ===
+**1. Événements majeurs de la semaine**
+* Les frappes américaines dans les Caraïbes ont dominé l'actualité internationale, avec des tensions montantes entre Cuba et les États-Unis ([RFI](https://www.rfi.fr/fr/podcasts/journal-ha%C3%AFti-am%C3%A9ricaines/podcast), [RMC](https://rmc.bfmtv.com/rss/actualites/)).
+* La situation en Ukraine a continué à évoluer, avec des conséquences politiques et militaires ([RMC](https://rmc.bfmtv.com/rss/actualites/), [RFI](https://www.rfi.fr/fr/en-bref/rss)).
+**2. Tendances significatives**
+* Des stratégies d'intimidation et de manipulation des informations ont été observées dans plusieurs pays, notamment en Afrique du Sud ([RFI](https://www.rfi.fr/fr/tag/afrique-du-sud/rss)).
+* Le bilan des inondations et des glissements de terrain en Sri Lanka a atteint 607 morts ([RFI](https://www.rfi.fr/fr/en-bref/rss)).
+**3. Analyse géopolitique**
+* Les événements en Ukraine et dans les Caraïbes ont mis en relief des équilibres de pouvoir et des relations internationales complexes, avec des réactions variées des communautés internationales ([RFI](https://www.rfi.fr/fr/podcasts/revue-de-presse-internationale/podcast), [Le Figaro](https://www.lefigaro.fr/rss/figaro_actualites.xml)).
+* La corruption et la fraude ont été mis en évidence dans l'unité militaire britannique au Kenya, entraînant des réactions du Parlement local ([RFI](https://www.rfi.fr/fr/afrique/rss)).
+**4. Perspectives et agenda**
