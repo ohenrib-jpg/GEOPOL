@@ -3,7 +3,7 @@
 Contact : ohenri.b@gmail.com / olivier.bellanza@ac-toulouse.fr 
 
 (Un grand merci a DeepSeek et a Claude pour leur aide *capitale* dans ce developpement).
-(PS : desole pour les accents manquants....Ce n'est pas facile avec un clavier qwerty sans stickers XD)
+(PS : desole pour les accents manquants....Ce n'est pas facile avec un clavier qwerty sans stickers ;-))
 
 Système d'analyse avancée des flux médiatiques/sociaux, d'indicateurs géopolitiques avec IA pour la veille géopolitique. Tableau de bord ETR pour la veille stratégique. Analyse en temps réel des tendances géopolitiques avec IA intégrées (RoBERTa + Deeplearning + Llama 3.2). Intégration de SpaCy pour NER (Named Entity Recognition)
 Pour le "Fun", mais avec une vraie utilite =>Systeme de comtage des pics SDR sur les frequences civiles et militaires (indicateur d'activite zonale)
