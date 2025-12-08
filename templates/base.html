@@ -1,0 +1,883 @@
+<!-- templates/base.html - VERSION AMÉLIORÉE AVEC MODULE ÉCONOMIQUE -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- head de l'assistant mistral -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* DESIGN INSPIRÉ "MISSION CONTROL" GÉOPOLITIQUE */
+
+        /* Bandeau principal héroïque */
+        .mission-header {
+            background:
+                linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%),
+                url('{{ url_for("static", filename="space.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            height: 140px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #f59e0b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Effet radar animé */
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .radar-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent 0deg,
+                rgba(34, 197, 94, 0.1) 30deg,
+                transparent 60deg,
+                rgba(59, 130, 246, 0.1) 120deg,
+                transparent 150deg,
+                rgba(245, 158, 11, 0.1) 210deg,
+                transparent 240deg,
+                rgba(239, 68, 68, 0.1) 300deg,
+                transparent 330deg
+            );
+            animation: radar-sweep 8s linear infinite;
+            transform-origin: 0 0;
+        }
+
+        /* Typographie inspirée militaire - VERSION SANS BACKGROUND-CLIP */
+        .mission-title {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-weight: 800;
+            color: #f59e0b;
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(245, 158, 11, 0.4),
+                0 0 30px rgba(245, 158, 11, 0.2);
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+
+        /* Effet de brillance alternatif */
+        .mission-title::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg,
+                rgba(245, 158, 11, 0.1) 0%,
+                rgba(132, 204, 22, 0.1) 50%,
+                rgba(6, 182, 212, 0.1) 100%);
+            filter: blur(15px);
+            z-index: -1;
+            border-radius: 10px;
+        }
+
+        .mission-subtitle {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Badges de statut */
+        .status-badge {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-online {
+            border-left: 3px solid #10b981;
+        }
+
+        .status-dev {
+            border-left: 3px solid #f59e0b;
+        }
+
+        /* Navigation style "tableau de bord" */
+        .nav-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-right: 2px solid #334155;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, #f59e0b 0%, #84cc16 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover {
+            transform: translateX(4px);
+            border-color: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .nav-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            color: #f59e0b;
+            font-size: 1.1rem;
+            min-width: 24px;
+        }
+
+        /* Contenu principal style "terminal moderne" */
+        .mission-content {
+            background:
+                radial-gradient(circle at 20% 80%, rgba(30, 41, 59, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(15, 23, 42, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-left: 1px solid #e2e8f0;
+        }
+
+        /* Cartes de données style "interface tactique" */
+        .data-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f59e0b, #84cc16, #06b6d4);
+        }
+
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Indicateurs animés */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse-indicator {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Bandeau latéral */
+        .side-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Effets cosmiques subtils */
+        .cosmic-dots::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, rgba(245, 158, 11, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 30% 70%, rgba(34, 197, 94, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 70% 40%, rgba(59, 130, 246, 0.4) 50%, transparent 100%),
+                radial-gradient(1px 1px at 90% 80%, rgba(239, 68, 68, 0.4) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Indicateurs de couleur pour les technologies */
+        .tech-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .tech-roberta { background: #ef4444; }
+        .tech-spacy { background: #3b82f6; }
+        .tech-mistral { background: #8b5cf6; }
+
+        /* Badge NOUVEAU */
+        .badge-new {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Badge ÉCONOMIQUE */
+        .badge-economy {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .mission-header {
+                height: 100px;
+            }
+
+            .mission-title {
+                font-size: 1.5rem;
+            }
+
+            .nav-panel {
+                transform: translateX(-100%);
+            }
+
+            .nav-panel.active {
+                transform: translateX(0);
+            }
+        }
+
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f59e0b 0%, #84cc16 100%);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #d97706 0%, #65a30d 100%);
+        }
+
+        /* Styles existants conservés */
+        .main-content-overlay {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .sentiment-positive { color: #10B981; }
+        .sentiment-negative { color: #EF4444; }
+        .sentiment-neutral { color: #6B7280; }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .learning-status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        /* Styles pour l'apprentissage continu */
+            .learning-status-indicator.active {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .learning-status-indicator.inactive {
+                background-color: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeeba;
+            }
+
+        /* Styles pour les cartes SDR */
+        .sdr-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .sdr-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
+        .sdr-input {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #e2e8f0;
+            transition: border-color 0.3s;
+        }
+
+            .sdr-input:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+
+        .sdr-btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+            .sdr-btn-primary:hover {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                transform: translateY(-1px);
+            }
+
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- EN-TÊTE MISSION CONTROL -->
+    <header class="mission-header radar-effect cosmic-dots">
+        <div class="container mx-auto px-6 h-full flex items-center justify-between">
+            <!-- Logo et identité -->
+            <div class="flex items-center space-x-6">
+                <div class="relative group">
+                    <img src="{{ url_for('static', filename='logo.png') }}"
+                         alt="GEOPOL Analytics"
+                         class="h-16 w-auto object-contain drop-shadow-lg">
+                    <div class="absolute -inset-2 bg-yellow-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300 -z-10"></div>
+                </div>
+
+                <div class="flex flex-col">
+                    <h1 class="mission-title text-4xl">GEOPOL ANALYTICS</h1>
+                    <p class="mission-subtitle text-sm mt-1">
+                        <i class="fas fa-satellite-dish mr-2 pulse-indicator"></i>
+                        Système de Veille Géopolitique et Stratégique
+                    </p>
+                </div>
+            </div>
+
+            <!-- Graph apprentissage continu -->
+            <div class="learning-status-container" style="position: fixed; top: 170px; right: 10px; z-index: 9999;">
+                <div class="learning-status-indicator" id="global-learning-status">
+                    <i class="fas fa-spinner fa-spin"></i> Initialisation...
+                </div>
+            </div>
+
+            <!-- Statuts et informations -->
+            <div class="flex flex-col space-y-2 items-end">
+                <div class="flex space-x-3">
+                    <div class="status-badge status-online flex items-center space-x-2">
+                        <i class="fas fa-circle text-green-500 text-xs"></i>
+                        <span>En ligne</span>
+                    </div>
+                    <div class="status-badge status-dev flex items-center space-x-2">
+                        <i class="fas fa-code-branch text-yellow-500 text-xs"></i>
+                        <span>Version 0.6PP</span>
+                    </div>
+                </div>
+
+                <div class="text-slate-300 text-xs font-mono">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="tech-indicator tech-roberta"></span>
+                        <span class="tech-indicator tech-spacy"></span>
+                        <span class="tech-indicator tech-mistral"></span>
+                        <span>RoBERTa • SpaCy • Mistral 3.2</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-graduation-cap text-blue-400"></i>
+                        <span>ohenri.b@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRE D'OUTILS -->
+    <nav class="bg-slate-800 border-b border-slate-700 shadow-lg">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center py-3">
+                <div>
+                    <button id="menuToggle" class="text-slate-300 hover:text-yellow-400 transition-colors text-xl md:hidden">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="flex items-center space-x-4 text-slate-300 text-sm">
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-database text-green-400"></i>
+                            <span>Base active</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-bolt text-yellow-400"></i>
+                            <span>IA Opérationnelle</span>
+                        </div>
+                        <!-- Badge indicateur économique -->
+                        <div class="flex items-center space-x-1 bg-blue-900/50 px-2 py-1 rounded">
+                            <i class="fas fa-chart-line text-blue-400"></i>
+                            <span class="text-blue-300">Éco. Inter.</span>
+                            <span class="badge-economy">ACTIF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <span id="currentTime" class="text-slate-300 font-mono text-sm"></span>
+                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- PANEL DE NAVIGATION -->
+        <div class="nav-panel w-64 min-h-screen fixed md:relative z-10">
+            <div class="p-6">
+                <!-- Bannière latérale -->
+                <div class="side-banner mb-6">
+                    <img src="{{ url_for('static', filename='bandeau.png') }}"
+                         alt="Interface GEOPOL"
+                         class="w-full h-auto object-contain p-2">
+                </div>
+
+                <!-- Navigation principale -->
+                <nav class="space-y-2">
+                    <a href="/" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-home"></i>
+                        <span class="font-medium">Tableau de Bord Principal</span>
+                    </a>
+
+                    <!-- GESTION DES THÈMES (Thèmes) -->
+                    <a href="#" class="nav-item nav-themes flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-tags"></i>
+                        <span class="font-medium">Gestion des Thèmes</span>
+                    </a>
+
+                    <a href="/dashboard" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-chart-bar"></i>
+                        <span class="font-medium">Analyses & Statistiques</span>
+                    </a>
+
+                    <a href="/social" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span class="font-medium">Veille Réseaux Sociaux</span>
+                    </a>
+
+                    <!-- CENTRE DE PRESSE (Articles) -->
+                    <a href="#" class="nav-item nav-articles flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-newspaper"></i>
+                        <span class="font-medium">Centre de Presse</span>
+                    </a>
+
+                    <!-- FILTRES TACTIQUES (Filtres avancés) -->
+                    <a href="#" class="nav-item nav-filters flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-filter"></i>
+                        <span class="font-medium">Filtres Thématiques</span>
+                    </a>
+
+                    <a href="#" class="nav-item nav-advanced flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-microscope"></i>
+                        <span class="font-medium">Analyses Profondes</span>
+                    </a>
+
+                    <a href="/weak-indicators" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <span class="font-medium">Indicateurs divers</span>
+                        <span class="badge-new">rtl-SDR</span>
+                    </a>
+
+                    <a href="/spectrum-analyzer" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fa-wave-square"></i>
+                        <span class="font-medium">Le Bruit des Ondes</span>
+                        <span class="badge-new">Spectre SDR</span>
+                    </a>
+
+                    <a href="#" class="nav-item nav-archiviste flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-archive"></i>
+                        <span class="font-medium">Archiviste comparatif</span>
+                    </a>
+
+                    <!-- ⭐ BOUTON INDICATEURS FRANÇAIS -->
+                    <a href="/indicators/france" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white bg-gradient-to-r from-blue-900/30 to-blue-700/30 border-l-4 border-blue-500">
+                        <i class="nav-icon fas fa-flag"></i>
+                        <span class="font-medium">Indicateurs Français</span>
+                        <span class="badge-economy">🇫🇷</span>
+                    </a>
+
+                    <!-- ⭐ BOUTON INDICATEURS INTERNATIONAUX -->
+                    <a href="/indicators" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white bg-gradient-to-r from-purple-900/30 to-purple-700/30 border-l-4 border-purple-500">
+                        <i class="nav-icon fas fa-globe"></i>
+                        <span class="font-medium">Indicateurs Internationaux</span>
+                        <span class="badge-economy">🌍</span>
+                    </a>
+
+                    <!-- CONFIGURATION (Paramètres) -->
+                    <a href="#" class="nav-item nav-settings flex items-center space-x-3 p-3 text-slate-200 hover:text-white">
+                        <i class="nav-icon fas fa-cog"></i>
+                        <span class="font-medium">Configuration</span>
+                    </a>
+                </nav>
+
+                <!-- Statut système -->
+                <div class="mt-8 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                    <div class="text-slate-400 text-xs font-mono">
+                        <div class="flex justify-between items-center mb-2">
+                            <span>Système</span>
+                            <span class="text-green-400">● ACTIF</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span>Charge IA:</span>
+                                <span class="text-yellow-400">24%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Mémoire:</span>
+                                <span class="text-blue-400">1.2GB</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Éco. Inter.:</span>
+                                <span class="text-green-400">● CONNECTÉ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENU PRINCIPAL -->
+        <div class="mission-content flex-1 md:ml-0">
+            <main class="container mx-auto px-6 py-8 main-content-overlay rounded-lg shadow-lg min-h-screen data-card">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-0 hidden md:hidden"></div>
+
+    <!-- MODALE GESTION DES THÈMES -->
+    <div id="themeManagerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl data-card"
+                 style="max-height: 90vh; height: 90vh;">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Centre de Contrôle des Thèmes</h3>
+                        <button id="closeThemeManager" class="text-gray-500 hover:text-gray-700 text-xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 overflow-y-auto" id="themeManagerContent"
+                     style="max-height: calc(90vh - 120px);">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/themes-advanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/articles.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/continuous-learning.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/continuous-learning-integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced-analysis.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/weak-indicators.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/alerts-management.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/geo-narrative.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ticker-banner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+    <script src="/static/js/archiviste-enhanced.js"></script>
+    {% if request.path == '/dashboard' %}
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% endif %}
+
+    <script>
+        // Gestionnaire de navigation
+        document.addEventListener('DOMContentLoaded', function () {
+            // Archiviste historique
+            const navArchiviste = document.querySelector('.nav-archiviste');
+            if (navArchiviste) {
+                navArchiviste.onclick = null;
+                navArchiviste.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('📚 Accès Archiviste historique');
+
+                    if (window.location.pathname === '/archiviste/') {
+                        window.location.reload();
+                        return;
+                    }
+
+                    fetch('/archiviste/', { method: 'HEAD' })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = '/archiviste/';
+                            } else {
+                                throw new Error('Route non trouvée');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Archiviste non disponible:', error);
+                            alert('📚 Le module Archiviste Historique est en cours de développement.\n\nDisponible prochainement !');
+                        });
+                });
+            }
+
+            // CENTRE DE PRESSE (Articles)
+            const navArticles = document.querySelector('.nav-articles');
+            if (navArticles) {
+                navArticles.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('📰 Accès Centre de Presse');
+                    if (typeof ArticleManager !== 'undefined' && typeof ArticleManager.showAllArticles === 'function') {
+                        ArticleManager.showAllArticles();
+                    } else {
+                        console.error('❌ ArticleManager non disponible');
+                        alert('Le module Centre de Presse est en cours de chargement...');
+                    }
+                });
+            }
+
+            // FILTRES TACTIQUES (Filtres)
+            const navFilters = document.querySelector('.nav-filters');
+            if (navFilters) {
+                navFilters.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('🔍 Accès Filtres Tactiques');
+                    if (typeof FilterManager !== 'undefined' && typeof FilterManager.showAdvancedFilters === 'function') {
+                        FilterManager.showAdvancedFilters();
+                    } else {
+                        console.error('❌ FilterManager non disponible');
+                        alert('Le module Filtres Tactiques est en cours de chargement...');
+                    }
+                });
+            }
+
+            // GESTION DES THÈMES (Thèmes)
+            const navThemes = document.querySelector('.nav-themes');
+            if (navThemes) {
+                navThemes.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('🏷️ Accès Gestion des Thèmes');
+                    if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.loadThemes === 'function') {
+                        ThemeManager.loadThemes();
+                    } else {
+                        console.error('❌ ThemeManager non disponible');
+                        alert('Le module Gestion des Thèmes est en cours de chargement...');
+                    }
+                });
+            }
+
+            // APPRENTISSAGE CONTINU
+            (function () {
+                console.log('🚀 Initialisation apprentissage continu...');
+
+                const initLearning = async () => {
+                    try {
+                        if (typeof LearningIntegration === 'undefined') {
+                            throw new Error('LearningIntegration non chargé');
+                        }
+
+                        const success = await window.LearningIntegration.initialize();
+                        console.log(success ? '✅ Apprentissage actif' : '⚠️ Apprentissage inactif');
+                    } catch (error) {
+                        console.error('❌ Erreur:', error);
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => setTimeout(initLearning, 500));
+                } else {
+                    setTimeout(initLearning, 500);
+                }
+            })();
+
+            // ANALYSES PROFONDES
+            const navAdvanced = document.querySelector('.nav-advanced');
+            if (navAdvanced) {
+                navAdvanced.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('🔬 Accès Analyses Profondes');
+
+                    if (typeof AdvancedAnalysisManager !== 'undefined') {
+                        AdvancedAnalysisManager.showAnalysisPanel();
+                    }
+                    else if (typeof GeoNarrativeManager !== 'undefined' && typeof GeoNarrativeManager.showNarrativeAnalysis === 'function') {
+                        GeoNarrativeManager.showNarrativeAnalysis();
+                    }
+                    else {
+                        console.error('❌ Aucun manager d\'analyse disponible');
+                        alert('Le module Analyses Profondes est en cours de chargement...\n\nVeuillez vérifier que le fichier advanced-analysis.js est bien chargé.');
+                    }
+                });
+            }
+
+            // CONFIGURATION (Paramètres)
+            const navSettings = document.querySelector('.nav-settings');
+            if (navSettings) {
+                navSettings.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('⚙️ Accès Configuration');
+                    if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.showSettings === 'function') {
+                        SettingsManager.showSettings();
+                    } else {
+                        console.error('❌ SettingsManager non disponible');
+                        alert('Le module Configuration est en cours de chargement...');
+                    }
+                });
+            }
+
+            // Mise à jour de l'heure en temps réel
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const dateString = now.toLocaleDateString('fr-FR', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short'
+                });
+
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = `${dateString} • ${timeString}`;
+                }
+            }
+
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // Animation d'indicators de statut
+            const indicators = document.querySelectorAll('.pulse-indicator');
+            indicators.forEach(indicator => {
+                setInterval(() => {
+                    indicator.style.opacity = indicator.style.opacity === '0.7' ? '1' : '0.7';
+                }, 2000);
+            });
+
+            // Gestionnaire de modale simple
+            const modal = document.getElementById('themeManagerModal');
+            const closeBtn = document.getElementById('closeThemeManager');
+
+            if (modal && closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    modal.classList.add('hidden');
+                });
+
+                // Fermer en cliquant en dehors
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Configuration Chart.js globale
+        Chart.defaults.font.family = "'Segoe UI', 'Inter', system-ui, sans-serif";
+        Chart.defaults.color = '#374151';
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+        Chart.defaults.plugins.tooltip.titleColor = '#f59e0b';
+        Chart.defaults.plugins.tooltip.bodyColor = '#e2e8f0';
+
+        // Gestionnaire de modale global
+        window.ModalManager = {
+            showModal: function (modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            },
+            hideModal: function (modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+        };
+
+        console.log('🎯 GEOPOL Analytics - Mission Control Initialized');
+        console.log('⭐ Module Économique disponible sur /indicators');
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

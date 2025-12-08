@@ -1,0 +1,483 @@
+<!-- templates/spectrum_analyzer.html -->
+{% extends "base.html" %}
+
+{% block title %}Le Bruit des Ondes - GEOPOL{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- En-tête -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-4xl font-bold text-blue-300">
+                <i class="fas fa-wave-square mr-3"></i>
+                Le Bruit des Ondes
+            </h1>
+            <button onclick="window.location.href='/'" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
+                <i class="fas fa-home mr-2"></i>Retour au Dashboard
+            </button>
+        </div>
+        <p class="text-gray-400 text-lg">Analyse spectrale passive - Détection d'activité radio anormale</p>
+        <div id="data-status" class="mt-4"></div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+        <div class="data-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Fréquences surveillées</p>
+                    <p class="text-3xl font-bold text-blue-400" id="total-frequencies">-</p>
+                </div>
+                <i class="fas fa-signal text-blue-400 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Anomalies détectées</p>
+                    <p class="text-3xl font-bold text-red-400" id="anomalies-detected">-</p>
+                </div>
+                <i class="fas fa-exclamation-triangle text-red-400 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Serveurs actifs</p>
+                    <p class="text-3xl font-bold text-green-400" id="active-servers">-</p>
+                </div>
+                <i class="fas fa-server text-green-400 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Dernière analyse</p>
+                    <p class="text-xl font-bold text-yellow-400" id="last-scan">-</p>
+                </div>
+                <i class="fas fa-clock text-yellow-400 text-3xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contrôles -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Scan rapide -->
+        <div class="data-card">
+            <h3 class="text-xl font-bold mb-4 text-blue-300">
+                <i class="fas fa-bolt mr-2"></i>Scan Rapide
+            </h3>
+            <button id="scan-all" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold transition text-lg">
+                <i class="fas fa-satellite-dish mr-2"></i>Scanner toutes les bandes géopolitiques
+            </button>
+        </div>
+
+        <!-- Fréquence spécifique -->
+        <div class="data-card">
+            <h3 class="text-xl font-bold mb-4 text-blue-300">
+                <i class="fas fa-bullseye mr-2"></i>Fréquence Spécifique
+            </h3>
+            <div class="flex gap-2">
+                <input type="number" id="frequency-input" value="4625"
+                       class="flex-1 bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="Fréquence (kHz)">
+                <button id="scan-frequency" class="px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition">
+                    <i class="fas fa-search mr-2"></i>Analyser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique du spectre -->
+    <div class="data-card mb-8">
+        <h3 class="text-2xl font-bold mb-6 text-blue-300">
+            <i class="fas fa-chart-area mr-2"></i>Spectre Radio
+        </h3>
+        <div id="spectrum-plot" class="h-96"></div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Scans récents -->
+        <div class="data-card">
+            <h3 class="text-xl font-bold mb-4 text-blue-300">
+                <i class="fas fa-history mr-2"></i>Scans Récents
+            </h3>
+            <div id="recent-scans" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                <!-- Chargé dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Anomalies -->
+        <div class="data-card">
+            <h3 class="text-xl font-bold mb-4 text-red-300">
+                <i class="fas fa-exclamation-circle mr-2"></i>Anomalies Détectées
+            </h3>
+            <div id="anomalies-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                <!-- Chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Console -->
+    <div class="data-card border border-gray-700">
+        <h3 class="text-xl font-bold mb-4 text-yellow-300">
+            <i class="fas fa-terminal mr-2"></i>Console d'Analyse
+        </h3>
+        <div id="sdr-console" class="h-48 overflow-y-auto bg-gray-900 rounded-lg p-4 font-mono text-sm">
+            <div class="text-green-400">>>> Initialisation de l'analyseur spectral...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<!-- SDR Spectrum Analyzer JS -->
+<script>
+    class SDRSpectrumAnalyzer {
+        constructor() {
+            this.currentPlot = null;
+            this.init();
+        }
+
+        async init() {
+            console.log('🔡 Initialisation de l\'analyseur SDR...');
+            this.setupEventListeners();
+            await this.loadDashboard();
+            await this.loadTestSpectrum();
+            console.log('✅ SDR Spectrum Analyzer prêt');
+        }
+
+        setupEventListeners() {
+            document.getElementById('scan-all')?.addEventListener('click', () => {
+                this.scanAllBands();
+            });
+
+            document.getElementById('scan-frequency')?.addEventListener('click', () => {
+                this.scanSpecificFrequency();
+            });
+        }
+
+        async loadDashboard() {
+            try {
+                const response = await fetch('/api/sdr/dashboard');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.updateStats(data.stats || {});
+                    this.displayRecentScans(data.recent_scans || []);
+                    this.displayAnomalies(data.anomalies || []);
+                    this.displayStatus(data.real_data || false);
+
+                    this.logToConsole(`✅ Dashboard chargé (${data.stats?.total_scans || 0} scans)`);
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement dashboard:', error);
+                this.logToConsole(`❌ Erreur: ${error.message}`);
+                this.showNotification('Service SDR temporairement indisponible', 'error');
+            }
+        }
+
+        updateStats(stats) {
+            document.getElementById('total-frequencies').textContent = stats.total_frequencies || 0;
+            document.getElementById('anomalies-detected').textContent = stats.anomalies_count || 0;
+            document.getElementById('active-servers').textContent = stats.active_servers || 0;
+            document.getElementById('last-scan').textContent = new Date().toLocaleTimeString('fr-FR');
+        }
+
+        displayRecentScans(scans) {
+            const container = document.getElementById('recent-scans');
+            if (!container) return;
+
+            if (!scans || scans.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">Aucun scan récent</div>';
+                return;
+            }
+
+            container.innerHTML = scans.map(scan => `
+            <div class="p-3 bg-gray-700 rounded-lg ${scan.anomaly ? 'border-l-4 border-red-500' : ''}">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-semibold text-white">${scan.frequency_khz || 0} kHz</p>
+                        <p class="text-sm text-gray-400">${scan.category || 'inconnu'}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs rounded ${scan.anomaly ? 'bg-red-600' : 'bg-green-600'} text-white">
+                        ${scan.peak_count || 0} pics
+                    </span>
+                </div>
+                <div class="text-xs text-gray-400">
+                    ${scan.power_db || 0} dB • ${new Date(scan.timestamp || Date.now()).toLocaleTimeString()}
+                </div>
+            </div>
+        `).join('');
+        }
+
+        displayAnomalies(anomalies) {
+            const container = document.getElementById('anomalies-list');
+            if (!container) return;
+
+            if (!anomalies || anomalies.length === 0) {
+                container.innerHTML = '<div class="text-green-500 text-center py-4">✅ Aucune anomalie détectée</div>';
+                return;
+            }
+
+            container.innerHTML = anomalies.map(anomaly => `
+            <div class="p-3 bg-gray-700 rounded-lg border-l-4 border-red-500">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="font-semibold text-white">${anomaly.frequency_khz || 0} kHz</p>
+                    <span class="px-2 py-1 text-xs rounded ${anomaly.severity === 'high' ? 'bg-red-600' : 'bg-yellow-600'} text-white">
+                        ${anomaly.severity || 'medium'}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-300">${anomaly.description || 'Anomalie détectée'}</p>
+                <p class="text-xs text-gray-400 mt-1">
+                    ${new Date(anomaly.timestamp || Date.now()).toLocaleString('fr-FR')}
+                </p>
+            </div>
+        `).join('');
+        }
+
+        displayStatus(realData) {
+            const statusElement = document.getElementById('data-status');
+            if (!statusElement) return;
+
+            if (realData) {
+                statusElement.innerHTML = `
+                <div class="px-4 py-2 rounded-lg bg-green-900 text-green-300 border border-green-700">
+                    <i class="fas fa-satellite mr-2"></i>
+                    <span class="font-semibold">MODE RÉEL ACTIF</span>
+                    <div class="text-sm mt-1">Données SDR en temps réel</div>
+                </div>
+            `;
+            } else {
+                statusElement.innerHTML = `
+                <div class="px-4 py-2 rounded-lg bg-yellow-900 text-yellow-300 border border-yellow-700">
+                    <i class="fas fa-vial mr-2"></i>
+                    <span class="font-semibold">MODE SIMULATION</span>
+                    <div class="text-sm mt-1">Données simulées - Activez GEOPOL_REAL_MODE=true pour le mode réel</div>
+                </div>
+            `;
+            }
+        }
+
+        async loadTestSpectrum() {
+            try {
+                const response = await fetch('/api/sdr/test-spectrum');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.renderSpectrumPlot(data);
+                    this.logToConsole('✅ Spectre de test chargé');
+                } else {
+                    throw new Error(data.error || 'Erreur de spectre');
+                }
+            } catch (error) {
+                console.error('⚠️ Spectre test:', error);
+                this.logToConsole(`⚠️ Spectre test: ${error.message}`);
+                this.generateFallbackSpectrum();
+            }
+        }
+
+        renderSpectrumPlot(data) {
+            const plotElement = document.getElementById('spectrum-plot');
+            if (!plotElement) return;
+
+            plotElement.innerHTML = '';
+
+            const trace = {
+                x: data.frequencies_mhz || Array.from({ length: 1000 }, (_, i) => i * 0.03),
+                y: data.powers || Array.from({ length: 1000 }, () => -90 + Math.random() * 30),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Spectre',
+                line: { color: '#3B82F6', width: 2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(59, 130, 246, 0.2)'
+            };
+
+            const layout = {
+                title: 'Spectre Radio (0-30 MHz)',
+                xaxis: {
+                    title: 'Fréquence (MHz)',
+                    gridcolor: '#374151',
+                    zerolinecolor: '#4B5563'
+                },
+                yaxis: {
+                    title: 'Puissance (dB)',
+                    gridcolor: '#374151',
+                    zerolinecolor: '#4B5563'
+                },
+                plot_bgcolor: '#1F2937',
+                paper_bgcolor: '#1F2937',
+                font: { color: '#D1D5DB' },
+                margin: { t: 40, r: 20, b: 40, l: 50 }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['lasso2d', 'select2d']
+            };
+
+            Plotly.newPlot(plotElement, [trace], layout, config);
+        }
+
+        generateFallbackSpectrum() {
+            const frequencies = Array.from({ length: 1000 }, (_, i) => i * 0.03);
+            const powers = Array.from({ length: 1000 }, () => -90 + Math.random() * 20);
+
+            [150, 300, 450, 600, 750].forEach(idx => {
+                powers[idx] += 30 + Math.random() * 10;
+            });
+
+            this.renderSpectrumPlot({
+                frequencies_mhz: frequencies,
+                powers: powers
+            });
+        }
+
+        async scanAllBands() {
+            this.logToConsole('🔍 Scan complet des bandes géopolitiques...');
+
+            try {
+                const response = await fetch('/api/sdr/scan-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.logToConsole(`✅ Scan terminé: ${data.stats?.total_scans || 0} fréquences`);
+                    if (data.stats?.anomalies_detected > 0) {
+                        this.logToConsole(`⚠️ ${data.stats.anomalies_detected} anomalies détectées`);
+                    }
+                    await this.loadDashboard();
+                } else {
+                    throw new Error(data.error || 'Erreur de scan');
+                }
+            } catch (error) {
+                console.error('❌ Erreur scan:', error);
+                this.logToConsole(`❌ Erreur scan: ${error.message}`);
+                this.showNotification('Erreur lors du scan complet', 'error');
+            }
+        }
+
+        async scanSpecificFrequency() {
+            const frequencyInput = document.getElementById('frequency-input');
+            const frequency = frequencyInput?.value;
+
+            if (!frequency || isNaN(frequency)) {
+                this.logToConsole('❌ Veuillez entrer une fréquence valide');
+                this.showNotification('Veuillez entrer une fréquence valide', 'warning');
+                return;
+            }
+
+            this.logToConsole(`🎯 Scan de ${frequency} kHz...`);
+
+            try {
+                const response = await fetch('/api/sdr/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        frequency: parseInt(frequency),
+                        bandwidth: 5
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const result = data.results;
+                    this.logToConsole(`✅ ${result.peak_count || 0} pics détectés, ${result.power_db || 0} dB`);
+
+                    if (result.anomaly_detected) {
+                        this.logToConsole(`🚨 ANOMALIE DÉTECTÉE!`);
+                        this.showNotification('Anomalie détectée sur cette fréquence!', 'error');
+                    }
+
+                    await this.loadDashboard();
+                } else {
+                    throw new Error(data.error || 'Erreur de scan');
+                }
+            } catch (error) {
+                console.error('❌ Erreur scan spécifique:', error);
+                this.logToConsole(`❌ Erreur: ${error.message}`);
+                this.showNotification('Erreur lors du scan', 'error');
+            }
+        }
+
+        logToConsole(message) {
+            const consoleElement = document.getElementById('sdr-console');
+            if (!consoleElement) return;
+
+            const timestamp = new Date().toLocaleTimeString('fr-FR');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'text-green-400 mb-1 font-mono text-sm';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+
+            consoleElement.appendChild(logEntry);
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+
+            while (consoleElement.children.length > 100) {
+                consoleElement.removeChild(consoleElement.firstChild);
+            }
+        }
+
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'error' ? 'bg-red-600 text-white' :
+                    type === 'warning' ? 'bg-yellow-600 text-white' :
+                        'bg-blue-600 text-white'
+                }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+        window.sdrAnalyzer = new SDRSpectrumAnalyzer();
+    });
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-// static/js/ticker-banner.js - VERSION CORRIGÉE ET OPTIMISÉE
+// static/js/ticker-banner.js - VERSION CORRIGÉE
 
 class TickerBanner {
     constructor() {
@@ -13,7 +13,7 @@ class TickerBanner {
         this.animationFrame = null;
         this.position = 0;
         this.lastTimestamp = 0;
-        this.scrollSpeed = 30; // pixels par seconde (ralenti)
+        this.scrollSpeed = 30;
     }
 
     async initialize() {
@@ -58,47 +58,25 @@ class TickerBanner {
                 }
                 
                 @keyframes slideDown {
-                    from {
-                        transform: translateY(-100%);
-                    }
-                    to {
-                        transform: translateY(0);
-                    }
+                    from { transform: translateY(-100%); }
+                    to { transform: translateY(0); }
                 }
                 
-                /* Ajuster le contenu principal pour ne pas être caché */
-                body {
-                    padding-top: 40px;
-                }
+                body { padding-top: 40px; }
                 
-                /* Effet de glow pour les éléments importants */
                 .ticker-highlight {
                     text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
                 }
                 
-                /* Couleurs par sentiment */
-                .ticker-positive {
-                    color: #10B981;
-                }
-                
-                .ticker-negative {
-                    color: #EF4444;
-                }
-                
-                .ticker-neutral {
-                    color: #60A5FA;
-                }
-                
-                .ticker-warning {
-                    color: #F59E0B;
-                }
+                .ticker-positive { color: #10B981; }
+                .ticker-negative { color: #EF4444; }
+                .ticker-neutral { color: #60A5FA; }
+                .ticker-warning { color: #F59E0B; }
             </style>
         `;
 
-        // Insérer le bandeau au début du body
         document.body.insertAdjacentHTML('afterbegin', bannerHTML);
 
-        // Configurer le bouton pause/play
         const toggleBtn = document.getElementById('ticker-toggle');
         toggleBtn.addEventListener('click', () => this.toggleAnimation());
     }
@@ -122,28 +100,28 @@ class TickerBanner {
     async loadRecentArticles() {
         try {
             const response = await fetch('/api/articles?limit=5');
-            const data = await response.json();
-
-            if (data.articles) {
-                this.tickerData.articles = data.articles.map(article => ({
-                    title: this.truncateText(article.title, 80),
-                    sentiment: article.detailed_sentiment || article.sentiment,
-                    score: article.sentiment_score || 0,
-                    pubDate: article.pub_date
-                }));
+            if (response.ok) {
+                const data = await response.json();
+                if (data.articles) {
+                    this.tickerData.articles = data.articles.map(article => ({
+                        title: this.truncateText(article.title, 80),
+                        sentiment: article.detailed_sentiment || article.sentiment,
+                        score: article.sentiment_score || 0,
+                        pubDate: article.pub_date
+                    }));
+                }
             }
         } catch (error) {
-            console.error('Erreur chargement articles:', error);
+            console.log('ℹ️ Articles non disponibles:', error.message);
         }
     }
 
+    // ✅ CORRECTION : Utiliser la bonne URL API
     async loadStockData() {
         try {
-            // ✅ CORRECTION : Utiliser la bonne URL API
             const response = await fetch('/indicators/api/indices');
 
-            // Vérifier si le service est disponible
-            if (response.status === 404 || response.status === 503) {
+            if (!response.ok) {
                 console.log('ℹ️ Service stocks non disponible, ignoré');
                 return;
             }
@@ -164,10 +142,11 @@ class TickerBanner {
         }
     }
 
+    // ✅ CORRECTION : Utiliser le bon endpoint et format
     async loadIndicators() {
         try {
-            // ✅ CORRECTION : Utiliser la bonne URL API
-            const response = await fetch('/indicators/api/data?ids=gdp,unemployment,hicp,trade_balance');
+            // Utiliser l'endpoint dashboard qui fonctionne
+            const response = await fetch('/indicators/api/dashboard');
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -178,19 +157,42 @@ class TickerBanner {
             if (data.success && data.indicators) {
                 this.tickerData.indicators = [];
 
-                // Traiter les indicateurs réels
+                // Traiter les indicateurs selon le nouveau format
                 Object.values(data.indicators).forEach(indicator => {
-                    if (indicator.success) {
+                    if (indicator && indicator.name) {
+                        // Mapper les indicateurs vers un format cohérent
+                        let displayName = indicator.name;
+                        let unit = indicator.unit;
+
+                        // Noms d'affichage optimisés
+                        const nameMapping = {
+                            'PIB': 'PIB',
+                            'Inflation': 'IPCH',
+                            'Commerce': 'Commerce',
+                            'Chômage': 'Chômage',
+                            'GINI': 'GINI'
+                        };
+
+                        // Trouver le nom court
+                        for (const [key, value] of Object.entries(nameMapping)) {
+                            if (displayName.includes(key)) {
+                                displayName = value;
+                                break;
+                            }
+                        }
+
                         this.tickerData.indicators.push({
-                            name: indicator.indicator_name,
-                            value: indicator.current_value,
-                            unit: indicator.unit,
+                            name: displayName,
+                            value: parseFloat(indicator.value),
+                            unit: unit,
                             change: indicator.change_percent,
                             trend: indicator.change_percent > 0 ? 'up' :
                                 indicator.change_percent < 0 ? 'down' : 'stable'
                         });
                     }
                 });
+
+                console.log('📊 Indicateurs chargés:', this.tickerData.indicators.length);
             }
         } catch (error) {
             console.error('Erreur chargement indicateurs:', error);
@@ -201,35 +203,37 @@ class TickerBanner {
         try {
             const response = await fetch('/api/social/statistics?days=1');
 
-            // Vérifier si le service est disponible
             if (response.status === 503) {
                 console.log('ℹ️ Service social non disponible, ignoré');
                 return;
             }
 
-            const data = await response.json();
+            if (response.ok) {
+                const data = await response.json();
 
-            if (data.success && data.statistics) {
-                this.tickerData.social = {
-                    totalPosts: data.statistics.total_posts || 0,
-                    positive: data.statistics.sentiment_distribution?.positive || 0,
-                    negative: data.statistics.sentiment_distribution?.negative || 0
-                };
+                if (data.success && data.statistics) {
+                    this.tickerData.social = {
+                        totalPosts: data.statistics.total_posts || 0,
+                        positive: data.statistics.sentiment_distribution?.positive || 0,
+                        negative: data.statistics.sentiment_distribution?.negative || 0
+                    };
+                }
             }
 
             // Récupérer le Factor Z
             const comparisonResponse = await fetch('/api/social/comparison-history?limit=1');
 
-            // Vérifier si le service est disponible
             if (comparisonResponse.status === 503) {
                 console.log('ℹ️ Service comparaison social non disponible, ignoré');
                 return;
             }
 
-            const comparisonData = await comparisonResponse.json();
+            if (comparisonResponse.ok) {
+                const comparisonData = await comparisonResponse.json();
 
-            if (comparisonData.success && comparisonData.history?.length > 0) {
-                this.tickerData.social.factorZ = comparisonData.history[0].factor_z;
+                if (comparisonData.success && comparisonData.history?.length > 0) {
+                    this.tickerData.social.factorZ = comparisonData.history[0].factor_z;
+                }
             }
         } catch (error) {
             console.log('ℹ️ Données sociales non disponibles:', error.message);
@@ -278,16 +282,16 @@ class TickerBanner {
                     <span class="flex items-center">
                         <i class="fas fa-chart-line mr-2 text-yellow-400"></i>
                         <span class="font-bold">${stock.symbol}</span>
-                        <span class="ml-2">${stock.price.toFixed(2)}</span>
+                        <span class="ml-2">${stock.price?.toFixed ? stock.price.toFixed(2) : stock.price}</span>
                         <span class="ml-2 ${trendClass}">
-                            ${trendIcon} ${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%
+                            ${trendIcon} ${stock.change >= 0 ? '+' : ''}${(stock.change || 0).toFixed(2)}%
                         </span>
                     </span>
                 `);
             });
         }
 
-        // 4. Indicateurs français
+        // 4. Indicateurs économiques
         if (this.tickerData.indicators.length > 0) {
             this.tickerData.indicators.forEach(indicator => {
                 const trendIcon = indicator.trend === 'up' ? '↗️' :
@@ -295,13 +299,13 @@ class TickerBanner {
 
                 let displayValue = '';
                 if (indicator.unit === '%') {
-                    displayValue = `${indicator.value.toFixed(1)}%`;
-                } else if (indicator.unit.includes('Milliards')) {
-                    displayValue = `${indicator.value.toLocaleString('fr-FR')} Mds`;
-                } else if (indicator.unit.includes('points')) {
-                    displayValue = `${indicator.value.toLocaleString('fr-FR')} pts`;
+                    displayValue = `${(indicator.value || 0).toFixed(1)}%`;
+                } else if (indicator.unit && indicator.unit.includes('Milliards')) {
+                    displayValue = `${(indicator.value || 0).toLocaleString('fr-FR')} Mds`;
+                } else if (indicator.unit && indicator.unit.includes('points')) {
+                    displayValue = `${(indicator.value || 0).toLocaleString('fr-FR')} pts`;
                 } else {
-                    displayValue = `${indicator.value.toLocaleString('fr-FR')} ${indicator.unit}`;
+                    displayValue = `${(indicator.value || 0).toLocaleString('fr-FR')} ${indicator.unit || ''}`;
                 }
 
                 items.push(`
@@ -311,7 +315,7 @@ class TickerBanner {
                         <span class="ml-2 font-bold">${displayValue}</span>
                         ${indicator.change !== undefined ? `
                             <span class="ml-2 text-sm">
-                                ${trendIcon} ${indicator.change > 0 ? '+' : ''}${indicator.change.toFixed(1)}
+                                ${trendIcon} ${indicator.change > 0 ? '+' : ''}${(indicator.change || 0).toFixed(1)}
                             </span>
                         ` : ''}
                     </span>
@@ -366,11 +370,9 @@ class TickerBanner {
             this.lastTimestamp = timestamp;
 
             if (!this.isPaused) {
-                // Calculer le déplacement basé sur le temps écoulé
                 const moveDistance = (this.scrollSpeed * deltaTime) / 1000;
                 this.position -= moveDistance;
 
-                // Réinitialiser la position quand le contenu est entièrement défilé
                 const contentWidth = tickerItems.offsetWidth;
                 if (Math.abs(this.position) >= contentWidth / 2) {
                     this.position = 0;

@@ -22,7 +22,7 @@ class GeoEntityManager {
      */
     async getPatternsEnriched(days = 7, minCountries = 2) {
         const cacheKey = `patterns_${days}_${minCountries}`;
-        
+
         // Vérifier le cache
         if (this._isCacheValid(cacheKey)) {
             console.log('📦 Données récupérées depuis le cache');
@@ -31,7 +31,7 @@ class GeoEntityManager {
 
         try {
             console.log(`🔍 Récupération patterns enrichis (${days} jours)...`);
-            
+
             const response = await fetch(
                 `${this.baseUrl}/patterns-enriched?days=${days}&min_countries=${minCountries}`
             );
@@ -41,10 +41,10 @@ class GeoEntityManager {
             }
 
             const data = await response.json();
-            
+
             // Mettre en cache
             this._setCache(cacheKey, data);
-            
+
             console.log(`✅ ${data.count} patterns enrichis récupérés`);
             return data;
 
@@ -62,7 +62,7 @@ class GeoEntityManager {
     async getComprehensiveAnalysis(days = 7) {
         try {
             console.log(`🔎 Lancement analyse complète (${days} jours)...`);
-            
+
             const response = await fetch(
                 `${this.baseUrl}/comprehensive-analysis?days=${days}`
             );
@@ -72,10 +72,10 @@ class GeoEntityManager {
             }
 
             const data = await response.json();
-            
+
             console.log('✅ Analyse complète terminée');
             console.log('📊 Résumé:', data.report.summary);
-            
+
             return data;
 
         } catch (error) {
@@ -94,7 +94,7 @@ class GeoEntityManager {
     async findPatternsByEntity(entityName, entityType = null, days = 7) {
         try {
             console.log(`🔍 Recherche patterns pour: ${entityName}`);
-            
+
             let url = `${this.baseUrl}/patterns/by-entity?entity=${encodeURIComponent(entityName)}&days=${days}`;
             if (entityType) {
                 url += `&type=${entityType}`;
@@ -107,7 +107,7 @@ class GeoEntityManager {
             }
 
             const data = await response.json();
-            
+
             console.log(`✅ ${data.count} patterns trouvés pour ${entityName}`);
             return data;
 
@@ -126,7 +126,7 @@ class GeoEntityManager {
     async getEntityTimeline(entityName, days = 30) {
         try {
             console.log(`📅 Récupération timeline pour: ${entityName}`);
-            
+
             const response = await fetch(
                 `${this.baseUrl}/entity/timeline?entity=${encodeURIComponent(entityName)}&days=${days}`
             );
@@ -136,7 +136,7 @@ class GeoEntityManager {
             }
 
             const data = await response.json();
-            
+
             console.log(`✅ Timeline récupérée: ${data.timeline.total_occurrences} occurrences`);
             return data;
 
@@ -154,7 +154,7 @@ class GeoEntityManager {
     async getEntityRelations(days = 7) {
         try {
             console.log(`🕸️ Extraction relations entités (${days} jours)...`);
-            
+
             const response = await fetch(
                 `${this.baseUrl}/entity-relations?days=${days}`
             );
@@ -164,10 +164,10 @@ class GeoEntityManager {
             }
 
             const data = await response.json();
-            
+
             const graph = data.graph;
             console.log(`✅ Graphe extrait: ${graph.metadata.total_nodes} nœuds, ${graph.metadata.total_edges} liens`);
-            
+
             return data;
 
         } catch (error) {
@@ -188,7 +188,7 @@ class GeoEntityManager {
     async downloadReport(days = 7, format = 'json') {
         try {
             console.log(`📥 Téléchargement rapport (${format})...`);
-            
+
             const response = await fetch(
                 `${this.baseUrl}/report?days=${days}&format=${format}`
             );
@@ -199,16 +199,16 @@ class GeoEntityManager {
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `geo_report_${days}days.${format === 'json' ? 'json' : 'md'}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            
+
             window.URL.revokeObjectURL(url);
-            
+
             console.log('✅ Rapport téléchargé');
 
         } catch (error) {
@@ -275,10 +275,10 @@ class GeoEntityManager {
 
     _isCacheValid(key) {
         if (!this.cache.has(key)) return false;
-        
+
         const cached = this.cache.get(key);
         const now = Date.now();
-        
+
         return (now - cached.timestamp) < this.cacheDuration;
     }
 
@@ -302,7 +302,7 @@ class GeoEntityManager {
         try {
             const response = await fetch(`${this.baseUrl}/health`);
             const data = await response.json();
-            
+
             console.log('🏥 Santé du service:', data);
             return data;
 
@@ -322,17 +322,17 @@ class GeoEntityManager {
  */
 async function exampleDisplayEnrichedPatterns() {
     const manager = new GeoEntityManager();
-    
+
     try {
         const data = await manager.getPatternsEnriched(7, 2);
-        
+
         console.log(`\n📊 ${data.count} PATTERNS ENRICHIS\n`);
-        
+
         data.patterns.forEach((pattern, index) => {
             console.log(`${index + 1}. "${pattern.pattern}"`);
             console.log(`   Pays: ${pattern.countries.join(', ')}`);
             console.log(`   Entités richesse: ${pattern.entity_richness_score}`);
-            
+
             // Afficher les entités
             const entities = pattern.entities;
             if (entities.locations?.length) {
@@ -345,7 +345,7 @@ async function exampleDisplayEnrichedPatterns() {
             }
             console.log('');
         });
-        
+
     } catch (error) {
         console.error('Erreur:', error);
     }
@@ -356,23 +356,23 @@ async function exampleDisplayEnrichedPatterns() {
  */
 async function exampleSearchEntity(entityName) {
     const manager = new GeoEntityManager();
-    
+
     try {
         const data = await manager.findPatternsByEntity(entityName);
-        
+
         console.log(`\n🔍 PATTERNS MENTIONNANT "${entityName}"\n`);
-        
+
         if (data.count === 0) {
             console.log('Aucun pattern trouvé.');
             return;
         }
-        
+
         data.patterns.forEach((pattern, index) => {
             console.log(`${index + 1}. "${pattern.pattern}"`);
             console.log(`   Pays: ${pattern.countries.join(', ')}`);
             console.log(`   Occurrences: ${pattern.total_occurrences}`);
         });
-        
+
     } catch (error) {
         console.error('Erreur:', error);
     }
@@ -383,23 +383,23 @@ async function exampleSearchEntity(entityName) {
  */
 async function exampleVisualizeRelations() {
     const manager = new GeoEntityManager();
-    
+
     try {
         const data = await manager.getEntityRelations(7);
         const graph = data.graph;
-        
+
         console.log('\n🕸️ GRAPHE DE RELATIONS\n');
         console.log(`Nœuds: ${graph.metadata.total_nodes}`);
         console.log(`Liens: ${graph.metadata.total_edges}`);
-        
+
         console.log('\nTop 10 relations:');
         graph.edges.slice(0, 10).forEach((edge, index) => {
             console.log(`${index + 1}. ${edge.source} ←→ ${edge.target} (${edge.weight} co-occurrences)`);
         });
-        
+
         // Ici vous pouvez utiliser vis.js ou D3.js pour visualiser
         // visualizeGraphWithVisJS(graph);
-        
+
     } catch (error) {
         console.error('Erreur:', error);
     }
@@ -410,13 +410,13 @@ async function exampleVisualizeRelations() {
  */
 async function exampleIntegrateWithLeaflet() {
     const manager = new GeoEntityManager();
-    
+
     try {
         const data = await manager.getPatternsEnriched(7, 2);
-        
+
         // Extraire les lieux pour les placer sur la carte
         const locations = new Set();
-        
+
         data.patterns.forEach(pattern => {
             const entities = pattern.entities;
             if (entities.locations) {
@@ -425,13 +425,13 @@ async function exampleIntegrateWithLeaflet() {
                 });
             }
         });
-        
+
         console.log('📍 Lieux à afficher sur la carte:');
         locations.forEach(loc => console.log(`  • ${loc}`));
-        
+
         // Ici vous pouvez ajouter des marqueurs sur votre carte Leaflet
         // addMarkersToMap(Array.from(locations));
-        
+
     } catch (error) {
         console.error('Erreur:', error);
     }

@@ -142,54 +142,55 @@ class AdvancedAnalysisManager {
                 </div>
 
                 <!-- CARTOGRAPHIE NARRATIVE - Section mise en évidence -->
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-2xl p-8 text-white transform hover:scale-[1.02] transition-transform duration-300">
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-white bg-opacity-20 p-4 rounded-full backdrop-blur-sm">
-                                <i class="fas fa-globe-europe text-4xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-bold mb-2">
-                                    Cartographie Narrative
-                                </h3>
-                                <p class="text-blue-100 text-sm">
-                                    Visualisation géopolitique avancée des récits médiatiques
-                                </p>
-                            </div>
-                        </div>
-                        <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
-                            NOUVEAU
-                        </div>
-                    </div>
-                    
-                    <p class="text-blue-50 mb-6 leading-relaxed">
-                        Explorez les interconnexions narratives entre les articles, 
-                        analysez les tendances géopolitiques et découvrez les relations 
-                        thématiques dans un environnement cartographique interactif.
-                    </p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
-                            <i class="fas fa-project-diagram text-2xl mb-2"></i>
-                            <p class="text-sm font-semibold">Graphes Relationnels</p>
-                        </div>
-                        <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
-                            <i class="fas fa-map-marked-alt text-2xl mb-2"></i>
-                            <p class="text-sm font-semibold">Visualisation Spatiale</p>
-                        </div>
-                        <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
-                            <i class="fas fa-brain text-2xl mb-2"></i>
-                            <p class="text-sm font-semibold">Analyse Sémantique</p>
-                        </div>
-                    </div>
-
-                    <button onclick="GeoNarrativeManager.showGeoNarrativePanel()"
-                            class="w-full bg-white text-indigo-700 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-3">
-                        <i class="fas fa-rocket text-xl"></i>
-                        <span>Lancer la Cartographie Narrative</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-2xl p-8 text-white transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-full backdrop-blur-sm">
+                    <i class="fas fa-globe-europe text-4xl"></i>
                 </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-2">
+                        🌍 Cartographie Narrative
+                    </h3>
+                    <p class="text-blue-100 text-sm">
+                        Visualisation géopolitique avancée des narratifs transnationaux
+                    </p>
+                </div>
+            </div>
+            <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                OPÉRATIONNEL
+            </div>
+        </div>
+
+        <p class="text-blue-50 mb-6 leading-relaxed">
+            Explorez les interconnexions narratives entre les articles,
+            analysez les tendances géopolitiques et découvrez les relations
+            thématiques dans un environnement cartographique interactif.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
+                <i class="fas fa-project-diagram text-2xl mb-2"></i>
+                <p class="text-sm font-semibold">Graphes Relationnels</p>
+            </div>
+            <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
+                <i class="fas fa-map-marked-alt text-2xl mb-2"></i>
+                <p class="text-sm font-semibold">Visualisation Spatiale</p>
+            </div>
+            <div class="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
+                <i class="fas fa-brain text-2xl mb-2"></i>
+                <p class="text-sm font-semibold">Analyse Sémantique</p>
+            </div>
+        </div>
+
+        <button onclick="GeoNarrativeManager.showCartographieNarrative()"
+                class="w-full bg-white text-indigo-700 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-3">
+            <i class="fas fa-rocket text-xl"></i>
+            <span>Lancer la Cartographie Narrative</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
 
                 <!-- SECTION IA LOCALE POUR RAPPORTS -->
                 <div class="bg-white rounded-lg shadow-md p-6">

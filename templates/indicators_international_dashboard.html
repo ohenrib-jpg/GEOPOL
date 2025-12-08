@@ -1,0 +1,208 @@
+<!-- templates/indicators_international_dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Indicateurs Économiques Internationaux{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- En-tête -->
+    <div class="mb-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 mb-4">
+            <i class="fas fa-globe text-2xl text-white"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+            🌍 Indicateurs Économiques Internationaux
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Indices boursiers mondiaux, données macroéconomiques, sanctions et économies émergentes
+        </p>
+        <div class="mt-4 flex justify-center space-x-4 text-sm text-gray-500 flex-wrap gap-2">
+            <span>📈 Yahoo Finance</span>
+            <span>🏦 Banque Mondiale</span>
+            <span>🛡️ OpenSanctions</span>
+            <span>⭐ BRICS</span>
+        </div>
+    </div>
+
+    <!-- Statut système -->
+    <div id="systemStatus" class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-purple-600 text-xl mr-3"></i>
+                <div>
+                    <h4 class="font-semibold text-purple-800">Système opérationnel</h4>
+                    <p class="text-sm text-purple-700">Indices boursiers actifs</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+                <button id="refreshDataBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-sync-alt mr-2"></i>Actualiser
+                </button>
+                <a href="/indicators/france" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition whitespace-nowrap flex items-center shadow-md">
+                    <i class="fas fa-flag-france mr-2"></i>Indicateurs Français
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indices internationaux -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2 text-purple-500"></i>
+            Indices Boursiers Internationaux
+        </h3>
+        <div id="internationalIndices" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Indices générés dynamiquement -->
+        </div>
+    </div>
+
+    <!-- Indices européens -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-euro-sign mr-2 text-blue-500"></i>
+            Indices Européens
+        </h3>
+        <div id="europeanIndices" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Indices européens -->
+        </div>
+    </div>
+
+    <!-- Graphique S&P 500 -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-chart-area mr-2 text-green-500"></i>
+            Évolution S&P 500
+        </h3>
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+            <div id="sp500Info" class="text-sm text-gray-600">
+                Chargement...
+            </div>
+            <select id="periodSelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="1mo">1 mois</option>
+                <option value="3mo">3 mois</option>
+                <option value="6mo" selected>6 mois</option>
+                <option value="1y">1 an</option>
+                <option value="2y">2 ans</option>
+            </select>
+        </div>
+        <div class="h-80">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Données macroéconomiques (développement) -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-globe-americas mr-2 text-orange-500"></i>
+            Données Macroéconomiques Mondiales
+            <span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Développement</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                <div class="text-2xl font-bold text-gray-700">3.1%</div>
+                <div class="text-sm text-gray-600">Croissance mondiale</div>
+                <div class="text-xs text-gray-500 mt-1">Banque Mondiale (simulation)</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                <div class="text-2xl font-bold text-gray-700">5.2%</div>
+                <div class="text-sm text-gray-600">Inflation mondiale</div>
+                <div class="text-xs text-gray-500 mt-1">FMI (simulation)</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                <div class="text-2xl font-bold text-gray-700">1.8%</div>
+                <div class="text-sm text-gray-600">Volume des échanges</div>
+                <div class="text-xs text-gray-500 mt-1">OMC (simulation)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRICS (développement) -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-star mr-2 text-red-500"></i>
+            Économies Émergentes BRICS
+            <span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Développement</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="bg-red-50 rounded-lg p-3 text-center">
+                <div class="font-semibold text-red-800">Chine</div>
+                <div class="text-sm mt-1">5.2% PIB</div>
+                <div class="text-xs text-red-600">0.3% Inflation</div>
+            </div>
+            <div class="bg-orange-50 rounded-lg p-3 text-center">
+                <div class="font-semibold text-orange-800">Inde</div>
+                <div class="text-sm mt-1">6.5% PIB</div>
+                <div class="text-xs text-orange-600">5.1% Inflation</div>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-3 text-center">
+                <div class="font-semibold text-blue-800">Brésil</div>
+                <div class="text-sm mt-1">2.8% PIB</div>
+                <div class="text-xs text-blue-600">4.1% Inflation</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <div class="font-semibold text-gray-800">Russie</div>
+                <div class="text-sm mt-1">3.5% PIB</div>
+                <div class="text-xs text-gray-600">7.2% Inflation</div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-3 text-center">
+                <div class="font-semibold text-green-800">Afrique du Sud</div>
+                <div class="text-sm mt-1">0.9% PIB</div>
+                <div class="text-xs text-green-600">4.8% Inflation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sanctions (développement) -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-shield-alt mr-2 text-red-500"></i>
+            Sanctions Internationales
+            <span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Développement</span>
+        </h3>
+        <div class="bg-gray-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div>
+                    <div class="text-2xl font-bold text-red-600">1,247
+                </div>
+                <div class="text-sm text-gray-600">Sanctions actives</div>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-orange-600">23</div>
+                <div class="text-sm text-gray-600">Nouvelles ce mois</div>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-blue-600">45</div>
+                <div class="text-sm text-gray-600">Pays concernés</div>
+            </div>
+        </div>
+        <div class="mt-3 text-sm text-gray-600">
+            Secteurs ciblés: Énergie, Technologie, Finance, Transport
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
+    <p>Données fournies par Yahoo Finance et sources internationales</p>
+    <p class="mt-2">Usage éducatif et recherche - Dernière mise à jour : <span id="lastUpdate">--</span></p>
+    <div class="mt-3 flex justify-center space-x-4 flex-wrap gap-2">
+        <a href="https://finance.yahoo.com" target="_blank" class="text-purple-600 hover:underline">
+            <i class="fas fa-external-link-alt mr-1"></i>Yahoo Finance
+        </a>
+        <a href="https://www.worldbank.org" target="_blank" class="text-purple-600 hover:underline">
+            <i class="fas fa-external-link-alt mr-1"></i>Banque Mondiale
+        </a>
+        <a href="/indicators/france" class="text-blue-600 hover:underline">
+            <i class="fas fa-flag-france mr-1"></i>Indicateurs Français
+        </a>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/indicators_international_dashboard.js') }}"></script>
+{% endblock %}
+

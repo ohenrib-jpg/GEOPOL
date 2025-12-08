@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carte Géopolitique - GEOPOL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: Segoe UI, Arial, sans-serif;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .controls {
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .stats {
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .pattern-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+            .pattern-item:hover {
+                background: #f0f8ff;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <label>Période (jours): <input type="number" id="dayRange" min="1" max="30" value="7"></label>
+            <label>Pays min: <input type="number" id="minCountries" min="2" max="10" value="2"></label>
+            <button onclick="loadData()">🔄 Actualiser</button>
+        </div>
+        <div id="map"></div>
+        <div class="stats">
+            <h3>Patterns détectés</h3>
+            <div id="patternsList"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let map;
+        let markers = {};
+        const countryCoords = {
+            'FR': [46.2276, 2.2137], 'DE': [51.1657, 10.4515], 'UK': [55.3781, -3.4360],
+            'US': [37.0902, -95.7129], 'ES': [40.4637, -3.7492], 'IT': [41.8719, 12.5674],
+            'CN': [35.8617, 104.1954], 'JP': [36.2048, 138.2529], 'RU': [61.5240, 105.3188]
+        };
+
+        function initMap() {
+            map = L.map('map').setView([50, 10], 4);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
+
+        function clearMap() {
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+            d3.select('#map').select('svg').remove();
+        }
+
+        function updateMap(patterns) {
+            clearMap();
+            const counts = {};
+            patterns.forEach(p => (p.countries || []).forEach(c => counts[c] = (counts[c] || 0) + 1));
+
+            Object.entries(counts).forEach(([country, count]) => {
+                if (countryCoords[country]) {
+                    const marker = L.circleMarker(countryCoords[country], {
+                        radius: 6 + (count * 2),
+                        color: '#2563eb',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.7
+                    }).addTo(map);
+                    marker.bindPopup(`<b>${country}</b><br/>Patterns: ${count}`);
+                    markers[country] = marker;
+                }
+            });
+
+            drawInfluenceNetwork(patterns);
+        }
+
+        function drawInfluenceNetwork(patterns) {
+            const mapContainer = document.getElementById('map');
+            const width = mapContainer.clientWidth;
+            const height = mapContainer.clientHeight;
+            d3.select('#map').select('svg').remove();
+            const svg = d3.select('#map').append('svg')
+                .attr('width', width).attr('height', height)
+                .style('position', 'absolute').style('top', '0').style('left', '0')
+                .style('pointer-events', 'none');
+
+            const edges = [];
+            patterns.forEach(p => {
+                const cs = p.countries || [];
+                for (let i = 0; i < cs.length; i++)
+                    for (let j = i + 1; j < cs.length; j++)
+                        edges.push({ source: cs[i], target: cs[j], weight: p.strength || 1 });
+            });
+
+            edges.forEach(e => {
+                const sc = countryCoords[e.source];
+                const tc = countryCoords[e.target];
+                if (!sc || !tc) return;
+                const latlngs = [L.latLng(sc[0], sc[1]), L.latLng(tc[0], tc[1])];
+                const projected = latlngs.map(ll => map.latLngToLayerPoint(ll));
+                svg.append('line')
+                    .attr('x1', projected[0].x).attr('y1', projected[0].y)
+                    .attr('x2', projected[1].x).attr('y2', projected[1].y)
+                    .attr('stroke', '#10b981').attr('stroke-width', Math.max(1, e.weight))
+                    .attr('opacity', 0.6);
+            });
+        }
+
+        function updatePatternsList(patterns) {
+            const list = document.getElementById('patternsList');
+            list.innerHTML = '';
+            patterns.slice(0, 20).forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'pattern-item';
+                el.innerHTML = `<b>"${p.pattern}"</b><br/>Pays: ${(p.countries || []).join(', ')} | Force: ${p.strength}`;
+                list.appendChild(el);
+            });
+        }
+
+        async function loadData() {
+            const days = document.getElementById('dayRange').value;
+            const min_countries = document.getElementById('minCountries').value;
+
+            try {
+                const response = await fetch(`/api/geo-narrative/patterns?days=${days}&min_countries=${min_countries}`);
+                const data = await response.json();
+                const patterns = data.patterns || [];
+                updateMap(patterns);
+                updatePatternsList(patterns);
+            } catch (e) {
+                console.error('Erreur API, fallback mock', e);
+                const mock = [
+                    { pattern: 'sanctions économiques contre', countries: ['FR', 'DE', 'UK', 'US'], strength: 4 },
+                    { pattern: 'négociations de paix', countries: ['FR', 'DE', 'ES'], strength: 3 }
+                ];
+                updateMap(mock);
+                updatePatternsList(mock);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+            loadData();
+        });
+    </script>
+</body>
+</html>
