@@ -1,0 +1,63 @@
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns-enriched
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/comprehensive-analysis
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns/by-entity
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity/timeline
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity-relations
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/report
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/patterns
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/entities
+2025-12-07 17:48:02,176 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/health
+2025-12-07 17:48:04,098 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.60:5000
+2025-12-07 17:48:04,099 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-07 17:58:30,545 - Flask.geo_entity_integration - INFO - [OK] GeoEntityIntegration initialisé
+2025-12-07 17:58:38,518 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns-enriched
+2025-12-07 17:58:38,518 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/comprehensive-analysis
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns/by-entity
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity/timeline
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity-relations
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/report
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/patterns
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/entities
+2025-12-07 17:58:38,519 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/health
+2025-12-07 17:58:40,529 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.60:5000
+2025-12-07 17:58:40,529 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-07 18:08:43,920 - Flask.geo_entity_integration - INFO - [OK] GeoEntityIntegration initialisé
+2025-12-07 18:08:50,415 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns-enriched
+2025-12-07 18:08:50,415 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/comprehensive-analysis
+2025-12-07 18:08:50,415 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns/by-entity
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity/timeline
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity-relations
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/report
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/patterns
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/entities
+2025-12-07 18:08:50,416 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/health
+2025-12-07 18:08:52,657 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.60:5000
+2025-12-07 18:08:52,657 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-07 18:28:43,031 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.60:5000
+2025-12-07 18:28:43,033 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-07 18:40:15,395 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns-enriched
+2025-12-07 18:40:15,395 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/comprehensive-analysis
+2025-12-07 18:40:15,395 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/patterns/by-entity
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity/timeline
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/entity-relations
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/report
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/patterns
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/stats/entities
+2025-12-07 18:40:15,400 - Flask.routes_geo_entity_integrated - INFO -    GET  /api/geo-entity/health
+2025-12-07 18:40:17,000 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.60:5000
+2025-12-07 18:40:17,000 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
