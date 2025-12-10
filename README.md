@@ -1,6 +1,6 @@
 🌍 GEOPOL - Analyseur Géopolitique Intelligent
 ===============================================
-Contact : ohenri.b@gmail.com / olivier.bellanza@ac-toulouse.fr 
+Contact : ohenri.b@gmail.com 
 
 (Un grand merci a DeepSeek et a Claude pour leur aide *capitale* dans ce developpement).
 (PS : desole pour les accents manquants....Ce n'est pas facile avec un clavier qwerty sans stickers ;-))
@@ -67,5 +67,5 @@ Correction de leaflet pour permettre aisement les surcouches datas a venir
 Evolution des fonctions du module "assistant", afin de lui donner les commandes des fonctions analytiques.
 Correction du module de Deeplearning (devenu assez efficace, sauf sur certains patterns, principalement lorsque la semantique est "aleatoire")
 Corrections des indices strategiques ==> ils sont "frais", mais ils ne sont pas tous "In real Time". Ce n'est pas satisfaisant.
-L'onglet "Avis aux voyageurs" des indicateurs divers doit etre rectifie=> tout les sites gouvernementaux n'utilisent pas les memes formats de donnees. PAr simplicite, je compte rectifier en commencant a partir des sources US, UK et Australie, car elles ont les memes formats json
+L'onglet "Avis aux voyageurs" des indicateurs divers doit etre rectifie=> tout les sites gouvernementaux n'utilisent pas les memes formats de donnees. PAr simplicite, je compte rectifier en commencant a partir des sources US, UK et Australie, car elles ont les memes formats json.
 M'acheter des stickers AZERTY pour ce clavier...
