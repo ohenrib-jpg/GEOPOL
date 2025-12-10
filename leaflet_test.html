@@ -1,0 +1,84 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Test Leaflet GEOPOL</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <style>
+            body { margin: 20px; font-family: Arial; }
+            #testMap { height: 500px; width: 100%; border: 3px solid #2c3e50; }
+            .controls { margin: 20px 0; padding: 15px; background: #f8f9fa; }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Test Leaflet Production</h1>
+        <div class="controls">
+            <button onclick="addMarker()">📍 Ajouter marqueur</button>
+            <button onclick="clearMarkers()">🗑️ Effacer</button>
+            <button onclick="testResize()">🔄 Redimensionner</button>
+        </div>
+        <div id="testMap"></div>
+        
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            let map;
+            let markers = [];
+            
+            // Initialisation
+            function initMap() {
+                map = L.map('testMap').setView([48.8566, 2.3522], 5);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap - Test GEOPOL'
+                }).addTo(map);
+                
+                console.log('✅ Carte initialisée');
+                
+                // Ajouter quelques marqueurs de test
+                addTestMarkers();
+            }
+            
+            function addTestMarkers() {
+                const testLocations = [
+                    { name: 'Paris', coords: [48.8566, 2.3522] },
+                    { name: 'Berlin', coords: [52.5200, 13.4050] },
+                    { name: 'Londres', coords: [51.5074, -0.1278] },
+                    { name: 'Rome', coords: [41.9028, 12.4964] }
+                ];
+                
+                testLocations.forEach(loc => {
+                    const marker = L.marker(loc.coords)
+                        .addTo(map)
+                        .bindPopup(`<b>${loc.name}</b><br/>Test réussi !`);
+                    markers.push(marker);
+                });
+            }
+            
+            function addMarker() {
+                const lat = 48 + Math.random() * 10;
+                const lng = 2 + Math.random() * 10;
+                const marker = L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup(`Marqueur aléatoire<br/>${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+                markers.push(marker);
+                map.setView([lat, lng], 6);
+            }
+            
+            function clearMarkers() {
+                markers.forEach(m => map.removeLayer(m));
+                markers = [];
+            }
+            
+            function testResize() {
+                if (map) {
+                    map.invalidateSize();
+                    alert('✅ Redimensionnement testé');
+                }
+            }
+            
+            // Lancer au chargement
+            document.addEventListener('DOMContentLoaded', initMap);
+        </script>
+    </body>
+    </html>
+    

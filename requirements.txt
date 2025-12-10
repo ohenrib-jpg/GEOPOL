@@ -21,6 +21,8 @@ urllib3==2.1.0
 
 # Variables d'environnement
 python-dotenv==1.0.0
+D3==0.1.0
+D3graph==2.6.1
 
 # RSS & Web Scraping
 feedparser==6.0.10
@@ -35,8 +37,7 @@ lxml==4.9.3
 yfinance==0.2.33
 
 # Pour scraping avancé (optionnel, pour futures extensions)
-scrapy==2.11.0  # Pour banques centrales BRICS
-
+scrapy==2.11.0  
 # ============================================
 # ANALYSE DE SENTIMENT & IA
 # ============================================
@@ -48,7 +49,12 @@ sentencepiece==0.1.99
 
 # Extraction d'entités géopolitiques
 spacy==3.7.2
-# Installer le modèle français : python -m spacy download fr_core_news_lg
+geopandas==0.14.0
+shapely==2.0.0
+folium==0.14.0
+
+# Installer le modèle français : 
+# python -m spacy download fr_core_news_lg
 
 # Client IA Mistral/Llama
 # Utilise llama-cpp-python ou API externe
@@ -70,7 +76,7 @@ fpdf==1.7.2      # Pour PDF
 # ============================================
 
 # Gestion des processus
-psutil==5.9.6
+psutil==7.1.3
 
 # Dates et temps
 python-dateutil==2.8.2
@@ -81,12 +87,12 @@ pytz==2023.3
 # ============================================
 
 # SDR (Software Defined Radio) - Optionnel
-# pyrtlsdr==0.2.93
-# numpy-quaternion==2022.4.3
+pyrtlsdr==0.2.93
+numpy-quaternion==2022.4.3
 
 # APIs financières avancées - Optionnel
-# alpha-vantage==2.3.1
-# fredapi==0.5.1
+alpha-vantage==2.3.1
+fredapi==0.5.1
 
 # ============================================
 # DÉVELOPPEMENT & TESTS
@@ -141,10 +147,9 @@ flake8==6.1.0
 # 1. yfinance utilise des APIs publiques sans clé
 # 2. Banque Mondiale : API ouverte, pas d'authentification
 # 3. OpenSanctions : Dataset public JSON
-# 4. Pour usage intensif : considérer des APIs premium
 
-# 5. Le module économique fonctionne sans clé API
-# 6. Toutes les données sont stockées en SQLite local
+# 4. Le module économique fonctionne sans clé API
+# 5. Toutes les données sont stockées en SQLite local
 
 # ============================================
 # MISES À JOUR RECOMMANDÉES
