@@ -44,8 +44,7 @@ Seul outil pédagogique géopolitique open-source en français
 - Taux obligataires (sentiment risque)
 - Devises refuges (à définir)
 - Corrélations géopolitiques (patterns) :
-- tensions_russes → RTSI, Gazprom, Rosneft
-- crise_moyen_orient → pétrole, or, VIX
+(tensions_russes → RTSI, Gazprom, Rosneft, crise_moyen_orient → pétrole, or, VIX,etc...)
   
 **🌐 Agrégation multi‑sources**
 - Flux RSS traditionnels.
