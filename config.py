@@ -37,3 +37,12 @@ DEFAULT_THEMES = {
     }
 }
 
+# Archiviste v3 configuration
+ARCHIVISTE_CONFIG = {
+    'cache_ttl': 3600,  # 1 heure
+    'max_cache_size': 100,
+    'max_retries': 3,
+    'deep_analysis': True,  # Active l'analyse linguistique
+    'default_max_items': 50
+}
+

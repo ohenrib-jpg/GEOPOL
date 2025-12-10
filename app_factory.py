@@ -356,6 +356,134 @@ def create_app():
     except Exception as e:
         print(f"⚠️ Archiviste: {e}")
 
+    # =============================================================
+    # ARCHIVISTE v3 - VERSION CORRIGÉE (SANS CONFLIT)
+    # =============================================================
+    print("\n📚 Initialisation du module Archiviste v3...")
+
+    # Chemin vers le dossier archiviste_v3
+    archiviste_path = os.path.join(flask_dir, 'archiviste_v3')
+
+    if os.path.exists(archiviste_path):
+        print(f"✅ Dossier Archiviste v3 trouvé: {archiviste_path}")
+    
+        # Variables pour le succès
+        archiviste_loaded = False
+        archiviste_service = None
+    
+        try:
+            # Essayer d'importer via le chemin relatif
+            print("  → Tentative d'import direct (méthode 1)...")
+        
+            # Ajouter le chemin parent au sys.path
+            parent_dir = os.path.dirname(archiviste_path)  # C'est "Flask"
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+                print(f"    → Chemin parent ajouté: {parent_dir}")
+        
+            # Importer avec le chemin relatif complet
+            from archiviste_v3.archiviste_service import ArchivisteServiceImproved
+            from archiviste_v3.archiviste_routes import create_archiviste_v3_blueprint
+        
+            # Créer le service
+            archiviste_service = ArchivisteServiceImproved(db_manager)
+        
+            # Créer le blueprint
+            archiviste_bp = create_archiviste_v3_blueprint(archiviste_service)
+        
+            # Enregistrer le blueprint
+            app.register_blueprint(archiviste_bp, url_prefix='/archiviste-v3')
+        
+            # Stocker dans la config
+            app.config['ARCHIVISTE_V3_SERVICE'] = archiviste_service
+        
+            archiviste_loaded = True
+            print("✅ Archiviste v3 initialisé avec succès (méthode 1)")
+        
+        except ImportError as e1:
+            print(f"❌ Échec méthode 1: {e1}")
+        
+            try:
+                # Méthode 2: importlib
+                print("  → Tentative via importlib (méthode 2)...")
+                import importlib.util
+            
+                # Charger archiviste_service.py
+                service_file = os.path.join(archiviste_path, 'archiviste_service.py')
+                spec = importlib.util.spec_from_file_location("archiviste_service", service_file)
+                service_module = importlib.util.module_from_spec(spec)
+                sys.modules["archiviste_service"] = service_module
+                spec.loader.exec_module(service_module)
+            
+                # Charger archiviste_routes.py
+                routes_file = os.path.join(archiviste_path, 'archiviste_routes.py')
+                spec2 = importlib.util.spec_from_file_location("archiviste_routes", routes_file)
+                routes_module = importlib.util.module_from_spec(spec2)
+                sys.modules["archiviste_routes"] = routes_module
+                spec2.loader.exec_module(routes_module)
+            
+                # Récupérer les classes
+                ArchivisteServiceImproved = service_module.ArchivisteServiceImproved
+                create_archiviste_v3_blueprint = routes_module.create_archiviste_v3_blueprint
+            
+                # Créer instances
+                archiviste_service = ArchivisteServiceImproved(db_manager)
+                archiviste_bp = create_archiviste_v3_blueprint(archiviste_service)
+            
+                # Enregistrer
+                app.register_blueprint(archiviste_bp, url_prefix='/archiviste-v3')
+                app.config['ARCHIVISTE_V3_SERVICE'] = archiviste_service
+            
+                archiviste_loaded = True
+                print("✅ Archiviste v3 initialisé (méthode 2)")
+            
+            except Exception as e2:
+                print(f"❌ Échec méthode 2: {e2}")
+    
+        except Exception as e:
+            print(f"❌ Erreur générale Archiviste: {e}")
+            import traceback
+            traceback.print_exc()
+    
+        # Si Archiviste est chargé, on ne fait PAS le fallback
+        if archiviste_loaded:
+            print(f"🎉 Archiviste v3 PRÊT")
+            print(f"   • URL: http://localhost:5000/archiviste-v3/")
+            print(f"   • API: http://localhost:5000/archiviste-v3/api/test")
+        else:
+            print("⚠️ Archiviste v3 non chargé, activation du fallback...")
+            _setup_archiviste_fallback(app)
+
+    else:
+        print(f"❌ Dossier Archiviste v3 introuvable: {archiviste_path}")
+        _setup_archiviste_fallback(app)
+
+    def _setup_archiviste_fallback(app):
+        """Configure un fallback minimal pour Archiviste v3"""
+        from flask import Blueprint, jsonify
+    
+        fallback_bp = Blueprint('archiviste_v3_fallback', __name__, url_prefix='/archiviste-v3')
+    
+        @fallback_bp.route('/')
+        def archiviste_fallback_home():
+            return jsonify({
+                'status': 'fallback',
+                'message': 'Module Archiviste v3 en maintenance ou configuration',
+                'available_endpoints': ['/api/test']
+            })
+    
+        @fallback_bp.route('/api/test')
+        def archiviste_fallback_test():
+            return jsonify({
+                'success': True,
+                'message': 'Archiviste v3 - Mode fallback actif',
+                'version': '3.0-fallback',
+                'note': 'Le module principal est en cours de chargement'
+            })
+    
+        app.register_blueprint(fallback_bp)
+        print("✅ Fallback Archiviste v3 activé (module principal non chargé)")
+
     # ============================================================================
     # Indicateurs français
     # ============================================================================
