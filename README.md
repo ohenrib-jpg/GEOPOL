@@ -59,7 +59,7 @@ llama.cpp
 (** Avant la version V.1.0, je devrais effectuer une migration big-bang, de sqlite vers Postgresql**)
 
                                                                           ======= A suivre ======
-Travaillant seul sur ce petit projet, je ne suis plus aussi presse de terminer la "base solide", puisqu'apres commencera le GROS boulot : creation d'un pipeline RAG interne (Retrieval-Augmented Generation) pour croiser les donnees.
+Travaillant seul sur ce petit projet, je ne suis plus aussi presse de terminer la "base solide", puisqu'apres commencera le GROS boulot : creation d'un pipeline RAG interne (Retrieval-Augmented Generation) pour croiser les donnees...Et a la fin, si on y arrive, la migration "Big-Bang" vers PostgreSQL.
 
 En cours avant 0.7PP:
 =====================
