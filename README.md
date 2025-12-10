@@ -1,6 +1,8 @@
-🌍 GEOPOL - Analyseur Géopolitique Intelligent
+🌍 GEOPOL - Analyseur Géopolitique Intelligent 
 ===============================================
 Contact : ohenri.b@gmail.com 
+
+**Version de développement : certaines fonctions sont encore en cours de stabilisation ou mockées pour la démo. L’essentiel du pipeline est déjà opérationnel (≈80% en mode prod).**
 
 (Un grand merci a DeepSeek et a Claude pour leur aide *capitale* dans ce developpement).
 (PS : desole pour les accents manquants....Ce n'est pas facile avec un clavier qwerty sans stickers ;-))
