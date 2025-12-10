@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archiviste v3.0 - Analyse Historique Vectorielle | GEOPOL</title>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Styles inspirés de votre design existant */
+        .mission-header {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(168, 85, 247, 0.8) 100%);
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-title {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-weight: 800;
+            color: #f59e0b;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .archiviste-card {
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            border: 1px solid #e9d5ff;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .btn-archiviste {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-archiviste:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+            }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            min-width: 300px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Header -->
+    <header class="mission-header">
+        <div class="container mx-auto px-6 h-full flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <img src="{{ url_for('static', filename='logo.png') }}"
+                     alt="GEOPOL Analytics"
+                     class="h-12 w-auto">
+                <div>
+                    <h1 class="mission-title text-3xl">ARCHIVISTE V3.0</h1>
+                    <p class="text-slate-200 text-sm mt-1">
+                        <i class="fas fa-brain mr-2"></i>
+                        Analyse Historique Vectorielle avec SpaCy
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <div class="text-slate-300 text-sm">
+                    <i class="fas fa-microchip mr-2"></i>
+                    SpaCy Activé
+                </div>
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-slate-800 border-b border-slate-700">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-4 text-slate-300 text-sm">
+                    <a href="/" class="hover:text-yellow-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Retour Dashboard
+                    </a>
+                    <div class="flex items-center space-x-1">
+                        <i class="fas fa-history text-purple-400"></i>
+                        <span>Archiviste v3.0</span>
+                    </div>
+                </div>
+                <div id="currentTime" class="text-slate-300 font-mono text-sm"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- En-tête -->
+        <div class="text-center mb-8">
+            <div class="archiviste-card p-8 mb-6">
+                <h1 class="text-4xl font-bold text-slate-800 mb-4">
+                    <i class="fas fa-brain text-purple-600 mr-3"></i>
+                    Archiviste v3.0
+                </h1>
+                <p class="text-lg text-slate-600 mb-6">
+                    Analyse historique intelligente avec SpaCy et recherche vectorielle
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full">
+                        <i class="fas fa-search mr-2"></i>Recherche Vectorielle
+                    </div>
+                    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                        <i class="fas fa-history mr-2"></i>Analogies Historiques
+                    </div>
+                    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full">
+                        <i class="fas fa-robot mr-2"></i>SpCy NER
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglets de navigation -->
+        <div class="mb-8">
+            <div class="border-b border-slate-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button onclick="showTab('analysis')"
+                            class="tab-btn active py-2 px-1 border-b-2 border-purple-500 font-medium text-sm text-purple-600">
+                        <i class="fas fa-chart-line mr-2"></i>Analyse de Période
+                    </button>
+                    <button onclick="showTab('vector')"
+                            class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">
+                        <i class="fas fa-search mr-2"></i>Recherche Vectorielle
+                    </button>
+                    <button onclick="showTab('analogies')"
+                            class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">
+                        <i class="fas fa-history mr-2"></i>Analogies
+                    </button>
+                    <button onclick="showTab('history')"
+                            class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">
+                        <i class="fas fa-clock mr-2"></i>Historique
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Contenu des onglets -->
+        <div id="tab-content">
+            <!-- Onglet Analyse -->
+            <div id="analysis-tab" class="tab-content">
+                <div class="archiviste-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                        <i class="fas fa-chart-line mr-3 text-purple-600"></i>
+                        Analyse Historique
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-2">
+                                <i class="fas fa-calendar mr-2 text-purple-600"></i>
+                                Période Historique
+                            </label>
+                            <select id="period-select"
+                                    class="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Sélectionnez une période...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-2">
+                                <i class="fas fa-tags mr-2 text-purple-600"></i>
+                                Thème d'Analyse
+                            </label>
+                            <select id="theme-select"
+                                    class="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Sélectionnez un thème...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-2">
+                                <i class="fas fa-sliders-h mr-2 text-purple-600"></i>
+                                Nombre max d'items
+                            </label>
+                            <input type="number" id="max-items" value="50" min="10" max="100"
+                                   class="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button id="analyze-period-btn"
+                                class="btn-archiviste px-8 py-4 text-lg font-semibold">
+                            <i class="fas fa-play-circle mr-3"></i>
+                            Lancer l'Analyse
+                        </button>
+                    </div>
+                </div>
+
+                <div id="analysis-results" class="hidden mb-8">
+                    <div class="archiviste-card p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-slate-800">
+                                <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
+                                Résultats d'Analyse
+                            </h3>
+                            <button onclick="document.getElementById('analysis-results').classList.add('hidden')"
+                                    class="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg">
+                                <i class="fas fa-times mr-2"></i>Fermer
+                            </button>
+                        </div>
+                        <div id="analysis-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Recherche Vectorielle -->
+            <div id="vector-tab" class="tab-content hidden">
+                <div class="archiviste-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                        <i class="fas fa-search mr-3 text-purple-600"></i>
+                        Recherche Vectorielle
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-2">
+                                <i class="fas fa-brain mr-2 text-purple-600"></i>
+                                Recherche sémantique
+                            </label>
+                            <textarea id="vector-search-input"
+                                      placeholder="Décrivez une situation géopolitique pour trouver des documents similaires..."
+                                      class="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                      rows="4"></textarea>
+                        </div>
+
+                        <button id="vector-search-btn"
+                                class="btn-archiviste px-6 py-3">
+                            <i class="fas fa-search mr-2"></i>
+                            Recherche Vectorielle
+                        </button>
+                    </div>
+                </div>
+
+                <div id="vector-results" class="hidden mb-8">
+                    <div class="archiviste-card p-8">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6">
+                            <i class="fas fa-search mr-3 text-purple-600"></i>
+                            Résultats Vectoriels
+                        </h3>
+                        <div id="vector-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Analogies -->
+            <div id="analogies-tab" class="tab-content hidden">
+                <div class="archiviste-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                        <i class="fas fa-history mr-3 text-purple-600"></i>
+                        Analogies Historiques
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-2">
+                                <i class="fas fa-lightbulb mr-2 text-purple-600"></i>
+                                Situation actuelle
+                            </label>
+                            <textarea id="analogies-input"
+                                      placeholder="Décrivez la situation géopolitique actuelle pour trouver des analogies historiques..."
+                                      class="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                      rows="4"></textarea>
+                        </div>
+
+                        <button id="analogies-btn"
+                                class="btn-archiviste px-6 py-3">
+                            <i class="fas fa-history mr-2"></i>
+                            Générer Analogies
+                        </button>
+                    </div>
+                </div>
+
+                <div id="analogies-results" class="hidden mb-8">
+                    <div class="archiviste-card p-8">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6">
+                            <i class="fas fa-history mr-3 text-purple-600"></i>
+                            Analogies Trouvées
+                        </h3>
+                        <div id="analogies-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Historique -->
+            <div id="history-tab" class="tab-content hidden">
+                <div class="archiviste-card p-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                        <i class="fas fa-clock mr-3 text-purple-600"></i>
+                        Historique des Analyses
+                    </h2>
+
+                    <div id="analyses-history">
+                        <div class="text-center py-8">
+                            <i class="fas fa-spinner fa-spin text-2xl text-purple-600 mb-3"></i>
+                            <p class="text-slate-600">Chargement de l'historique...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 pt-8 border-t border-slate-200">
+            <p class="text-slate-600">
+                <i class="fas fa-brain mr-2 text-purple-600"></i>
+                Archiviste v3.0 - Analyse Historique Vectorielle
+            </p>
+            <p class="text-sm text-slate-500 mt-2">
+                Propulsé par SpaCy NER et recherche vectorielle
+            </p>
+        </div>
+    </div>
+
+    <!-- Indicateur de cache -->
+    <div class="cache-indicator">
+        <i class="fas fa-bolt"></i>
+        <span id="cache-status">Cache actif</span>
+        <span id="cache-hit-rate">0%</span>
+    </div>
+
+    <!-- Stats de session -->
+    <div class="session-stats">
+        <div>Recherches: <span id="searches-count">0</span></div>
+        <div>Items analysés: <span id="items-count">0</span></div>
+        <div>Cache hits: <span id="cache-hits">0</span></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api-client.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/archiviste_v3.js') }}"></script>
+
+    <script>
+        // Gestion des onglets
+        function showTab(tabName) {
+            // Cacher tous les contenus
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Afficher le contenu sélectionné
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            // Mettre à jour le style des boutons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'text-purple-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+
+            event.target.classList.remove('border-transparent', 'text-slate-500');
+            event.target.classList.add('border-purple-500', 'text-purple-600');
+        }
+
+        // Horloge
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('fr-FR', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short'
+            });
+
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = `${dateString} • ${timeString}`;
+            }
+        }
+
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("🚀 Archiviste v3.0 Mission Control Initialisé");
+
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // Simuler le chargement initial
+            setTimeout(() => {
+                const historyDiv = document.getElementById('analyses-history');
+                if (historyDiv) {
+                    historyDiv.innerHTML = `
+                                <div class="text-center py-8">
+                                    <i class="fas fa-history text-3xl text-purple-600 mb-3"></i>
+                                    <p class="text-slate-500">Aucune analyse précédente</p>
+                                    <p class="text-sm text-slate-400 mt-2">Effectuez votre première analyse pour voir l'historique</p>
+                                </div>
+                            `;
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
