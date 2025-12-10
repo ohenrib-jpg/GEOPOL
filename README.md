@@ -36,7 +36,7 @@ Seul outil pédagogique géopolitique open-source en français
 - Évolution temporelle sur 30 jours.
 - Indicateurs macroéconomiques :
 - Mode scolaire → Eurostat, INSEE.
-- Mode recherche → Eurostat, yFinance, WorldBank.
+- Mode recherche et veille → Eurostat, yFinance, WorldBank.
 - Surveillance des indicateurs clés (MAJ 30/11) :
 - VIX (indice de peur des marchés)
 - Pétrole Brent (baromètre géopolitique)
