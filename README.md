@@ -11,54 +11,97 @@ Pour le "Fun", mais avec une vraie utilite =>Systeme de comtage des pics SDR sur
 
 Seul outil pédagogique géopolitique open-source en français
 
-Concurrents : GDELT (anglais, complexe, cher, pas toujours adapte), MediaCloud (archivé)
+🎯 Positionnement
+=====================
+- Concurrents :
+- GDELT (anglais, complexe, cher, peu adapté)
+- MediaCloud (archivé)
+- Approche multi‑échelles : du local (cartographie narrative) au global (rapports synthétiques).
+- Publics cibles : programmes scolaires (Terminale HGGSP, Eco/Soc), chercheurs, journalistes, analystes, entreprises exposées à l’international.
 
-Approche Multi-Échelles: Du local (cartographie narrative) au global (rapports synthétiques) Correspond aux programmes scolaires (géopolitique en Term ES/L/S/sup.)
-
-
-🚀 Fonctionnalités Principales
+🚀 Fonctionnalités principales
 ===============================
+**🔍 Analyse sémantique avancée**
+- RoBERTa : analyse fine des sentiments et émotions.
+- Llama 3.2 : génération de rapports intelligents.
+- SpaCy (NER) : extraction d’entités (pays, villes, organisations, personnalités).
+- Classification automatique par thèmes géopolitiques (via llama.cpp + modèles gguf).
+- Assistant géopolitique intégré (fenêtre flottante, MAJ 27/11).
+  
+**📊 Tableaux de bord interactifs**
+- Visualisation en temps réel des tendances.
+- Statistiques détaillées par thème et sentiment.
+- Évolution temporelle sur 30 jours.
+- Indicateurs macroéconomiques :
+- Mode scolaire → Eurostat, INSEE.
+- Mode recherche → Eurostat, yFinance, WorldBank.
+- Surveillance des indicateurs clés (MAJ 30/11) :
+- VIX (indice de peur des marchés)
+- Pétrole Brent (baromètre géopolitique)
+- Or (valeur refuge)
+- Taux obligataires (sentiment risque)
+- Devises refuges (à définir)
+- Corrélations géopolitiques (patterns) :
+- tensions_russes → RTSI, Gazprom, Rosneft
+- crise_moyen_orient → pétrole, or, VIX
+  
+**🌐 Agrégation multi‑sources**
+- Flux RSS traditionnels.
+- Réseaux sociaux (Twitter via Nitter, Reddit).
+- Archives historiques (Archive.org depuis 1945).
+- Sources économiques : INSEE, Eurostat, WorldBank, yFinance.
+- Spectrum WebSDR (surveillance des pics d’activité, sans écoute).
+  
+**🤖 Intelligence artificielle**
+- Détection d’anomalies et tendances émergentes.
+- Corroboration automatique entre sources (V.0.6).
+- Analyse bayésienne pour la confiance (V.0.6).
+- Génération automatique de rapports PDF.
+- Affinage des résultats via Deep Learning.
 
-🔍 Analyse Sémantique Avancée
-* RoBERTa pour l'analyse fine des sentiments et émotions + Deeplearning pour affiner les resultats (sequence de correction tout les 20 articles analyses).
-* Llama 3.2 pour la génération de rapports intelligents.
-* MAJ 27/11 ==> Le modele IA est egalement integre comme "assistant geopolitique" dans l'interface via fenetre flottante.
-* Classification automatique par thèmes géopolitiques configurables (utiliser llama.cpp avec modele gguf).
-* Spacy pour le NER (recherche et construction des réseaux d'influences=> pays, villes, organisations, personnalités ((entities = nlp(article_text).ents)).
+**⚙️ Installation**
+Installation rapide
+git clone https://github.com/ohenrib-jpg/GEO.git -b GEOPOL-V.0.6-preprod
+cd GEO
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+.venv\Scripts\activate      # Windows
 
-📊 Tableaux de Bord Interactifs
-Visualisation en temps réel des tendances.
-Statistiques détaillées par thème et sentiment.
-Évolution temporelle sur 30 jours.
-Indicateurs macroéconomiques (français et inter. pour la version V.06pp, source Eurostat, WorldBank (https://data360.worldbank.org/en/api) et scrap leger INSEE) "mode scolaire".
-Veille Economique en temps reel, et comparaison avec les pays de la zone Euros (utilise sources Eurostat, yFinance) "Mode etendu Recherche".
-MAJ3011=> Integration en cours Surveillance des indicateurs clés (VIX (indice de peur des marchés),Pétrole Brent (baromètre géopolitique),Or (valeur refuge),taux des bonds (sentiment risque),Devises refuges (A definir)), Corrélations géopolitiques (detec. de patterns exemple :"tensions_russes": ["RTSI", "Gazprom", "Rosneft"],"crise_moyen_orient": ["pétrole", "or", "VIX"]).
+pip install -r requirements.txt
+python run.py
+# ou
+GEOPOL.bat
+# ou
+GEOPOLCMD.bat   # mode debug
 
-🌐 Agrégation Multi-Sources
-Flux RSS traditionnels.
-Réseaux sociaux (Twitter via Nitter, Reddit) MAJ 0812==>Integration des "bruits" de WallStreet.
-Archives historiques (Archive.org depuis 1945). **MAJ0912 => Evolution 3.0 : l'Archiviste gere a present, en plus des analyses de periodes, la Recherche Vectorielle et les Analogies Historiques. SpaCy est egalement integre pour NER, et future surcouche dans leaflet**
-SpaCy NER
-Sources Economiques : INSEE, Eurostat, World Bank, yFinance.
-Spectrum WebSDR (surveillance des pics d'activites, **sans ecoutes**)
 
-🤖 Intelligence Artificielle
-Détection d'anomalies et tendances émergentes.
-Corroboration automatique entre sources (automatisée dans la V.0.6).
-Analyse bayésienne pour la confiance (automatisée dans la V.0.6).
-Génération de rapports d'analyses en PDF automatisés.
-Affinage des résultats automatiques (-> Deeplearning automatise dans la v.0.6).
-Fonctions d'Assistance IA.
+⚠️ N’oubliez pas d’installer llama.cpp et de placer un modèle GGUF dans le dossier /models.
+👉 Les modèles GGUF sont disponibles gratuitement sur HuggingFace.
 
-⚙️ Installation
-Prérequis
-Python 3.8+
-llama.cpp
-6GB RAM minimum (8GB pour IA rec. MINIMUM ====>Mistral 3.2 3b (Q4) 2/3 Go, RoBERTa 1,2 Go, Spacy 1 Go, serveur logiciel 1/1,5 Go)
-7GB espace disque (sans compter le modèle gguf et les donnees de vos traitements. Compter 15 Go d'espace disque pour un mois d'analyses sur 200/300 sources)
-(** Avant la version V.1.0, je devrais effectuer une migration big-bang, de sqlite vers Postgresql**)
+🗺️ Roadmap
+- [X] Intégration des fonctions éco/macroéco
+- [X] Détecteur de signaux faibles
+- [X] Cartographie Leaflet.js (MAJ 30/11 → intégrée, HTML fait, routes à suivre)
+- [X] MAJ 10/12===> Nouvelle architecture V3 de l'Archiviste
+- [ ] --IA légère en arrière‑plan pour fine‑tuning métier (LoRA)-- MAJ 10/12=> Suivant le temps dont je dispose. Sinon, RaG directement.
+- [ ] Support multilingue étendu
+- [ ] API REST complète
+- [ ] Applications mobiles
+- [ ] Analyses prédictives
+- [ ] Plugin Zotero pour export bibliographique
+- [ ] Mise en conformité aux normes de recherche
 
-                                                                          ======= A suivre ======
+🌈 Impacts potentiels
+Scolaires
+- Terminale HGGSP
+- Terminale Éco & Soc
+Formations / Chercheurs
+- Journalistes et médias
+- Analystes géopolitiques
+- Chercheurs en sciences politiques
+- Entreprises avec exposition internationale
+  
+
 Travaillant seul sur ce petit projet, je ne suis plus aussi presse de terminer la "base solide", puisqu'apres commencera le GROS boulot : creation d'un pipeline RAG interne (Retrieval-Augmented Generation) pour croiser les donnees...Et a la fin, si on y arrive, la migration "Big-Bang" vers PostgreSQL.
 
 En cours avant 0.7PP:
@@ -69,3 +112,8 @@ Correction du module de Deeplearning (devenu assez efficace, sauf sur certains p
 Corrections des indices strategiques ==> ils sont "frais", mais ils ne sont pas tous "In real Time". Ce n'est pas satisfaisant.
 L'onglet "Avis aux voyageurs" des indicateurs divers doit etre rectifie=> tout les sites gouvernementaux n'utilisent pas les memes formats de donnees. PAr simplicite, je compte rectifier en commencant a partir des sources US, UK et Australie, car elles ont les memes formats json.
 M'acheter des stickers AZERTY pour ce clavier...
+
+
+
+
+
