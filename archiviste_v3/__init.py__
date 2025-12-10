@@ -1,0 +1,11 @@
+# Flask/archiviste_v3/__init__.py
+"""
+Package Archiviste v3 - Analyse historique
+"""
+
+from .historical_item import HistoricalItem
+from .archiviste_service import ArchivisteServiceImproved
+from .archiviste_routes import create_archiviste_v3_blueprint
+
+__all__ = ['HistoricalItem', 'ArchivisteServiceImproved', 'create_archiviste_v3_blueprint']
+__version__ = "3.0"
