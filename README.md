@@ -37,9 +37,10 @@ MAJ3011=> Integration en cours Surveillance des indicateurs clés (VIX (indice d
 🌐 Agrégation Multi-Sources
 Flux RSS traditionnels.
 Réseaux sociaux (Twitter via Nitter, Reddit) MAJ 0812==>Integration des "bruits" de WallStreet.
-Archives historiques (Archive.org depuis 1945).
+Archives historiques (Archive.org depuis 1945). **MAJ0912 => Evolution 3.0 : l'Archiviste gere a present, en plus des analyses de periodes, la Recherche Vectorielle et les Analogies Historiques. SpaCy est egalement integre pour NER, et future surcouche dans leaflet**
+SpaCy NER
 Sources Economiques : INSEE, Eurostat, World Bank, yFinance.
-WebSDR
+Spectrum WebSDR (surveillance des pics d'activites, **sans ecoutes**)
 
 🤖 Intelligence Artificielle
 Détection d'anomalies et tendances émergentes.
