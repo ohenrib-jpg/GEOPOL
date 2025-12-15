@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🔔 Dashboard des Alertes</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #1e293b;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .alert-item {
+      border-left: 4px solid #10b981;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #f0fdf4;
+    }
+
+    .alert-item.warning {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .alert-item.critical {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn.danger {
+      background: #ef4444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #f1f5f9;
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .badge.low { background: #10b981; color: white; }
+    .badge.medium { background: #f59e0b; color: white; }
+    .badge.high { background: #ef4444; color: white; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔔 Dashboard des Alertes Géopolitiques</h1>
+    <div>
+      <button class="btn" onclick="window.location.href='/alerts/config'">⚙️ Configurer</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Statistiques -->
+    <div class="card">
+      <h2>📊 Statistiques</h2>
+      <div style="display: flex; gap: 2rem;">
+        <div>
+          <strong>Alertes actives</strong><br>
+          <span id="activeCount">0</span>
+        </div>
+        <div>
+          <strong>Alertes déclenchées (24h)</strong><br>
+          <span id="triggeredCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertes récentes -->
+    <div class="card">
+      <h2>🚨 Alertes déclenchées récemment</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Alerte</th>
+            <th>Pays</th>
+            <th>Indicateur</th>
+            <th>Valeur</th>
+            <th>Seuil</th>
+            <th>Date</th>
+            <th>Gravité</th>
+          </tr>
+        </thead>
+        <tbody id="triggeredAlertsTable">
+          <tr><td colspan="7" style="text-align:center;">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Alertes actives -->
+    <div class="card">
+      <h2>✅ Alertes configurées</h2>
+      <div id="activeAlertsList">
+        <p>Chargement...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      // Charger les alertes déclenchées
+      const triggeredRes = await fetch('/api/geopol/alerts/triggered?hours=24');
+      const triggeredData = await triggeredRes.json();
+      document.getElementById('triggeredCount').textContent = triggeredData.alerts.length;
+
+      const tableBody = document.getElementById('triggeredAlertsTable');
+      tableBody.innerHTML = triggeredData.alerts.map(alert => `
+        <tr>
+          <td>${alert.alert_name}</td>
+          <td>${alert.country_code}</td>
+          <td>${alert.indicator}</td>
+          <td>${alert.actual_value.toFixed(2)}</td>
+          <td>${alert.threshold}</td>
+          <td>${new Date(alert.triggered_at).toLocaleString()}</td>
+          <td><span class="badge ${getSeverityClass(alert.actual_value, alert.threshold)}">${getSeverity(alert.actual_value, alert.threshold)}</span></td>
+        </tr>
+      `).join('');
+
+      // Charger les alertes actives
+      const activeRes = await fetch('/api/geopol/alerts');
+      const activeData = await activeRes.json();
+      document.getElementById('activeCount').textContent = activeData.alerts.length;
+
+      const list = document.getElementById('activeAlertsList');
+      list.innerHTML = activeData.alerts.map(alert => `
+        <div class="alert-item ${alert.condition === '>' && alert.threshold > 10 ? 'warning' : ''}">
+          <strong>${alert.name}</strong> - ${alert.country_code} : ${alert.indicator} ${alert.condition} ${alert.threshold}
+          <button class="btn danger" style="float:right;" onclick="deleteAlert(${alert.id})">🗑️ Supprimer</button>
+        </div>
+      `).join('');
+    }
+
+    function getSeverityClass(value, threshold) {
+      if (value > threshold * 1.5) return 'high';
+      if (value > threshold) return 'medium';
+      return 'low';
+    }
+
+    function getSeverity(value, threshold) {
+      if (value > threshold * 1.5) return 'Critique';
+      if (value > threshold) return 'Moyen';
+      return 'Faible';
+    }
+
+    async function deleteAlert(id) {
+      await fetch(`/api/geopol/alerts/${id}`, { method: 'DELETE' });
+      loadDashboard();
+    }
+
+    // Charger au démarrage
+    loadDashboard();
+  </script>
+</body>
+</html>

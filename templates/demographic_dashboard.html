@@ -1,27 +1,28 @@
-<!-- templates/base.html - VERSION AMÉLIORÉE AVEC MODULE ÉCONOMIQUE -->
+<!-- templates/demographic_dashboard.html - VERSION HARMONISÉE AVEC CSS EXTERNE -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Dashboard Démographique - GEOPOL</title>
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
 
     <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- head de l'assistant mistral -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CSS spécifique au module démographique -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demographic.css') }}">
+
     <style>
-        /* DESIGN INSPIRÉ "MISSION CONTROL" GÉOPOLITIQUE */
+        /* DESIGN INSPIRÉ "MISSION CONTROL" GÉOPOLITIQUE - STYLES MINIMAUX POUR HARMONISATION */
 
         /* Bandeau principal héroïque */
         .mission-header {
@@ -66,7 +67,7 @@
             transform-origin: 0 0;
         }
 
-        /* Typographie inspirée militaire - VERSION SANS BACKGROUND-CLIP */
+        /* Typographie inspirée militaire */
         .mission-title {
             font-family: 'Segoe UI', system-ui, sans-serif;
             font-weight: 800;
@@ -178,32 +179,6 @@
             border-left: 1px solid #e2e8f0;
         }
 
-        /* Cartes de données style "interface tactique" */
-        .data-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .data-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #f59e0b, #84cc16, #06b6d4);
-        }
-
-        .data-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
         /* Indicateurs animés */
         @keyframes pulse-glow {
             0%, 100% { opacity: 1; }
@@ -296,42 +271,10 @@
             }
         }
 
-        /* Scrollbar personnalisée */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f59e0b 0%, #84cc16 100%);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #d97706 0%, #65a30d 100%);
-        }
-
         /* Styles existants conservés */
         .main-content-overlay {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-        }
-
-        .sentiment-positive { color: #10B981; }
-        .sentiment-negative { color: #EF4444; }
-        .sentiment-neutral { color: #6B7280; }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .learning-status-indicator {
@@ -356,51 +299,6 @@
                 border: 1px solid #ffeeba;
             }
 
-        /* Styles pour les cartes SDR */
-        .sdr-card {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border: 1px solid #475569;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-            .sdr-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            }
-
-        .sdr-input {
-            background: #0f172a;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            color: #e2e8f0;
-            transition: border-color 0.3s;
-        }
-
-            .sdr-input:focus {
-                outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            }
-
-        .sdr-btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-            .sdr-btn-primary:hover {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                transform: translateY(-1px);
-            }
-
         /* Badge style */
         .badge {
             background: #FFD617;
@@ -411,6 +309,80 @@
             font-size: 0.85em;
         }
 
+        /* Styles spécifiques au dashboard démographique harmonisés */
+        .demographic-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .demographic-title {
+            color: #f59e0b;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Boutons harmonisés */
+        .collect-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .collect-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+        }
+
+        .collect-btn-yellow {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .collect-btn-yellow:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+
+        .collect-btn-green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .collect-btn-green:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        /* Animation ripple pour les boutons */
+        .collect-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .collect-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -654,8 +626,184 @@
 
         <!-- CONTENU PRINCIPAL -->
         <div class="mission-content flex-1 md:ml-0">
-            <main class="container mx-auto px-6 py-8 main-content-overlay rounded-lg shadow-lg min-h-screen data-card">
-                {% block content %}{% endblock %}
+            <main class="container mx-auto px-6 py-8 main-content-overlay rounded-lg shadow-lg min-h-screen">
+                <!-- En-tête spécifique au dashboard démographique -->
+                <div class="mb-8 demographic-header p-6 rounded-lg">
+                    <h1 class="demographic-title text-3xl font-bold mb-2">
+                        <i class="fas fa-chart-line mr-2"></i>Dashboard Démographique
+                    </h1>
+                    <p class="text-slate-200">Données socio-économiques - Eurostat, BCE, Banque Mondiale</p>
+                </div>
+
+                <!-- Cartes de statistiques -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="data-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700">Pays couverts</h3>
+                                <p class="text-3xl font-bold text-blue-600" id="total-countries">0</p>
+                                <p class="text-sm text-gray-500 mt-1" id="countries-loading">Chargement...</p>
+                            </div>
+                            <div class="text-3xl text-blue-500">
+                                <i class="fas fa-globe-europe"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700">Indicateurs</h3>
+                                <p class="text-3xl font-bold text-green-600" id="total-indicators">0</p>
+                                <p class="text-sm text-gray-500 mt-1" id="indicators-loading">Chargement...</p>
+                            </div>
+                            <div class="text-3xl text-green-500">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700">Sources</h3>
+                                <p class="text-3xl font-bold text-purple-600">3</p>
+                                <p class="text-sm text-gray-500 mt-1">Eurostat, BCE, Banque Mondiale</p>
+                            </div>
+                            <div class="text-3xl text-purple-500">
+                                <i class="fas fa-database"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contrôles principaux -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Sélection de pays -->
+                    <div class="data-card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-search mr-2"></i>Explorer par pays
+                        </h3>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sélectionnez un pays</label>
+                            <select id="country-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Chargement des pays...</option>
+                            </select>
+                        </div>
+                        <div id="country-data" class="mt-4 hidden">
+                            <!-- Données pays chargées dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Sélection d'indicateur -->
+                    <div class="data-card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-line mr-2"></i>Explorer par indicateur
+                        </h3>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sélectionnez un indicateur</label>
+                            <select id="indicator-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Chargement des indicateurs...</option>
+                            </select>
+                        </div>
+                        <div id="indicator-data" class="mt-4 hidden">
+                            <!-- Données indicateur chargées dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outils de collecte -->
+                <div class="data-card p-6 mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-cloud-download-alt mr-2"></i>Collecte de données
+                    </h3>
+                    <p class="text-gray-600 mb-4">Collectez les données les plus récentes depuis les sources officielles</p>
+
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <button id="collect-demo" class="collect-btn collect-btn-yellow">
+                            <i class="fas fa-vial mr-2"></i>Données de démo
+                        </button>
+                        <button id="collect-quick" class="collect-btn">
+                            <i class="fas fa-bolt mr-2"></i>Collecte rapide
+                        </button>
+                        <button id="collect-all" class="collect-btn collect-btn-green">
+                            <i class="fas fa-globe mr-2"></i>Tout collecter
+                        </button>
+                    </div>
+
+                    <div id="collect-status" class="hidden">
+                        <!-- Status de collecte -->
+                    </div>
+                </div>
+
+                <!-- Graphique et tableau -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Graphique -->
+                    <div class="data-card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-area mr-2"></i>Visualisation
+                        </h3>
+                        <div class="h-64">
+                            <canvas id="data-chart"></canvas>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-4 text-center">Sélectionnez des données pour voir le graphique</p>
+                    </div>
+
+                    <!-- Tableau de données -->
+                    <div class="data-card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-table mr-2"></i>Données disponibles
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200" id="data-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Indicateur</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valeur</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                                            Sélectionnez un pays ou un indicateur pour afficher les données
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations système -->
+                <div class="data-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-info-circle mr-2"></i>Informations système
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-3 bg-blue-50 rounded">
+                            <h4 class="font-semibold text-blue-700">API Endpoints</h4>
+                            <ul class="text-sm text-blue-600 mt-2 space-y-1">
+                                <li><a href="/demographic/api/test" class="hover:underline">/api/test</a> - Test</li>
+                                <li><a href="/demographic/api/debug" class="hover:underline">/api/debug</a> - Debug</li>
+                                <li><a href="/demographic/api/stats" class="hover:underline">/api/stats</a> - Stats</li>
+                            </ul>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded">
+                            <h4 class="font-semibold text-green-700">Actions</h4>
+                            <ul class="text-sm text-green-600 mt-2 space-y-1">
+                                <li><a href="/demographic/api/countries" class="hover:underline">Voir les pays</a></li>
+                                <li><a href="/demographic/api/indicators" class="hover:underline">Voir les indicateurs</a></li>
+                                <li><a href="/demographic/api/collect/demo" class="hover:underline">Créer données démo</a></li>
+                            </ul>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded">
+                            <h4 class="font-semibold text-purple-700">Statut</h4>
+                            <p class="text-sm text-purple-600 mt-2" id="system-status">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -663,188 +811,23 @@
     <!-- Overlay for mobile menu -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-0 hidden md:hidden"></div>
 
-    <!-- MODALE GESTION DES THÈMES -->
-    <div id="themeManagerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl data-card"
-                 style="max-height: 90vh; height: 90vh;">
-                <div class="p-6 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Centre de Contrôle des Thèmes</h3>
-                        <button id="closeThemeManager" class="text-gray-500 hover:text-gray-700 text-xl">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-6 overflow-y-auto" id="themeManagerContent"
-                     style="max-height: calc(90vh - 120px);">
-                    <!-- Contenu chargé dynamiquement -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts JavaScript -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/themes-advanced.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/articles.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/filters.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/continuous-learning.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/continuous-learning-integration.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/advanced-analysis.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/weak-indicators.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/alerts-management.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/geo-narrative.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/ticker-banner.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
-    <script src="/static/js/archiviste-enhanced.js"></script>
-    {% if request.path == '/dashboard' %}
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    {% endif %}
+    <!-- JavaScript principal -->
+    <script src="{{ url_for('static', filename='js/demographic-dashboard.js') }}"></script>
 
     <script>
-        // Gestionnaire de navigation
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
-            // Archiviste historique
-            const navArchiviste = document.querySelector('.nav-archiviste');
-            if (navArchiviste) {
-                navArchiviste.onclick = null;
-                navArchiviste.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('📚 Accès Archiviste historique');
+            console.log('🚀 Dashboard démographique initialisé');
 
-                    if (window.location.pathname === '/archiviste/') {
-                        window.location.reload();
-                        return;
-                    }
-
-                    fetch('/archiviste/', { method: 'HEAD' })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = '/archiviste/';
-                            } else {
-                                throw new Error('Route non trouvée');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('❌ Archiviste non disponible:', error);
-                            alert('📚 Le module Archiviste Historique est en cours de développement.\n\nDisponible prochainement !');
-                        });
-                });
-            }
-
-            // CENTRE DE PRESSE (Articles)
-            const navArticles = document.querySelector('.nav-articles');
-            if (navArticles) {
-                navArticles.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('📰 Accès Centre de Presse');
-                    if (typeof ArticleManager !== 'undefined' && typeof ArticleManager.showAllArticles === 'function') {
-                        ArticleManager.showAllArticles();
-                    } else {
-                        console.error('❌ ArticleManager non disponible');
-                        alert('Le module Centre de Presse est en cours de chargement...');
+            // Vérifier le statut système
+            fetch('/demographic/api/test')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('system-status').innerHTML =
+                            '<span class="text-green-600">✅ Module actif</span>';
                     }
                 });
-            }
-
-            // FILTRES TACTIQUES (Filtres)
-            const navFilters = document.querySelector('.nav-filters');
-            if (navFilters) {
-                navFilters.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('🔍 Accès Filtres Tactiques');
-                    if (typeof FilterManager !== 'undefined' && typeof FilterManager.showAdvancedFilters === 'function') {
-                        FilterManager.showAdvancedFilters();
-                    } else {
-                        console.error('❌ FilterManager non disponible');
-                        alert('Le module Filtres Tactiques est en cours de chargement...');
-                    }
-                });
-            }
-
-            // GESTION DES THÈMES (Thèmes)
-            const navThemes = document.querySelector('.nav-themes');
-            if (navThemes) {
-                navThemes.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('🏷️ Accès Gestion des Thèmes');
-                    if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.loadThemes === 'function') {
-                        ThemeManager.loadThemes();
-                    } else {
-                        console.error('❌ ThemeManager non disponible');
-                        alert('Le module Gestion des Thèmes est en cours de chargement...');
-                    }
-                });
-            }
-
-            // APPRENTISSAGE CONTINU
-            (function () {
-                console.log('🚀 Initialisation apprentissage continu...');
-
-                const initLearning = async () => {
-                    try {
-                        const li = window.LearningIntegration;
-                        if (!li || typeof li.initialize !== 'function') {
-                            console.warn('⚠️ LearningIntegration non chargé ou initialize non défini');
-                            return;
-                        }
-
-                        const success = await li.initialize();
-                        console.log(success ? '✅ Apprentissage actif' : '⚠️ Apprentissage inactif');
-                    } catch (error) {
-                        console.error('❌ Erreur:', error);
-                    }
-                };
-
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', () => setTimeout(initLearning,500));
-                } else {
-                    setTimeout(initLearning,500);
-                }
-            })();
-
-            // ANALYSES PROFONDES
-            const navAdvanced = document.querySelector('.nav-advanced');
-            if (navAdvanced) {
-                navAdvanced.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('🔬 Accès Analyses Profondes');
-
-                    const aam = window.AdvancedAnalysisManager;
-                    const gnm = window.GeoNarrativeManager;
-
-                    if (aam && typeof aam.showAnalysisPanel === 'function') {
-                        try { aam.showAnalysisPanel(); } catch (err) { console.error('Erreur AdvancedAnalysisManager:', err); }
-                    }
-                    else if (gnm && typeof gnm.showNarrativeAnalysis === 'function') {
-                        try { gnm.showNarrativeAnalysis(); } catch (err) { console.error('Erreur GeoNarrativeManager:', err); }
-                    }
-                    else {
-                        console.error('❌ Aucun manager d\'analyse disponible');
-                        alert('Le module Analyses Profondes est en cours de chargement...\n\nVeuillez vérifier que le fichier advanced-analysis.js est bien chargé.');
-                    }
-                });
-            }
-
-            // CONFIGURATION (Paramètres)
-            const navSettings = document.querySelector('.nav-settings');
-            if (navSettings) {
-                navSettings.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('⚙️ Accès Configuration');
-                    const sm = window.SettingsManager;
-                    if (sm && typeof sm.showSettings === 'function') {
-                        try { sm.showSettings(); } catch (err) { console.error('Erreur SettingsManager:', err); }
-                    } else {
-                        console.error('❌ SettingsManager non disponible');
-                        alert('Le module Configuration est en cours de chargement...');
-                    }
-                });
-            }
 
             // Mise à jour de l'heure en temps réel
             function updateTime() {
@@ -876,80 +859,7 @@
                     indicator.style.opacity = indicator.style.opacity === '0.7' ? '1' : '0.7';
                 }, 2000);
             });
-
-            // Gestionnaire de modale simple
-            const modal = document.getElementById('themeManagerModal');
-            const closeBtn = document.getElementById('closeThemeManager');
-
-            if (modal && closeBtn) {
-                closeBtn.addEventListener('click', function () {
-                    modal.classList.add('hidden');
-                });
-
-                // Fermer en cliquant en dehors
-                modal.addEventListener('click', function (e) {
-                    if (e.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            }
         });
-
-        // Configuration Chart.js globale
-        Chart.defaults.font.family = "'Segoe UI', 'Inter', system-ui, sans-serif";
-        Chart.defaults.color = '#374151';
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-        Chart.defaults.plugins.tooltip.titleColor = '#f59e0b';
-        Chart.defaults.plugins.tooltip.bodyColor = '#e2e8f0';
-
-        // Gestionnaire de modale global
-        window.ModalManager = {
-            showModal: function (modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                }
-            },
-            hideModal: function (modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }
-            }
-        };
-
-        console.log('🎯 GEOPOL Analytics - Mission Control Initialized');
-        console.log('⭐ Module Économique disponible sur /indicators');
-
-        // Mettre à jour le compteur de données disponibles
-        async function updateDemographicBadge() {
-            try {
-                const response = await fetch('/demographic/api/stats');
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const data = await response.json();
-
-                if (data.success) {
-                    const badge = document.getElementById('demographicDataCount');
-                    if (badge) {
-                        badge.textContent = data.stats.total_countries;
-                        badge.title = `${data.stats.total_indicators} indicateurs disponibles`;
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur mise à jour badge démographique:', error);
-            }
-        }
-
-        // Appeler au chargement de la page
-        if (document.getElementById('demographicDataCount')) {
-            updateDemographicBadge();
-        }
-
     </script>
-
-    {% block scripts %}{% endblock %}
 </body>
 </html>
-

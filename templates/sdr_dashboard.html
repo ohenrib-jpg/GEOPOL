@@ -250,6 +250,9 @@
                                         <div class="text-sm ${analysis.average_power_db > -60 ? 'text-green-400' : 'text-gray-400'}">
                                             ${analysis.average_power_db ? analysis.average_power_db.toFixed(1) + ' dB' : 'N/A'}
                                         </div>
+                                        <button onclick="exportScanData()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                                        <i class="fas fa-download mr-2"></i>Exporter
+                                        </button>
                                     </div>
                                     <div class="text-sm text-gray-400">
                                         ${scan.description || 'Frégence critique'}
@@ -381,6 +384,63 @@
             }
         }
 
+        // Auto-refresh du spectre
+        let spectrumRefreshInterval = null;
+
+        function startSpectrumAutoRefresh(intervalSeconds = 30) {
+            if (spectrumRefreshInterval) {
+                clearInterval(spectrumRefreshInterval);
+            }
+
+            spectrumRefreshInterval = setInterval(async () => {
+                await refreshSpectrum();
+            }, intervalSeconds * 1000);
+        }
+
+        async function refreshSpectrum() {
+            try {
+                const response = await fetch('/api/sdr/test-spectrum');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateSpectrumPlot(data);
+                    SDRDashboard.log('🔄 Spectre rafraîchi automatiquement');
+                }
+            } catch (error) {
+                console.error('Erreur rafraîchissement spectre:', error);
+            }
+        }
+
+        // Export des données
+        function exportScanData() {
+            const scans = document.querySelectorAll('#results > div');
+            const exportData = [];
+
+            scans.forEach(scan => {
+                const freq = scan.querySelector('.font-medium')?.textContent;
+                const power = scan.querySelector('.text-sm')?.textContent;
+
+                if (freq && power) {
+                    exportData.push({
+                        frequency: freq.replace(' kHz', ''),
+                        power: power,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            });
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+            const exportLink = document.createElement('a');
+            exportLink.setAttribute('href', dataUri);
+            exportLink.setAttribute('download', `sdr_scan_${Date.now()}.json`);
+            document.body.appendChild(exportLink);
+            exportLink.click();
+            document.body.removeChild(exportLink);
+
+            SDRDashboard.showNotification('✅ Données exportées', 'success');
+        }
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             SDRDashboard.initialize();

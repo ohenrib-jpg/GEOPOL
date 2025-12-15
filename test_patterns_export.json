@@ -1,0 +1,212 @@
+[
+  {
+    "pattern": "p a href https",
+    "countries": [
+      "DE",
+      "ES",
+      "FR",
+      "UK"
+    ],
+    "country_count": 4,
+    "total_occurrences": 57,
+    "strength": 4,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 14.25
+  },
+  {
+    "pattern": "a href https",
+    "countries": [
+      "ES",
+      "FR",
+      "IT"
+    ],
+    "country_count": 3,
+    "total_occurrences": 101,
+    "strength": 3,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 33.666666666666664
+  },
+  {
+    "pattern": "lire aussi a href https",
+    "countries": [
+      "DE",
+      "ES",
+      "FR"
+    ],
+    "country_count": 3,
+    "total_occurrences": 19,
+    "strength": 3,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 6.333333333333333
+  },
+  {
+    "pattern": "voir plus a",
+    "countries": [
+      "DE",
+      "ES",
+      "FR"
+    ],
+    "country_count": 3,
+    "total_occurrences": 15,
+    "strength": 3,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 5.0
+  },
+  {
+    "pattern": "a p p",
+    "countries": [
+      "DE",
+      "ES",
+      "IT"
+    ],
+    "country_count": 3,
+    "total_occurrences": 4,
+    "strength": 3,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.3333333333333333
+  },
+  {
+    "pattern": "the post a href https",
+    "countries": [
+      "FR",
+      "IT"
+    ],
+    "country_count": 2,
+    "total_occurrences": 16,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 8.0
+  },
+  {
+    "pattern": "p p a href https",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 15,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 7.5
+  },
+  {
+    "pattern": "ce n est pas",
+    "countries": [
+      "DE",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 7,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 3.5
+  },
+  {
+    "pattern": "n y a pas",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 6,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 3.0
+  },
+  {
+    "pattern": "cordon sanitaire a l epreuve",
+    "countries": [
+      "DE",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 4,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 2.0
+  },
+  {
+    "pattern": "c est l",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 4,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 2.0
+  },
+  {
+    "pattern": "c est ce que",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 4,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 2.0
+  },
+  {
+    "pattern": "svg span a figcaption",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 3,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.5
+  },
+  {
+    "pattern": "a university of",
+    "countries": [
+      "ES",
+      "UK"
+    ],
+    "country_count": 2,
+    "total_occurrences": 3,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.5
+  },
+  {
+    "pattern": "taille importante fait publiquement",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 2,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.0
+  },
+  {
+    "pattern": "pays est devenu",
+    "countries": [
+      "ES",
+      "FR"
+    ],
+    "country_count": 2,
+    "total_occurrences": 2,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.0
+  },
+  {
+    "pattern": "dreaming of a white christmas",
+    "countries": [
+      "FR",
+      "UK"
+    ],
+    "country_count": 2,
+    "total_occurrences": 2,
+    "strength": 2,
+    "first_detected": "2025-11-28T00:39:07.705645",
+    "avg_occurrences": 1.0
+  }
+]

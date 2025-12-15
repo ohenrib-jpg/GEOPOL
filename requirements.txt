@@ -80,7 +80,7 @@ psutil==7.1.3
 
 # Dates et temps
 python-dateutil==2.8.2
-pytz==2023.3
+
 
 # ============================================
 # DÉPENDANCES OPTIONNELLES (Mode RÉEL)
@@ -89,7 +89,9 @@ pytz==2023.3
 # SDR (Software Defined Radio) - Optionnel
 pyrtlsdr==0.2.93
 numpy-quaternion==2022.4.3
-
+pytz==2023.0
+redis==4.5.0
+aiofiles==23.0.0
 # APIs financières avancées - Optionnel
 alpha-vantage==2.3.1
 fredapi==0.5.1

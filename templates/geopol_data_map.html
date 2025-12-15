@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte Géopolitique avec Météo - GEOPOL</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 1rem 2rem;
+            border-bottom: 3px solid #f59e0b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .header h1 {
+                font-size: 1.8rem;
+                color: #f59e0b;
+                text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .header .status {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+
+        .status-badge {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 1px solid #475569;
+            border-left: 3px solid #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Container principal */
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        /* Carte */
+        #map {
+            flex: 1;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Panneau latéral */
+        .sidebar {
+            width: 400px;
+            background: rgba(30, 41, 59, 0.98);
+            border-left: 2px solid #475569;
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+
+            .sidebar.hidden {
+                transform: translateX(100%);
+            }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 1.5rem;
+            border-bottom: 2px solid #475569;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sidebar-content {
+            padding: 1.5rem;
+        }
+
+        .country-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .country-flag {
+            font-size: 3rem;
+        }
+
+        .country-info h2 {
+            font-size: 1.5rem;
+            color: #f59e0b;
+            margin-bottom: 0.25rem;
+        }
+
+        .country-info .code {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        /* Sections de données */
+        .data-section {
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #475569;
+        }
+
+            .data-section h3 {
+                color: #60a5fa;
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+            .data-row:last-child {
+                border-bottom: none;
+            }
+
+        .data-label {
+            color: #cbd5e1;
+            font-size: 0.875rem;
+        }
+
+        .data-value {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+            .data-value.positive {
+                color: #10b981;
+            }
+
+            .data-value.negative {
+                color: #ef4444;
+            }
+
+        /* Score badges */
+        .score-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .score-low {
+            background: #10b981;
+            color: white;
+        }
+
+        .score-medium {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .score-high {
+            background: #f97316;
+            color: white;
+        }
+
+        .score-critical {
+            background: #ef4444;
+            color: white;
+        }
+
+        .score-unknown {
+            background: #64748b;
+            color: white;
+        }
+
+        /* État de chargement */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #334155;
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Placeholder */
+        .placeholder {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+            .placeholder i {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                color: #475569;
+            }
+
+        /* Toggle sidebar button */
+        .toggle-sidebar {
+            position: absolute;
+            top: 100px;
+            right: 420px;
+            z-index: 3;
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid #475569;
+            border-radius: 8px 0 0 8px;
+            padding: 1rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .toggle-sidebar:hover {
+                background: rgba(51, 65, 85, 0.95);
+            }
+
+        .sidebar.hidden + .toggle-sidebar {
+            right: 10px;
+        }
+
+        /* Scrollbar custom */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+            .sidebar::-webkit-scrollbar-thumb:hover {
+                background: #64748b;
+            }
+
+        /* Metadata footer */
+        .metadata {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-top: 1px solid #475569;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                right: 0;
+                height: 100%;
+            }
+
+            .toggle-sidebar {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            <span>🗺️</span>
+            <span>CARTE GÉOPOLITIQUE</span>
+        </h1>
+
+        <div class="status">
+            <div class="status-badge">
+                <div class="pulse"></div>
+                <span id="status-text">En ligne</span>
+            </div>
+            <div class="status-badge">
+                <span>🌦️</span>
+                <span id="weather-status">Météo: chargement...</span>
+            </div>
+            <div class="flex items-center space-x-4 text-slate-300 text-sm">
+                <a href="/" class="hover:text-yellow-400 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour Accueil
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Container principal -->
+    <div class="container">
+        <!-- Carte Leaflet -->
+        <div id="map"></div>
+
+        <!-- Panneau latéral -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div id="sidebar-content">
+                    <!-- Placeholder initial -->
+                    <div class="placeholder">
+                        <i>🌍</i>
+                        <p>Cliquez sur un pays pour afficher ses données géopolitiques</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton toggle sidebar -->
+        <div class="toggle-sidebar" onclick="toggleSidebar()">
+            <span id="toggle-icon">◀</span>
+        </div>
+    </div>
+
+    <!-- Bouton pour ouvrir la fenêtre -->
+    <button id="openAlertsConfig" class="floating-config-btn">
+        ⚙️ Configurer les alertes
+    </button>
+
+    <!-- 📡 Couches SDR -->
+    <div class="layer-control">
+        <h4>📡 Couches SDR</h4>
+        <label>
+            <input type="checkbox" id="sdr-layer-toggle" checked>
+            Santé réseau SDR
+        </label>
+        <div class="sdr-legend">
+            <div class="legend-item">
+                <span class="legend-color" style="background:#ff0000"></span>
+                Critique
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background:#ff6b00"></span>
+                Haut risque
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background:#ffd700"></span>
+                Avertissement
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background:#90ee90"></span>
+                Stable
+            </div>
+        </div>
+    </div>
+    <!-- Modal flottante -->
+    <div id="alertsConfigModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🔔 Configuration des alertes géopolitiques</h2>
+
+            <form id="alertForm">
+                <label>
+                    <strong>Nom de l'alerte :</strong>
+                    <input type="text" name="name" required />
+                </label>
+
+                <label>
+                    <strong>Pays concerné :</strong>
+                    <select name="country_code" required>
+                        <option value="FR">France</option>
+                        <option value="US">États-Unis</option>
+                        <option value="CN">Chine</option>
+                        <option value="RU">Russie</option>
+                        <!-- Ajoutez d'autres pays selon vos besoins -->
+                    </select>
+                </label>
+
+                <label>
+                    <strong>Indicateur :</strong>
+                    <select name="indicator" required>
+                        <option value="inflation">Inflation</option>
+                        <option value="military_spending_pct">Dépenses militaires</option>
+                        <option value="unemployment">Chômage</option>
+                        <option value="pm25">Pollution (PM2.5)</option>
+                        <option value="gdp_growth">Croissance PIB</option>
+                    </select>
+                </label>
+
+                <label>
+                    <strong>Condition :</strong>
+                    <select name="condition">
+                        <option value=">">Supérieur à</option>
+                        <option value="<">Inférieur à</option>
+                        <option value="increased_by">Augmentation de</option>
+                    </select>
+                    <input type="number" name="threshold" step="0.01" placeholder="Valeur seuil" />
+                </label>
+
+                <button type="submit">✅ Créer l'alerte</button>
+            </form>
+
+            <h3>📋 Alertes actives</h3>
+            <div id="activeAlertsList"></div>
+        </div>
+    </div>
+
+    <style>
+        .floating-config-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+            .modal.hidden {
+                display: none;
+            }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        form input, form select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.3rem;
+        }
+
+        button[type="submit"] {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+
+    <script>
+        // Ouverture/fermeture du modal
+        document.getElementById("openAlertsConfig").onclick = () => {
+            document.getElementById("alertsConfigModal").classList.remove("hidden");
+            loadActiveAlerts();
+        };
+
+        document.querySelector(".close").onclick = () => {
+            document.getElementById("alertsConfigModal").classList.add("hidden");
+        };
+
+        // Soumission du formulaire
+        document.getElementById("alertForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            const res = await fetch("/api/geopol/alerts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+
+            if (res.ok) {
+                alert("✅ Alerte créée !");
+                loadActiveAlerts();
+                e.target.reset();
+            } else {
+                alert("❌ Erreur");
+            }
+        };
+
+        // Charger les alertes actives
+        async function loadActiveAlerts() {
+            const res = await fetch("/api/geopol/alerts");
+            const data = await res.json();
+            const list = document.getElementById("activeAlertsList");
+            list.innerHTML = data.alerts.map(alert => `
+                                      <div style="border:1px solid #ddd; padding:10px; margin:5px 0; border-radius:5px;">
+                                        <strong>${alert.name}</strong> - ${alert.country_code} : ${alert.indicator} ${alert.condition} ${alert.threshold}
+                                        <button onclick="deleteAlert(${alert.id})" style="float:right; color:red;">🗑️</button>
+                                      </div>
+                                    `).join("");
+        }
+
+        // Supprimer une alerte
+        async function deleteAlert(id) {
+            await fetch(`/api/geopol/alerts/${id}`, { method: "DELETE" });
+            loadActiveAlerts();
+        }
+    </script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Script principal -->
+    <script src="{{ url_for('static', filename='js/geopol_map.js') }}"></script>
+
+    <!-- 🆕 MODULE MÉTÉO -->
+    <script src="{{ url_for('static', filename='js/weather_layers.js') }}"></script>
+
+    <!-- 🆕 INITIALISATION INTÉGRÉE -->
+    <script>
+
+        let weatherManager;
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                // 1. Initialiser la carte géopolitique (existant)
+                console.log('🗺️ Initialisation carte...');
+                initMap(); // Votre fonction existante
+
+                // 2. Attendre que la carte soit prête
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // 3. Initialiser les couches météo
+                console.log('🌦️ Initialisation météo...');
+                weatherManager = await initializeWeatherLayers(map);
+
+                if (weatherManager) {
+                    // Mettre à jour le statut
+                    document.getElementById('weather-status').textContent = 'Météo: actif';
+                    console.log('✅ Système météo opérationnel');
+                } else {
+                    document.getElementById('weather-status').textContent = 'Météo: erreur';
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur initialisation:', error);
+                document.getElementById('weather-status').textContent = 'Météo: erreur';
+            }
+        });
+
+        // Fonction utilitaire pour ajouter météo au clic pays
+        async function onCountryClickEnriched(countryCode) {
+            console.log(`🌍 Clic pays: ${countryCode}`);
+
+            // 1. Afficher les données géopolitiques (existant)
+            await loadCountryData(countryCode); // Votre fonction existante
+
+            // 2. Enrichir avec météo
+            try {
+                const response = await fetch(`/api/geopol/weather/country/${countryCode}`);
+                const data = await response.json();
+
+                if (data.success && data.weather) {
+                    // Ajouter section météo au sidebar
+                    const weatherSection = `
+                                        <div class="data-section weather-section">
+                                            <h3>🌤️ Météo actuelle</h3>
+                                            <div class="data-row">
+                                                <span class="data-label">Température</span>
+                                                <span class="data-value">${data.weather.temperature?.toFixed(1) || 'N/A'}°C</span>
+                                            </div>
+                                            ${data.weather.precipitation !== null ? `
+                                            <div class="data-row">
+                                                <span class="data-label">Précipitations</span>
+                                                <span class="data-value">${data.weather.precipitation.toFixed(1)} mm</span>
+                                            </div>
+                                            ` : ''}
+                                            ${data.weather.wind_speed !== null ? `
+                                            <div class="data-row">
+                                                <span class="data-label">Vent</span>
+                                                <span class="data-value">${data.weather.wind_speed.toFixed(0)} km/h</span>
+                                            </div>
+                                            ` : ''}
+                                            ${data.air_quality && data.air_quality.aqi !== null ? `
+                                            <div class="data-row">
+                                                <span class="data-label">Qualité air</span>
+                                                <span class="data-value">
+                                                    <span class="score-badge score-${getAqiClass(data.air_quality.aqi)}">
+                                                        ${data.air_quality.aqi_level}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+
+                    // Injecter dans le sidebar
+                    const sidebarContent = document.getElementById('sidebar-content');
+                    if (sidebarContent) {
+                        sidebarContent.insertAdjacentHTML('beforeend', weatherSection);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement météo pays:', error);
+            }
+        }
+
+        // Fonction helper pour classe AQI
+        function getAqiClass(aqi) {
+            if (aqi <= 50) return 'low';
+            else if (aqi <= 100) return 'medium';
+            else if (aqi <= 150) return 'high';
+            else return 'critical';
+        }
+    </script>
+</body>
+</html>

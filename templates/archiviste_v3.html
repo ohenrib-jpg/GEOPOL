@@ -13,10 +13,15 @@
     <style>
         /* Styles inspirés de votre design existant */
         .mission-header {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(168, 85, 247, 0.8) 100%);
-            height: 120px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%), url('{{ url_for("static", filename="space.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            height: 140px;
             position: relative;
             overflow: hidden;
+            border-bottom: 3px solid #f59e0b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         .mission-title {
@@ -97,9 +102,12 @@
                      class="h-12 w-auto">
                 <div>
                     <h1 class="mission-title text-3xl">ARCHIVISTE V3.0</h1>
+
                     <p class="text-slate-200 text-sm mt-1">
                         <i class="fas fa-brain mr-2"></i>
-                        Analyse Historique Vectorielle avec SpaCy
+                        <span style="color:#ff72d2 !important;">
+                            Analyse Historique Vectorielle avec SpaCy
+                        </span>
                     </p>
                 </div>
             </div>

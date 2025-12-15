@@ -1,1900 +1,2089 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicateurs Faibles - GEOPOL</title>
 
-{% block content %}
-<div class="container mx-auto px-4 py-6">
-    <!-- Ticker défilant -->
-    <div class="mb-6">
-        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3">
-            <div class="flex items-center">
-                <i class="fas fa-broadcast-tower text-yellow-400 mr-3"></i>
-                <div class="overflow-hidden whitespace-nowrap">
-                    <div class="inline-block animate-marquee">
-                        <span class="font-mono text-slate-300 text-sm">
-                            🛰️ SDR ACTIF • Fréquences: 2182 kHz (Urgence) • 121.5 MHz (Aéronautique) • 4625 kHz (Militaire) •
-                            📡 3 Serveurs Opérationnels • 🌍 Mode Surveillance Globale Activé •
-                            ⚠️ Dernière anomalie détectée: 4625 kHz •
-                            📊 Stockage: 1.4TB • Latence: 24ms
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Styles de base.html -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Bouton retour -->
-    <div class="mb-6">
-        <a href="/" class="inline-flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-blue px-4 py-2 rounded-lg transition-all duration-300 border border-slate-600 shadow-lg hover:shadow-xs">
-            <i class="fas fa-arrow-left"></i>
-            <span>Retour au Tableau de Bord</span>
-        </a>
-    </div>
-
-    <!-- Titre de page -->
-    <div class="mb-8">
-        <h1 class="text-xl font-bold text-slate-800 flex items-center">
-            <i class="fas fa-satellite-dish text-blue-500 mr-3"></i>
-            Surveillance - Indicateurs Stratégiques (SDR, Avis aux voyageurs, Alertes bourses)
-            <span class="ml-3 badge-new">rtl-SDR</span>
-        </h1>
-        <p class="text-slate-600 mt-2">
-            <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-            Système de surveillance de la disponibilité du réseau WebSDR (sans écoute)
-            Une perte de signal ou une indisponibilité sur zones critiques peut indiquer des activités suspectes.
-        </p>
-    </div>
-
-    <!-- Navigation par onglets -->
-    <div class="mb-8">
-        <div class="border-b border-slate-200">
-            <nav class="flex space-x-8">
-                <button id="tab-sdr" class="tab-button py-3 px-4 font-medium text-slate-700 border-b-2 border-blue-500 text-blue-600 flex items-center space-x-2">
-                    <i class="fas fa-broadcast-tower"></i>
-                    <span>Moniteur SDR</span>
-                </button>
-                <button id="tab-travel" class="tab-button py-3 px-4 font-medium text-slate-600 hover:text-slate-800 flex items-center space-x-2">
-                    <i class="fas fa-plane"></i>
-                    <span>Avis aux Voyageurs</span>
-                </button>
-                <button id="tab-stock" class="tab-button py-3 px-4 font-medium text-slate-600 hover:text-slate-800 flex items-center space-x-2">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Suivi Personnalisé</span>
-                </button>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Contenu des onglets -->
-    <div id="tab-content">
-        <!-- Onglet 1: Moniteur SDR -->
-        <div id="content-sdr" class="tab-panel">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="data-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-3xl font-bold text-blue-600" id="total-frequencies">0</div>
-                            <div class="text-sm text-slate-600">Fréquences surveillées</div>
-                        </div>
-                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-wave-square text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-slate-500 flex items-center">
-                        <i class="fas fa-arrow-up text-green-500 mr-1"></i>
-                        <span>Scan actif en temps réel</span>
-                    </div>
-                </div>
-
-                <div class="data-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-3xl font-bold text-red-600" id="anomalies-detected">0</div>
-                            <div class="text-sm text-slate-600">Anomalies détectées</div>
-                        </div>
-                        <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-slate-500 flex items-center">
-                        <i class="fas fa-shield-alt text-yellow-500 mr-1"></i>
-                        <span>Seuil de sécurité: Moyen</span>
-                    </div>
-                </div>
-
-                <div class="data-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-3xl font-bold text-green-600" id="active-servers">0</div>
-                            <div class="text-sm text-slate-600">Serveurs actifs</div>
-                        </div>
-                        <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-server text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-slate-500 flex items-center">
-                        <span class="status-indicator status-online pulse-online mr-2"></span>
-                        <span>Tous les systèmes normaux</span>
-                    </div>
-                </div>
-
-                <div class="data-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-3xl font-bold text-purple-600" id="uptime">99.9%</div>
-                            <div class="text-sm text-slate-600">Disponibilité SDR</div>
-                        </div>
-                        <div class="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-slate-500 flex items-center">
-                        <i class="fas fa-bolt text-purple-500 mr-1"></i>
-                        <span>Performance optimale</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Content Grid -->
-            <div id="data-status" class="mb-6">
-                <!-- Chargé dynamiquement -->
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- SDR Monitoring - Main Panel -->
-                <div class="lg:col-span-2">
-                    <div class="data-card p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center">
-                                <i class="fas fa-broadcast-tower text-blue-500 mr-3"></i>
-                                Tableau de Contrôle SDR
-                                <span class="ml-3 text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">LIVE</span>
-                            </h2>
-                            <div class="flex items-center space-x-3">
-                                <div class="relative">
-                                    <select id="server-select" class="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
-                                        <option value="">Serveur principal</option>
-                                        <option value="europe">Europe - SDR-01</option>
-                                        <option value="na">Amérique du Nord - SDR-02</option>
-                                        <option value="asia">Asie - SDR-03</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-500 pointer-events-none"></i>
-                                </div>
-                                <button onclick="SDRMonitor.loadDashboard()" class="h-10 w-10 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors">
-                                    <i class="fas fa-sync text-slate-600"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Radar Grid Simulation -->
-                        <div class="radar-grid rounded-lg p-6 mb-6 border border-slate-200">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-semibold text-slate-700">Carte des Signaux</h3>
-                                <div class="flex space-x-2">
-                                    <span class="text-xs px-3 py-1 bg-green-100 text-green-800 rounded-full">Normaux: 12</span>
-                                    <span class="text-xs px-3 py-1 bg-red-100 text-red-800 rounded-full">Anomalies: 3</span>
-                                </div>
-                            </div>
-
-                            <div id="sdr-dashboard">
-                                <div class="text-center py-16 text-slate-500">
-                                    <div class="inline-block relative">
-                                        <i class="fas fa-satellite text-4xl text-blue-500 mb-4"></i>
-                                        <div class="absolute inset-0 animate-ping bg-blue-500 rounded-full opacity-20"></div>
-                                    </div>
-                                    <p class="mt-4 font-medium">Initialisation du système SDR...</p>
-                                    <p class="text-sm mt-2">Connexion aux récepteurs radio</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Fréquences Actives -->
-                        <div class="mt-6">
-                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
-                                <i class="fas fa-frequency mr-2 text-purple-500"></i>
-                                Fréquences Surveillées
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="sdr-frequency active">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono">2182.0 kHz</span>
-                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">EMERGENCY</span>
-                                    </div>
-                                    <div class="flex items-center mt-2">
-                                        <div class="signal-meter flex-1 mr-3">
-                                            <div class="signal-level" style="width: 60%"></div>
-                                        </div>
-                                        <span class="text-xs text-slate-400">-45 dB</span>
-                                    </div>
-                                </div>
-
-                                <div class="sdr-frequency">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono">121.5 MHz</span>
-                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">AÉRONAUTIQUE</span>
-                                    </div>
-                                    <div class="flex items-center mt-2">
-                                        <div class="signal-meter flex-1 mr-3">
-                                            <div class="signal-level" style="width: 40%"></div>
-                                        </div>
-                                        <span class="text-xs text-slate-400">-62 dB</span>
-                                    </div>
-                                </div>
-
-                                <div class="sdr-frequency alert">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono">4625.0 kHz</span>
-                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">MILITAIRE</span>
-                                    </div>
-                                    <div class="flex items-center mt-2">
-                                        <div class="signal-meter flex-1 mr-3">
-                                            <div class="signal-level" style="width: 85%"></div>
-                                        </div>
-                                        <span class="text-xs text-red-500">ACTIVITÉ ÉLEVÉE</span>
-                                    </div>
-                                </div>
-
-                                <div class="sdr-frequency">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono">5732.0 kHz</span>
-                                        <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">DIPLOMATIQUE</span>
-                                    </div>
-                                    <div class="flex items-center mt-2">
-                                        <div class="signal-meter flex-1 mr-3">
-                                            <div class="signal-level" style="width: 30%"></div>
-                                        </div>
-                                        <span class="text-xs text-slate-400">-70 dB</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar -->
-                <div class="space-y-8">
-                    <!-- Serveurs SDR -->
-                    <div class="data-card p-6">
-                        <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
-                            <i class="fas fa-server text-green-500 mr-3"></i>
-                            Statut des Serveurs
-                        </h3>
-                        <div id="sdr-servers-list" class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <span class="status-indicator status-online pulse-online mr-3"></span>
-                                    <div>
-                                        <div class="font-medium">SDR-01 - Europe</div>
-                                        <div class="text-xs text-slate-500">Berlin, DE • 24°C</div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-mono text-sm">87%</div>
-                                    <div class="text-xs text-slate-500">Charge CPU</div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <span class="status-indicator status-online pulse-online mr-3"></span>
-                                    <div>
-                                        <div class="font-medium">SDR-02 - Amérique du Nord</div>
-                                        <div class="text-xs text-slate-500">New York, US • 18°C</div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-mono text-sm">92%</div>
-                                    <div class="text-xs text-slate-500">Charge CPU</div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <span class="status-indicator status-warning mr-3"></span>
-                                    <div>
-                                        <div class="font-medium">SDR-03 - Asie</div>
-                                        <div class="text-xs text-slate-500">Singapour, SG • 31°C</div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-mono text-sm">64%</div>
-                                    <div class="text-xs text-slate-500">Charge CPU</div>
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="SDRMonitor.loadServers()" class="mt-6 w-full py-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center text-slate-700 font-medium">
-                            <i class="fas fa-sync-alt mr-2"></i> Actualiser les statuts
-                        </button>
-                    </div>
-
-                    <!-- Configuration SDR -->
-                    <div class="data-card p-6">
-                        <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
-                            <i class="fas fa-sliders-h text-blue-500 mr-3"></i>
-                            Paramètres SDR
-                        </h3>
-                        <div class="space-y-6">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="text-sm font-medium text-slate-700">Seuil d'anomalie</label>
-                                    <span class="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">Niveau 3</span>
-                                </div>
-                                <input type="range" min="1" max="5" value="3" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                            </div>
-
-                            <div class="pt-4 border-t border-slate-200">
-                                <h4 class="font-medium text-slate-700 mb-3">Plages de Fréquences</h4>
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-bell text-red-500 mr-2"></i>
-                                            <span class="text-sm">Bandes d'urgence</span>
-                                        </div>
-                                        <span class="text-xs font-mono bg-red-100 text-red-800 px-2 py-1 rounded">ACTIVE</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-fighter-jet text-orange-500 mr-2"></i>
-                                            <span class="text-sm">Communications militaires</span>
-                                        </div>
-                                        <span class="text-xs font-mono bg-orange-100 text-orange-800 px-2 py-1 rounded">MONITOR</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-handshake text-purple-500 mr-2"></i>
-                                            <span class="text-sm">Trafic diplomatique</span>
-                                        </div>
-                                        <span class="text-xs font-mono bg-purple-100 text-purple-800 px-2 py-1 rounded">PASSIVE</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet 2: Avis aux Voyageurs -->
-        <div id="content-travel" class="tab-panel hidden">
-            <div class="data-card p-6">
-                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
-                    <i class="fas fa-plane text-blue-500 mr-3"></i>
-                    Avis aux Voyageurs - Alertes Sécurité
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Alertes par région -->
-                    <div>
-                        <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
-                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-                            Alertes Actives
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="border-l-4 border-red-500 bg-red-50 p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium text-red-800">Niveau 3 - Éviter tout voyage</span>
-                                    <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">URGENT</span>
-                                </div>
-                                <p class="text-sm text-red-700 mt-2">Ukraine - Zone de conflit actif</p>
-                                <div class="text-xs text-red-600 mt-2">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    Dernière mise à jour: Aujourd'hui 14:30
-                                </div>
-                            </div>
-
-                            <div class="border-l-4 border-orange-500 bg-orange-50 p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium text-orange-800">Niveau 2 - Prudence renforcée</span>
-                                    <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">ALERTE</span>
-                                </div>
-                                <p class="text-sm text-orange-700 mt-2">Moyen-Orient - Tensions régionales</p>
-                                <div class="text-xs text-orange-600 mt-2">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    Dernière mise à jour: Hier 09:15
-                                </div>
-                            </div>
-
-                            <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium text-yellow-800">Niveau 1 - Vigilance normale</span>
-                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">INFO</span>
-                                </div>
-                                <p class="text-sm text-yellow-700 mt-2">Europe - Menace terroriste modérée</p>
-                                <div class="text-xs text-yellow-600 mt-2">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    Dernière mise à jour: 03/12/2024
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Conseils généraux -->
-                    <div>
-                        <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
-                            <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
-                            Conseils de Sécurité
-                        </h3>
-                        <div class="bg-blue-50 rounded-lg p-5">
-                            <ul class="space-y-3">
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                    <span class="text-sm text-slate-700">Enregistrez-vous sur Ariane (Ministère des Affaires Étrangères)</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                    <span class="text-sm text-slate-700">Constituez une copie numérique de vos documents</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                    <span class="text-sm text-slate-700">Localisez l'ambassade/consulat le plus proche</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                    <span class="text-sm text-slate-700">Évitez les rassemblements et manifestations</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                    <span class="text-sm text-slate-700">Surveillez les médias locaux et les alertes officielles</span>
-                                </li>
-                            </ul>
-
-                            <div class="mt-6 pt-4 border-t border-blue-200">
-                                <h4 class="font-medium text-slate-700 mb-2">Ressources Utiles</h4>
-                                <div class="flex flex-wrap gap-2">
-                                    <a href="https://www.diplomatie.gouv.fr/fr/conseils-aux-voyageurs/" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
-                                        France Diplomatie
-                                    </a>
-                                    <a href="https://travel.state.gov" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
-                                        US Travel Advisories
-                                    </a>
-                                    <a href="https://www.gov.uk/foreign-travel-advice" target="_blank" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded transition-colors">
-                                        UK Foreign Advice
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ONGLET 3: SUIVI PERSONNALISÉ (NOUVEAU) -->
-        <div id="content-stock" class="tab-panel hidden">
-            <div class="data-card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-slate-800 flex items-center">
-                        <i class="fas fa-chart-line text-green-500 mr-3"></i>
-                        Suivi Personnalisé - Mes Instruments
-                    </h2>
-                    <button id="addInstrumentBtn" class="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
-                        <i class="fas fa-plus"></i>
-                        <span>Ajouter un Instrument</span>
-                    </button>
-                </div>
-
-                <!-- Barre de recherche et filtres -->
-                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="relative">
-                        <input type="text" id="searchInstruments" placeholder="Rechercher un instrument..."
-                               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <i class="fas fa-search absolute right-3 top-3 text-slate-400"></i>
-                    </div>
-                    <select id="filterType" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Tous les types</option>
-                        <option value="stock">Actions</option>
-                        <option value="index">Indices</option>
-                        <option value="currency">Devises</option>
-                        <option value="commodity">Matières premières</option>
-                        <option value="crypto">Cryptomonnaies</option>
-                    </select>
-                    <select id="filterAlert" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Toutes les alertes</option>
-                        <option value="active">Alertes actives</option>
-                        <option value="inactive">Alertes inactives</option>
-                        <option value="triggered">Récemment déclenchées</option>
-                    </select>
-                    <button id="refreshTracking" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        <span>Actualiser</span>
-                    </button>
-                </div>
-
-                <!-- Sous-onglets -->
-                <div class="border-b border-slate-200 mb-6">
-                    <nav class="flex space-x-8">
-                        <button id="tab-tracking-dashboard" class="tracking-tab py-3 px-4 font-medium text-blue-600 border-b-2 border-blue-500">
-                            Tableau de Bord
-                        </button>
-                        <button id="tab-tracking-instruments" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
-                            Mes Instruments
-                        </button>
-                        <button id="tab-tracking-alerts" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
-                            Gestion des Alertes
-                        </button>
-                        <button id="tab-tracking-notifications" class="tracking-tab py-3 px-4 font-medium text-slate-600 hover:text-slate-800">
-                            Notifications
-                            <span id="notificationBadge" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Contenu des sous-onglets -->
-                <div id="tracking-content">
-                    <!-- Sous-onglet 1: Tableau de bord -->
-                    <div id="tracking-dashboard" class="tracking-subpanel">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                            <div class="data-card p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div>
-                                        <div class="text-3xl font-bold text-blue-600" id="tracked-count">0</div>
-                                        <div class="text-sm text-slate-600">Instruments suivis</div>
-                                    </div>
-                                    <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-star text-blue-600 text-xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="data-card p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div>
-                                        <div class="text-3xl font-bold text-green-600" id="active-alerts-count">0</div>
-                                        <div class="text-sm text-slate-600">Alertes actives</div>
-                                    </div>
-                                    <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-bell text-green-600 text-xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="data-card p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div>
-                                        <div class="text-3xl font-bold text-red-600" id="triggered-today">0</div>
-                                        <div class="text-sm text-slate-600">Alertes déclenchées (24h)</div>
-                                    </div>
-                                    <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Graphique des variations -->
-                        <div class="data-card p-6 mb-8">
-                            <h3 class="font-semibold text-slate-700 mb-4">Variations des dernières 24h</h3>
-                            <div id="tracking-chart-container" class="h-64">
-                                <canvas id="trackingChart"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- Liste des instruments en temps réel -->
-                        <div class="data-card p-6">
-                            <h3 class="font-semibold text-slate-700 mb-4">Données en Temps Réel</h3>
-                            <div id="realtime-data-container">
-                                <div class="text-center py-8 text-slate-500">
-                                    <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
-                                    <p>Chargement des données...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sous-onglet 2: Mes instruments -->
-                    <div id="tracking-instruments" class="tracking-subpanel hidden">
-                        <div id="instruments-list-container">
-                            <!-- Chargé dynamiquement -->
-                        </div>
-                    </div>
-
-                    <!-- Sous-onglet 3: Gestion des alertes -->
-                    <div id="tracking-alerts" class="tracking-subpanel hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Liste des alertes -->
-                            <div>
-                                <h3 class="font-semibold text-slate-700 mb-4">Mes Alertes Configurées</h3>
-                                <div id="alerts-list-container" class="space-y-4">
-                                    <!-- Chargé dynamiquement -->
-                                </div>
-                            </div>
-
-                            <!-- Formulaire d'ajout d'alerte -->
-                            <div class="data-card p-6">
-                                <h3 class="font-semibold text-slate-700 mb-4">Nouvelle Alerte</h3>
-                                <form id="addAlertForm" class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Instrument</label>
-                                        <select id="alertInstrument" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">Sélectionner un instrument</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Nom de l'alerte</label>
-                                        <input type="text" id="alertName" required placeholder="Ex: Hausse importante AAPL"
-                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Condition</label>
-                                        <select id="alertCondition" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="above">Dépasse</option>
-                                            <option value="below">Descend sous</option>
-                                            <option value="change_up">Hausse de plus de (%)</option>
-                                            <option value="change_down">Baisse de plus de (%)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Valeur/Seuil</label>
-                                        <input type="number" id="alertValue" required step="0.01" placeholder="0.00"
-                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-                                    <div id="thresholdContainer" class="hidden">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Pourcentage (%)</label>
-                                        <input type="number" id="alertThreshold" step="0.1" min="0.1" max="100" value="5"
-                                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-                                    <div>
-                                        <label class="flex items-center space-x-2">
-                                            <input type="checkbox" id="alertActive" checked class="rounded text-blue-600">
-                                            <span class="text-sm text-slate-700">Alerte active</span>
-                                        </label>
-                                    </div>
-                                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg transition-all duration-300">
-                                        Ajouter l'Alerte
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sous-onglet 4: Notifications -->
-                    <div id="tracking-notifications" class="tracking-subpanel hidden">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-semibold text-slate-700">Historique des Notifications</h3>
-                            <button id="markAllRead" class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg transition-colors">
-                                <i class="fas fa-check-double mr-1"></i>
-                                Tout marquer comme lu
-                            </button>
-                        </div>
-                        <div id="notifications-container" class="space-y-3">
-                            <!-- Chargé dynamiquement -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer Status -->
-    <div class="mt-8 pt-6 border-t border-slate-200">
-        <div class="flex flex-col md:flex-row md:items-center justify-between text-sm text-slate-500">
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center">
-                    <span class="status-indicator status-online pulse-online mr-2"></span>
-                    <span>SDR System: ONLINE</span>
-                </div>
-                <span class="hidden md:inline">•</span>
-                <div class="flex items-center">
-                    <i class="fas fa-database mr-2"></i>
-                    <span>Stockage: 1.4TB / 2.0TB</span>
-                </div>
-                <span class="hidden md:inline">•</span>
-                <div class="flex items-center">
-                    <i class="fas fa-network-wired mr-2"></i>
-                    <span>Latence: 24ms</span>
-                </div>
-            </div>
-            <div class="mt-4 md:mt-0">
-                <span class="font-mono">SDR Command v2.3 • Dernière mise à jour: </span>
-                <span id="system-update-time" class="font-medium">Aujourd'hui 22:45 CET</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal pour ajouter un instrument -->
-<div id="addInstrumentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md data-card">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800">Ajouter un Instrument</h3>
-                    <button id="closeInstrumentModal" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="p-6">
-                <form id="addInstrumentForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Symbole*</label>
-                        <input type="text" id="instrumentSymbol" required placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-slate-500 mt-1">Utilisez les symboles Yahoo Finance</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nom*</label>
-                        <input type="text" id="instrumentName" required placeholder="Ex: Apple Inc."
-                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Type*</label>
-                        <select id="instrumentType" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="stock">Action</option>
-                            <option value="index">Indice</option>
-                            <option value="currency">Devise</option>
-                            <option value="commodity">Matière première</option>
-                            <option value="crypto">Cryptomonnaie</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                        <textarea id="instrumentDescription" rows="3" placeholder="Description optionnelle..."
-                                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                    </div>
-                    <div class="flex items-center justify-between pt-4">
-                        <button type="button" id="cancelInstrument" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-                            Annuler
-                        </button>
-                        <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
-                            Ajouter
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Système de notifications global -->
-<div id="globalNotifications" class="fixed bottom-4 right-4 z-50 space-y-3 max-w-sm">
-    <!-- Les notifications apparaissent ici dynamiquement -->
-</div>
-
-<style>
-    /* Styles supplémentaires pour la page weak_indicators */
-    .status-indicator {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 8px;
-    }
-
-    .status-online {
-        background-color: #10b981;
-    }
-
-    .status-offline {
-        background-color: #ef4444;
-    }
-
-    .status-warning {
-        background-color: #f59e0b;
-    }
-
-    @keyframes pulse-glow {
-        0%, 100% {
-            opacity: 1;
-            box-shadow: 0 0 10px currentColor;
+    <style>
+        /* Styles de base.html - MISSION CONTROL */
+        .mission-header {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            height: 140px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #f59e0b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        50% {
-            opacity: 0.7;
-            box-shadow: 0 0 20px currentColor;
-        }
-    }
+        @keyframes radar-sweep {
+            0% {
+                transform: rotate(0deg);
+            }
 
-    .pulse-online {
-        animation: pulse-glow 2s ease-in-out infinite;
-        color: #10b981;
-    }
-
-    .sdr-frequency {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        border: 1px solid #475569;
-        border-radius: 8px;
-        padding: 8px 12px;
-        margin: 4px 0;
-        color: #e2e8f0;
-        font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
-    }
-
-        .sdr-frequency.active {
-            border-left: 4px solid #3b82f6;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        .sdr-frequency.alert {
-            border-left: 4px solid #ef4444;
-            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
-        }
-
-    .signal-meter {
-        background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
-        height: 6px;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .signal-level {
-        height: 100%;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 3px;
-    }
-
-    .radar-grid {
-        background-image: radial-gradient(circle at center, transparent 0%, rgba(59, 130, 246, 0.05) 100%), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(0deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
-        background-size: 100% 100%, 20px 20px, 20px 20px;
-    }
-
-    /* Animation pour le ticker */
-    @keyframes marquee {
-        0% {
-            transform: translateX(100%);
-        }
-
-        100% {
-            transform: translateX(-100%);
-        }
-    }
-
-    .animate-marquee {
-        display: inline-block;
-        animation: marquee 30s linear infinite;
-        white-space: nowrap;
-        padding-left: 100%;
-    }
-
-    /* Styles pour les notifications */
-    .notification-toast {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        animation: slideIn 0.3s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .notification-toast::before {
+        .radar-effect::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient( transparent 0deg, rgba(34, 197, 94, 0.1) 30deg, transparent 60deg, rgba(59, 130, 246, 0.1) 120deg, transparent 150deg, rgba(245, 158, 11, 0.1) 210deg, transparent 240deg, rgba(239, 68, 68, 0.1) 300deg, transparent 330deg );
+            animation: radar-sweep 8s linear infinite;
+            transform-origin: 0 0;
         }
 
-        .notification-toast.info::before {
-            background: #3b82f6;
+        .mission-title {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-weight: 800;
+            color: #f59e0b;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(245, 158, 11, 0.4), 0 0 30px rgba(245, 158, 11, 0.2);
+            letter-spacing: -0.5px;
+            position: relative;
         }
 
-        .notification-toast.warning::before {
-            background: #f59e0b;
+        .mission-subtitle {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
-        .notification-toast.danger::before {
+        .status-badge {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-online {
+            border-left: 3px solid #10b981;
+        }
+
+        .status-dev {
+            border-left: 3px solid #f59e0b;
+        }
+
+        .data-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .data-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #f59e0b, #84cc16, #06b6d4);
+            }
+
+            .data-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .pulse-indicator {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .badge-economy {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        .badge-new {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .tech-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .tech-roberta {
             background: #ef4444;
         }
 
-        .notification-toast.success::before {
-            background: #10b981;
+        .tech-spacy {
+            background: #3b82f6;
         }
 
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
+        .tech-mistral {
+            background: #8b5cf6;
         }
 
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
+        /* Styles spécifiques aux indicateurs faibles */
+        .indicator-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
         }
 
-        to {
-            opacity: 0;
-        }
-    }
-
-    .notification-fadeout {
-        animation: fadeOut 0.5s ease-out forwards;
-    }
-
-    /* Styles pour les sous-onglets */
-    .tracking-subpanel {
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
+        .indicator-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-top-left-radius: 11px;
+            border-top-right-radius: 11px;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Badge de notification */
-    .notification-badge {
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
+        .risk-badge-1 {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
         }
 
-        50% {
-            opacity: 0.5;
-        }
-    }
-</style>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Gestion des onglets principaux
-        const tabs = document.querySelectorAll('.tab-button');
-        const panels = document.querySelectorAll('.tab-panel');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function () {
-                const target = this.id.replace('tab-', 'content-');
-
-                // Mettre à jour l'onglet actif
-                tabs.forEach(t => {
-                    t.classList.remove('border-blue-500', 'text-blue-600');
-                    t.classList.add('text-slate-600');
-                });
-                this.classList.add('border-blue-500', 'text-blue-600');
-                this.classList.remove('text-slate-600');
-
-                // Afficher le bon contenu
-                panels.forEach(panel => {
-                    panel.classList.add('hidden');
-                });
-                document.getElementById(target).classList.remove('hidden');
-
-                // Initialiser le suivi personnalisé si on clique dessus
-                if (target === 'content-stock' && typeof initTracking === 'function') {
-                    initTracking();
-                }
-            });
-        });
-
-        // Mise à jour de l'heure du système
-        function updateSystemTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            const dateString = now.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-
-            const lastUpdate = document.getElementById('last-update');
-            const systemUpdate = document.getElementById('system-update-time');
-
-            if (lastUpdate) lastUpdate.textContent = `${dateString} ${timeString}`;
-            if (systemUpdate) systemUpdate.textContent = `Aujourd'hui ${timeString} CET`;
+        .risk-badge-2 {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
         }
 
-        updateSystemTime();
-        setInterval(updateSystemTime, 1000);
-
-        // Simulation de données SDR
-        const totalFreqElement = document.getElementById('total-frequencies');
-        const anomaliesElement = document.getElementById('anomalies-detected');
-        const serversElement = document.getElementById('active-servers');
-
-        function simulateSDRData() {
-            const totalFreq = Math.floor(Math.random() * 20) + 45;
-            const anomalies = Math.floor(Math.random() * 5);
-            const activeServers = Math.floor(Math.random() * 2) + 2;
-
-            if (totalFreqElement) totalFreqElement.textContent = totalFreq;
-            if (anomaliesElement) anomaliesElement.textContent = anomalies;
-            if (serversElement) serversElement.textContent = activeServers;
-
-            // Animation de mise à jour
-            [totalFreqElement, anomaliesElement, serversElement].forEach(el => {
-                if (el) {
-                    el.classList.add('animate-pulse');
-                    setTimeout(() => el.classList.remove('animate-pulse'), 500);
-                }
-            });
+        .risk-badge-3 {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
         }
 
-        simulateSDRData();
-        setInterval(simulateSDRData, 10000); // Mise à jour toutes les 10 secondes
+        .risk-badge-4 {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
 
-        // Vérifier l'état des données
-        async function checkDataStatus() {
-            try {
-                const response = await fetch('/api/system/data-status');
-                const data = await response.json();
-                const statusDiv = document.getElementById('data-status');
+        .sdr-anomaly {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid #ef4444;
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
 
-                if (!statusDiv) return;
+        .financial-positive {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
 
-                let sourcesText = 'Données simulées';
-                if (data.sources) {
-                    if (Array.isArray(data.sources)) {
-                        sourcesText = data.sources.join(', ');
-                    } else if (typeof data.sources === 'object') {
-                        sourcesText = Object.values(data.sources).join(', ');
-                    }
+        .financial-negative {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+        }
+
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f59e0b 0%, #84cc16 100%);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, #d97706 0%, #65a30d 100%);
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Styles pour les filtres */
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .filter-chip:hover {
+                background: #f1f5f9;
+                border-color: #cbd5e1;
+                transform: translateY(-1px);
+            }
+
+            .filter-chip.active {
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                color: white;
+                border-color: #3b82f6;
+                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            }
+
+        .active-filter-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+            .active-filter-tag button {
+                margin-left: 6px;
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                opacity: 0.8;
+            }
+
+                .active-filter-tag button:hover {
+                    opacity: 1;
                 }
 
-                if (data.real_mode) {
-                    statusDiv.innerHTML = `
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex items-center">
-                                <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-                                <div>
-                                    <h4 class="font-bold text-green-800">Mode RÉEL activé</h4>
-                                    <p class="text-green-700 text-sm">Données en temps réel - Sources: ${sourcesText}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    statusDiv.innerHTML = `
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <div class="flex items-center">
-                                <i class="fas fa-flask text-yellow-500 text-xl mr-3"></i>
-                                <div>
-                                    <h4 class="font-bold text-yellow-800">Mode SIMULATION</h4>
-                                    <p class="text-yellow-700 text-sm">Données de démonstration</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Erreur lors de la vérification du statut:', error);
+        /* Animation pour le panneau filtres */
+        @keyframes slideDown {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+
+            to {
+                max-height: 500px;
+                opacity: 1;
             }
         }
 
-        checkDataStatus();
-
-        // ===============================================
-        // GESTION DU SUIVI PERSONNALISÉ (Nouveau module)
-        // ===============================================
-
-        // Références aux éléments
-        const addInstrumentBtn = document.getElementById('addInstrumentBtn');
-        const addInstrumentModal = document.getElementById('addInstrumentModal');
-        const closeInstrumentModal = document.getElementById('closeInstrumentModal');
-        const cancelInstrument = document.getElementById('cancelInstrument');
-        const addInstrumentForm = document.getElementById('addInstrumentForm');
-        const trackingTabs = document.querySelectorAll('.tracking-tab');
-        const trackingSubpanels = document.querySelectorAll('.tracking-subpanel');
-        const refreshTrackingBtn = document.getElementById('refreshTracking');
-        const addAlertForm = document.getElementById('addAlertForm');
-        const alertCondition = document.getElementById('alertCondition');
-        const thresholdContainer = document.getElementById('thresholdContainer');
-        const markAllReadBtn = document.getElementById('markAllRead');
-        const notificationBadge = document.getElementById('notificationBadge');
-
-        // Variables d'état
-        let trackedInstruments = [];
-        let alerts = [];
-        let notifications = [];
-        let trackingChart = null;
-
-        // === INITIALISATION ===
-        function initTracking() {
-            loadTrackingData();
-            setupEventListeners();
-            startPolling();
-        }
-
-        function setupEventListeners() {
-            // Modal d'instrument
-            if (addInstrumentBtn) {
-                addInstrumentBtn.addEventListener('click', () => {
-                    addInstrumentModal.classList.remove('hidden');
-                    addInstrumentModal.classList.add('flex');
-                });
+        @keyframes slideUp {
+            from {
+                max-height: 500px;
+                opacity: 1;
             }
 
-            if (closeInstrumentModal) {
-                closeInstrumentModal.addEventListener('click', closeInstrumentModalFunc);
-            }
-
-            if (cancelInstrument) {
-                cancelInstrument.addEventListener('click', closeInstrumentModalFunc);
-            }
-
-            // Formulaire d'instrument
-            if (addInstrumentForm) {
-                addInstrumentForm.addEventListener('submit', handleAddInstrument);
-            }
-
-            // Sous-onglets tracking
-            trackingTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const target = tab.id.replace('tab-tracking-', 'tracking-');
-
-                    // Mettre à jour les onglets
-                    trackingTabs.forEach(t => {
-                        t.classList.remove('border-blue-500', 'text-blue-600');
-                        t.classList.add('text-slate-600');
-                    });
-                    tab.classList.add('border-blue-500', 'text-blue-600');
-
-                    // Afficher le bon contenu
-                    trackingSubpanels.forEach(panel => {
-                        panel.classList.add('hidden');
-                    });
-                    document.getElementById(target).classList.remove('hidden');
-
-                    // Charger les données spécifiques
-                    if (target === 'tracking-dashboard') {
-                        loadDashboardData();
-                    } else if (target === 'tracking-instruments') {
-                        loadInstrumentsList();
-                    } else if (target === 'tracking-alerts') {
-                        loadAlertsList();
-                        loadInstrumentsForAlerts();
-                    } else if (target === 'tracking-notifications') {
-                        loadNotifications();
-                    }
-                });
-            });
-
-            // Condition d'alerte
-            if (alertCondition) {
-                alertCondition.addEventListener('change', function () {
-                    if (this.value === 'change_up' || this.value === 'change_down') {
-                        thresholdContainer.classList.remove('hidden');
-                    } else {
-                        thresholdContainer.classList.add('hidden');
-                    }
-                });
-            }
-
-            // Formulaire d'alerte
-            if (addAlertForm) {
-                addAlertForm.addEventListener('submit', handleAddAlert);
-            }
-
-            // Bouton refresh
-            if (refreshTrackingBtn) {
-                refreshTrackingBtn.addEventListener('click', loadTrackingData);
-            }
-
-            // Marquer toutes les notifications comme lues
-            if (markAllReadBtn) {
-                markAllReadBtn.addEventListener('click', markAllNotificationsRead);
+            to {
+                max-height: 0;
+                opacity: 0;
             }
         }
 
-        // === FONCTIONS DE GESTION DES DONNÉES ===
-        async function loadTrackingData() {
-            try {
-                // Charger les instruments
-                const instrumentsResponse = await fetch('/api/financial-tracking/instruments');
-                if (instrumentsResponse.ok) {
-                    const data = await instrumentsResponse.json();
-                    trackedInstruments = data.instruments || [];
-                    updateTrackingCounts();
-                }
+        .slide-down {
+            animation: slideDown 0.3s ease-out forwards;
+        }
 
-                // Charger les données temps réel
-                loadDashboardData();
+        .slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
 
-                // Charger les notifications
-                loadNotifications();
+        /* Styles pour les alertes */
+        .alert-badge {
+            position: relative;
+            display: inline-block;
+        }
 
-            } catch (error) {
-                console.error('Erreur chargement données tracking:', error);
-                showToast('Erreur de chargement des données', 'danger');
+        .alert-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
             }
         }
 
-        async function loadDashboardData() {
-            try {
-                // Données temps réel
-                const response = await fetch('/api/financial-tracking/real-time-data');
-                if (response.ok) {
-                    const data = await response.json();
-                    updateRealtimeData(data.data || []);
-                    updateTrackingChart(data.data || []);
-                }
-            } catch (error) {
-                console.error('Erreur chargement dashboard:', error);
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 400px;
+            background: white;
+            border-left: 4px solid;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
 
-        async function loadInstrumentsList() {
-            try {
-                const response = await fetch('/api/financial-tracking/instruments');
-                if (response.ok) {
-                    const data = await response.json();
-                    renderInstrumentsList(data.instruments || []);
-                }
-            } catch (error) {
-                console.error('Erreur chargement instruments:', error);
+        .alert-toast.critical {
+            border-left-color: #ef4444;
+        }
+
+        .alert-toast.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .alert-toast.info {
+            border-left-color: #3b82f6;
+        }
+
+        .alert-card {
+            border-left: 4px solid;
+            transition: all 0.2s;
+        }
+
+            .alert-card.critical {
+                border-left-color: #ef4444;
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
             }
-        }
 
-        async function loadAlertsList() {
-            try {
-                // Charger toutes les alertes
-                const alertsPromises = trackedInstruments.map(instrument =>
-                    fetch(`/api/financial-tracking/instruments/${instrument.id}/alerts`)
-                );
-
-                const responses = await Promise.all(alertsPromises);
-                alerts = [];
-
-                for (const response of responses) {
-                    if (response.ok) {
-                        const data = await response.json();
-                        alerts.push(...data.alerts);
-                    }
-                }
-
-                renderAlertsList(alerts);
-
-            } catch (error) {
-                console.error('Erreur chargement alertes:', error);
+            .alert-card.warning {
+                border-left-color: #f59e0b;
+                background: linear-gradient(135deg, #fffbeb, #fef3c7);
             }
-        }
 
-        async function loadInstrumentsForAlerts() {
-            try {
-                const select = document.getElementById('alertInstrument');
-                select.innerHTML = '<option value="">Sélectionner un instrument</option>';
-
-                trackedInstruments.forEach(instrument => {
-                    const option = document.createElement('option');
-                    option.value = instrument.id;
-                    option.textContent = `${instrument.name} (${instrument.symbol})`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Erreur chargement instruments pour alertes:', error);
+            .alert-card.info {
+                border-left-color: #3b82f6;
+                background: linear-gradient(135deg, #eff6ff, #dbeafe);
             }
-        }
 
-        async function loadNotifications() {
-            try {
-                const response = await fetch('/api/financial-tracking/notifications');
-                if (response.ok) {
-                    const data = await response.json();
-                    notifications = data.notifications || [];
-                    renderNotifications(notifications);
-                    updateNotificationBadge(data.unread_count || 0);
-                }
-            } catch (error) {
-                console.error('Erreur chargement notifications:', error);
+            .alert-card:hover {
+                transform: translateX(2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
+
+        .severity-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
-        // === FONCTIONS DE RENDU ===
-        function updateTrackingCounts() {
-            const trackedCount = document.getElementById('tracked-count');
-            const activeAlertsCount = document.getElementById('active-alerts-count');
-            const triggeredToday = document.getElementById('triggered-today');
-
-            if (trackedCount) trackedCount.textContent = trackedInstruments.length;
-
-            // Compter les alertes actives
-            const activeAlerts = alerts.filter(a => a.active);
-            if (activeAlertsCount) activeAlertsCount.textContent = activeAlerts.length;
-
-            // Compter les alertes déclenchées aujourd'hui
-            const today = new Date().toISOString().split('T')[0];
-            const todayAlerts = notifications.filter(n =>
-                n.created_at && n.created_at.includes(today)
-            );
-            if (triggeredToday) triggeredToday.textContent = todayAlerts.length;
+        .severity-critical {
+            background: #ef4444;
+            color: white;
         }
 
-        function updateRealtimeData(data) {
-            const container = document.getElementById('realtime-data-container');
-            if (!container) return;
+        .severity-warning {
+            background: #f59e0b;
+            color: white;
+        }
 
-            if (data.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-slate-500">
-                        <i class="fas fa-chart-line text-3xl mb-4"></i>
-                        <p>Aucun instrument suivi</p>
-                        <p class="text-sm mt-2">Ajoutez des instruments pour commencer le suivi</p>
+        .severity-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .alert-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .alert-tab:hover {
+                color: #334155;
+                border-bottom-color: #cbd5e1;
+            }
+
+            .alert-tab.active {
+                color: #3b82f6;
+                border-bottom-color: #3b82f6;
+            }
+
+        .alert-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+            .alert-tab-content.active {
+                display: block;
+            }
+
+        .rule-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+            .rule-card:hover {
+                border-color: #cbd5e1;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .rule-card.enabled {
+                border-left: 4px solid #10b981;
+            }
+
+            .rule-card.disabled {
+                border-left: 4px solid #94a3b8;
+                opacity: 0.7;
+            }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 16px;
+                width: 16px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+
+            input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100">
+
+    <!-- EN-TÊTE MISSION CONTROL -->
+    <header class="mission-header radar-effect">
+        <div class="container mx-auto px-6 h-full flex items-center justify-between">
+            <!-- Logo et identité -->
+            <div class="flex items-center space-x-6">
+                <div class="relative group">
+                    <div class="h-16 w-16 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl shadow-2xl">
+                        <i class="fas fa-satellite-dish text-white text-3xl"></i>
                     </div>
-                `;
-                return;
-            }
-
-            let html = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left text-sm text-slate-600 border-b">
-                                <th class="pb-3">Instrument</th>
-                                <th class="pb-3">Prix</th>
-                                <th class="pb-3">Variation</th>
-                                <th class="pb-3">Volume</th>
-                                <th class="pb-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            data.forEach(item => {
-                const changeClass = item.current_data?.change_percent >= 0 ?
-                    'text-green-600' : 'text-red-600';
-                const changeIcon = item.current_data?.change_percent >= 0 ?
-                    'fa-arrow-up' : 'fa-arrow-down';
-
-                html += `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="py-3">
-                            <div class="font-medium">${item.name}</div>
-                            <div class="text-sm text-slate-500">${item.symbol}</div>
-                        </td>
-                        <td class="py-3 font-medium">
-                            ${item.current_data?.current_price ? item.current_data.current_price.toFixed(2) : 'N/A'}
-                        </td>
-                        <td class="py-3">
-                            <div class="${changeClass} font-medium">
-                                <i class="fas ${changeIcon} mr-1"></i>
-                                ${item.current_data?.change_percent ? item.current_data.change_percent.toFixed(2) : '0.00'}%
-                            </div>
-                        </td>
-                        <td class="py-3 text-sm text-slate-600">
-                            ${item.current_data?.volume ? formatNumber(item.current_data.volume) : 'N/A'}
-                        </td>
-                        <td class="py-3">
-                            <button onclick="addAlertForInstrument(${item.id})"
-                                    class="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg transition-colors">
-                                <i class="fas fa-bell mr-1"></i>
-                                Alerte
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                        </tbody>
-                    </table>
+                    <div class="absolute -inset-2 bg-yellow-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300 -z-10"></div>
                 </div>
-            `;
 
-            container.innerHTML = html;
-        }
+                <div class="flex flex-col">
+                    <h1 class="mission-title text-3xl">INDICATEURS FAIBLES</h1>
+                    <p class="mission-subtitle text-sm mt-1">
+                        <i class="fas fa-chart-network mr-2 pulse-indicator"></i>
+                        Surveillance Géopolitique en Temps Réel
+                    </p>
+                </div>
+            </div>
 
-        function renderInstrumentsList(instruments) {
-            const container = document.getElementById('instruments-list-container');
-            if (!container) return;
+            <!-- Statuts et informations -->
+            <div class="flex flex-col space-y-2 items-end">
+                <div class="flex space-x-3">
+                    <div class="status-badge status-online flex items-center space-x-2">
+                        <i class="fas fa-circle text-green-500 text-xs"></i>
+                        <span>En ligne</span>
+                    </div>
+                    <div class="status-badge status-dev flex items-center space-x-2">
+                        <i class="fas fa-database text-blue-500 text-xs"></i>
+                        <span>Persistance SQLite</span>
+                    </div>
+                </div>
 
-            if (instruments.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-slate-500">
-                        <i class="fas fa-star text-4xl mb-4"></i>
-                        <p class="text-lg font-medium">Aucun instrument suivi</p>
-                        <p class="mt-2">Commencez par ajouter un instrument à suivre</p>
-                        <button id="addFirstInstrument" class="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
-                            <i class="fas fa-plus mr-2"></i>
-                            Ajouter mon premier instrument
+                <div class="text-slate-300 text-xs font-mono">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="tech-indicator tech-roberta"></span>
+                        <span class="tech-indicator tech-spacy"></span>
+                        <span class="tech-indicator tech-mistral"></span>
+                        <span>Finance • Voyage • SDR</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-globe-europe text-cyan-400"></i>
+                        <span style="color:#ff72d2 !important;">GEOPOL Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRE D'OUTILS -->
+    <nav class="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 shadow-lg">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center py-3">
+                <div>
+                    <div class="flex items-center space-x-4 text-slate-300 text-sm">
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-plane-departure text-blue-400"></i>
+                            <span>Avis Voyageurs</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-chart-line text-green-400"></i>
+                            <span>Marchés Financiers</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-broadcast-tower text-purple-400"></i>
+                            <span>Surveillance SDR</span>
+                        </div>
+                        <div class="flex items-center space-x-1 bg-blue-900/50 px-2 py-1 rounded">
+                            <i class="fas fa-database text-blue-400"></i>
+                            <span class="text-blue-300">Persistance</span>
+                            <span class="badge-economy">ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <span id="currentTime" class="text-slate-300 font-mono text-sm"></span>
+
+                    <!-- Badge alerte -->
+                    <div class="alert-badge">
+                        <button id="alertsBell" class="text-slate-300 hover:text-yellow-400 transition-colors">
+                            <i class="fas fa-bell text-xl"></i>
+                        </button>
+                        <span id="alertCount" class="alert-count hidden">0</span>
+                    </div>
+
+                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-indicator"></div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+            <div class="data-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-700">Avis Voyageurs</h3>
+                            <p class="text-3xl font-bold text-blue-600" id="travel-count">0</p>
+                            <p class="text-xs text-slate-500 mt-1" id="travel-source">Chargement...</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-full">
+                            <i class="fas fa-plane-departure text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-700">Instruments Financiers</h3>
+                            <p class="text-3xl font-bold text-green-600" id="financial-count">0</p>
+                            <p class="text-xs text-slate-500 mt-1" id="financial-source">Chargement...</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-100 to-green-200 p-4 rounded-full">
+                            <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-700">Fréquences SDR</h3>
+                            <p class="text-3xl font-bold text-purple-600" id="sdr-count">0</p>
+                            <p class="text-xs text-slate-500 mt-1" id="sdr-source">Chargement...</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-full">
+                            <i class="fas fa-broadcast-tower text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-700">Persistance DB</h3>
+                            <p class="text-3xl font-bold text-amber-600" id="db-total">0</p>
+                            <p class="text-xs text-slate-500 mt-1">Données stockées</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-100 to-amber-200 p-4 rounded-full">
+                            <i class="fas fa-database text-amber-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Filtres Interactifs -->
+        <div class="indicator-card mb-6 fade-in">
+            <div class="indicator-header p-6">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-sliders-h text-cyan-400 mr-3"></i>
+                    Filtres Interactifs
+                    <span class="badge-new ml-2">Dashboard</span>
+                </h2>
+                <p class="text-slate-300 text-sm mt-1">Personnalisez l'affichage selon vos besoins d'analyse</p>
+            </div>
+
+            <div class="p-6">
+                <!-- Barre de contrôle principale -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <!-- Recherche globale -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text"
+                                   id="globalSearch"
+                                   placeholder="Rechercher pays, indicateur, fréquence..."
+                                   class="w-full px-4 py-3 pl-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Sélecteur de catégorie -->
+                    <div class="w-full md:w-64">
+                        <select id="categoryFilter" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">Toutes catégories</option>
+                            <option value="travel">Avis de Voyage</option>
+                            <option value="financial">Marchés Financiers</option>
+                            <option value="sdr">Surveillance SDR</option>
+                        </select>
+                    </div>
+
+                    <!-- Bouton filtres avancés -->
+                    <div>
+                        <button id="toggleAdvancedFilters"
+                                class="px-6 py-3 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white rounded-lg transition-all duration-300 flex items-center">
+                            <i class="fas fa-filter mr-2"></i>
+                            Filtres Avancés
+                            <i id="filterArrow" class="fas fa-chevron-down ml-2 transition-transform"></i>
                         </button>
                     </div>
-                `;
+                </div>
 
-                document.getElementById('addFirstInstrument')?.addEventListener('click', () => {
-                    addInstrumentModal.classList.remove('hidden');
-                    addInstrumentModal.classList.add('flex');
-                });
-                return;
-            }
+                <!-- Panneau filtres avancés (caché par défaut) -->
+                <div id="advancedFiltersPanel" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-slate-50 border border-slate-200 rounded-xl">
 
-            let html = `
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            `;
+                        <!-- Filtres Voyage -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-slate-700 flex items-center">
+                                <i class="fas fa-plane-departure text-blue-500 mr-2"></i>
+                                Avis de Voyage
+                            </h4>
 
-            instruments.forEach(instrument => {
-                html += `
-                    <div class="data-card p-5">
-                        <div class="flex justify-between items-start mb-4">
                             <div>
-                                <div class="font-bold text-lg text-slate-800">${instrument.name}</div>
-                                <div class="text-sm text-slate-500">${instrument.symbol}</div>
-                                <div class="text-xs text-slate-400 mt-1">${instrument.type}</div>
-                            </div>
-                            <button onclick="deleteInstrument(${instrument.id})"
-                                    class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-
-                        ${instrument.description ? `<p class="text-sm text-slate-600 mb-4">${instrument.description}</p>` : ''}
-
-                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
-                            <div class="text-sm text-slate-500">
-                                <i class="far fa-calendar mr-1"></i>
-                                ${new Date(instrument.created_at).toLocaleDateString('fr-FR')}
-                            </div>
-                            <button onclick="loadAlertsForInstrument(${instrument.id})"
-                                    class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg transition-colors">
-                                Voir alertes
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function renderAlertsList(alerts) {
-            const container = document.getElementById('alerts-list-container');
-            if (!container) return;
-
-            if (alerts.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-slate-500">
-                        <i class="fas fa-bell-slash text-2xl mb-4"></i>
-                        <p>Aucune alerte configurée</p>
-                        <p class="text-sm mt-2">Configurez des alertes pour être notifié des variations</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-
-            alerts.forEach(alert => {
-                const instrument = trackedInstruments.find(i => i.id === alert.instrument_id);
-                const statusClass = alert.active ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800';
-                const lastTriggered = alert.last_triggered ?
-                    new Date(alert.last_triggered).toLocaleString('fr-FR') : 'Jamais';
-
-                html += `
-                    <div class="data-card p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <div class="font-medium text-slate-800">${alert.name}</div>
-                                <div class="text-sm text-slate-500">
-                                    ${instrument ? instrument.name + ' (' + instrument.symbol + ')' : 'Instrument inconnu'}
+                                <label class="block text-sm text-slate-600 mb-2">Niveau de risque</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="filter-chip risk-filter" data-risk="1">
+                                        <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                        Niveau 1
+                                    </button>
+                                    <button class="filter-chip risk-filter" data-risk="2">
+                                        <span class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                                        Niveau 2
+                                    </button>
+                                    <button class="filter-chip risk-filter" data-risk="3">
+                                        <span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>
+                                        Niveau 3
+                                    </button>
+                                    <button class="filter-chip risk-filter" data-risk="4">
+                                        <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                        Niveau 4
+                                    </button>
                                 </div>
                             </div>
-                            <span class="text-xs ${statusClass} px-2 py-1 rounded-full">
-                                ${alert.active ? 'Active' : 'Inactive'}
-                            </span>
-                        </div>
 
-                        <div class="text-sm text-slate-600 mb-3">
-                            Condition: ${getConditionText(alert.condition, alert.value, alert.threshold_percent)}
-                        </div>
-
-                        <div class="flex justify-between items-center text-xs text-slate-500">
                             <div>
-                                <i class="far fa-clock mr-1"></i>
-                                Dernier déclenchement: ${lastTriggered}
-                            </div>
-                            <div class="flex space-x-2">
-                                <button onclick="toggleAlert(${alert.id}, ${!alert.active})"
-                                        class="hover:text-blue-600">
-                                    <i class="fas fa-power-off"></i>
-                                </button>
-                                <button onclick="deleteAlert(${alert.id})"
-                                        class="hover:text-red-600">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <label class="block text-sm text-slate-600 mb-2">Source</label>
+                                <select id="sourceFilter" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                                    <option value="all">Toutes sources</option>
+                                    <option value="uk_gov">UK Government</option>
+                                    <option value="fr_diplomatie">France Diplomatie</option>
+                                    <option value="au_smartraveller">Australia Smartraveller</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
 
-            container.innerHTML = html;
-        }
+                        <!-- Filtres Financiers -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-slate-700 flex items-center">
+                                <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                                Marchés Financiers
+                            </h4>
 
-        function renderNotifications(notifications) {
-            const container = document.getElementById('notifications-container');
-            if (!container) return;
-
-            if (notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-slate-500">
-                        <i class="fas fa-bell text-2xl mb-4"></i>
-                        <p>Aucune notification</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-
-            notifications.slice(0, 20).forEach(notif => {
-                const date = new Date(notif.created_at).toLocaleString('fr-FR');
-                const readClass = notif.read ? 'opacity-70' : 'bg-blue-50';
-                const severityClass = notif.severity === 'warning' ? 'border-l-4 border-yellow-500' :
-                    notif.severity === 'danger' ? 'border-l-4 border-red-500' : '';
-
-                html += `
-                    <div class="data-card p-4 ${readClass} ${severityClass}">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="font-medium text-slate-800">${notif.message}</div>
-                                <div class="text-sm text-slate-500 mt-1">
-                                    ${notif.instrument_name ? notif.instrument_name + ' • ' : ''}
-                                    ${date}
+                            <div>
+                                <label class="block text-sm text-slate-600 mb-2">Catégorie</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="filter-chip category-filter" data-category="index">
+                                        <i class="fas fa-chart-bar mr-2"></i>
+                                        Indices
+                                    </button>
+                                    <button class="filter-chip category-filter" data-category="commodity">
+                                        <i class="fas fa-gas-pump mr-2"></i>
+                                        Commodities
+                                    </button>
+                                    <button class="filter-chip category-filter" data-category="crypto">
+                                        <i class="fab fa-bitcoin mr-2"></i>
+                                        Crypto
+                                    </button>
                                 </div>
                             </div>
-                            ${!notif.read ? `
-                                <button onclick="markNotificationRead(${notif.id})"
-                                        class="ml-3 text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            ` : ''}
+
+                            <div>
+                                <label class="block text-sm text-slate-600 mb-2">Variation</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="number" id="minChange" placeholder="Min %"
+                                           class="w-24 px-3 py-2 border border-slate-300 rounded-lg">
+                                    <span class="text-slate-400">à</span>
+                                    <input type="number" id="maxChange" placeholder="Max %"
+                                           class="w-24 px-3 py-2 border border-slate-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtres SDR -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-slate-700 flex items-center">
+                                <i class="fas fa-broadcast-tower text-purple-500 mr-2"></i>
+                                Surveillance SDR
+                            </h4>
+
+                            <div>
+                                <label class="block text-sm text-slate-600 mb-2">Type d'activité</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="anomalyOnly" class="mr-2 rounded">
+                                        <span class="text-sm">Anomalies seulement</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="highActivity" class="mr-2 rounded">
+                                        <span class="text-sm">Haute activité (>75%)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm text-slate-600 mb-2">Plage de fréquences (kHz)</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="number" id="minFreq" placeholder="Min"
+                                           class="w-24 px-3 py-2 border border-slate-300 rounded-lg" value="0">
+                                    <span class="text-slate-400">à</span>
+                                    <input type="number" id="maxFreq" placeholder="Max"
+                                           class="w-24 px-3 py-2 border border-slate-300 rounded-lg" value="30000">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                `;
-            });
 
-            container.innerHTML = html;
-        }
-
-        function updateTrackingChart(data) {
-            const ctx = document.getElementById('trackingChart');
-            if (!ctx || data.length === 0) return;
-
-            if (trackingChart) {
-                trackingChart.destroy();
-            }
-
-            // Préparer les données
-            const labels = data.map(item => item.symbol);
-            const changes = data.map(item => item.current_data?.change_percent || 0);
-
-            const colors = changes.map(change =>
-                change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
-            );
-
-            trackingChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Variation (%)',
-                        data: changes,
-                        backgroundColor: colors,
-                        borderColor: changes.map(change =>
-                            change >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
-                        ),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Variation: ${context.parsed.y.toFixed(2)}%`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // === GESTION DES ÉVÉNEMENTS ===
-        async function handleAddInstrument(e) {
-            e.preventDefault();
-
-            const symbol = document.getElementById('instrumentSymbol').value.trim();
-            const name = document.getElementById('instrumentName').value.trim();
-            const type = document.getElementById('instrumentType').value;
-            const description = document.getElementById('instrumentDescription').value.trim();
-
-            try {
-                const response = await fetch('/api/financial-tracking/instruments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        symbol: symbol,
-                        name: name,
-                        type: type,
-                        description: description
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    closeInstrumentModalFunc();
-                    showToast(`Instrument ${symbol} ajouté avec succès`, 'success');
-                    loadTrackingData();
-                } else {
-                    showToast(data.error || 'Erreur lors de l\'ajout', 'danger');
-                }
-            } catch (error) {
-                console.error('Erreur ajout instrument:', error);
-                showToast('Erreur réseau', 'danger');
-            }
-        }
-
-        async function handleAddAlert(e) {
-            e.preventDefault();
-
-            const instrumentId = document.getElementById('alertInstrument').value;
-            const name = document.getElementById('alertName').value.trim();
-            const condition = document.getElementById('alertCondition').value;
-            const value = parseFloat(document.getElementById('alertValue').value);
-            const threshold = parseFloat(document.getElementById('alertThreshold').value) || 5;
-            const active = document.getElementById('alertActive').checked;
-
-            if (!instrumentId) {
-                showToast('Veuillez sélectionner un instrument', 'warning');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/financial-tracking/alerts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        instrument_id: instrumentId,
-                        name: name,
-                        condition: condition,
-                        value: value,
-                        threshold_percent: threshold,
-                        active: active
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast(`Alerte "${name}" créée`, 'success');
-                    loadAlertsList();
-                    document.getElementById('addAlertForm').reset();
-                } else {
-                    showToast(data.error || 'Erreur lors de la création', 'danger');
-                }
-            } catch (error) {
-                console.error('Erreur ajout alerte:', error);
-                showToast('Erreur réseau', 'danger');
-            }
-        }
-
-        // === FONCTIONS UTILITAIRES ===
-        function closeInstrumentModalFunc() {
-            addInstrumentModal.classList.add('hidden');
-            addInstrumentModal.classList.remove('flex');
-            document.getElementById('addInstrumentForm').reset();
-        }
-
-        async function deleteInstrument(instrumentId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cet instrument ?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/financial-tracking/instruments/${instrumentId}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast('Instrument supprimé', 'success');
-                    loadTrackingData();
-                } else {
-                    showToast(data.error || 'Erreur lors de la suppression', 'danger');
-                }
-            } catch (error) {
-                console.error('Erreur suppression instrument:', error);
-                showToast('Erreur réseau', 'danger');
-            }
-        }
-
-        async function toggleAlert(alertId, active) {
-            try {
-                // Cette fonction nécessiterait une route spécifique pour toggle
-                // Pour l'instant, on peut supprimer et recréer
-                alert('Fonctionnalité à implémenter');
-            } catch (error) {
-                console.error('Erreur toggle alerte:', error);
-            }
-        }
-
-        async function deleteAlert(alertId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/financial-tracking/alerts/${alertId}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast('Alerte supprimée', 'success');
-                    loadAlertsList();
-                } else {
-                    showToast(data.error || 'Erreur lors de la suppression', 'danger');
-                }
-            } catch (error) {
-                console.error('Erreur suppression alerte:', error);
-                showToast('Erreur réseau', 'danger');
-            }
-        }
-
-        async function markNotificationRead(notificationId) {
-            try {
-                const response = await fetch(`/api/financial-tracking/notifications/${notificationId}/read`, {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    loadNotifications();
-                }
-            } catch (error) {
-                console.error('Erreur marquer notification comme lue:', error);
-            }
-        }
-
-        async function markAllNotificationsRead() {
-            try {
-                // Marquer toutes les notifications non lues
-                const unread = notifications.filter(n => !n.read);
-                const promises = unread.map(n =>
-                    fetch(`/api/financial-tracking/notifications/${n.id}/read`, {
-                        method: 'POST'
-                    })
-                );
-
-                await Promise.all(promises);
-                loadNotifications();
-                showToast('Toutes les notifications marquées comme lues', 'success');
-            } catch (error) {
-                console.error('Erreur marquer toutes comme lues:', error);
-            }
-        }
-
-        function updateNotificationBadge(count) {
-            if (notificationBadge) {
-                if (count > 0) {
-                    notificationBadge.textContent = count;
-                    notificationBadge.classList.remove('hidden');
-                } else {
-                    notificationBadge.classList.add('hidden');
-                }
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('globalNotifications');
-            if (!container) return;
-
-            const toast = document.createElement('div');
-            toast.className = `notification-toast ${type}`;
-            toast.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                        <div class="font-medium text-slate-800">${message}</div>
-                        <div class="text-sm text-slate-500 mt-1">${new Date().toLocaleTimeString('fr-FR')}</div>
+                    <!-- Barre d'actions filtres -->
+                    <div class="flex justify-between items-center mt-6 pt-6 border-t border-slate-200">
+                        <div class="text-sm text-slate-600" id="activeFiltersCount">
+                            Aucun filtre actif
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="applyFilters"
+                                    class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300">
+                                <i class="fas fa-check mr-2"></i>
+                                Appliquer les filtres
+                            </button>
+                            <button id="resetFilters"
+                                    class="px-6 py-2 bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white rounded-lg transition-all duration-300">
+                                <i class="fas fa-redo mr-2"></i>
+                                Réinitialiser
+                            </button>
+                        </div>
                     </div>
-                    <button class="ml-3 text-slate-400 hover:text-slate-600" onclick="this.parentElement.parentElement.remove()">
-                        <i class="fas fa-times"></i>
+                </div>
+
+                <!-- Barre filtres actifs -->
+                <div id="activeFiltersBar" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div class="flex flex-wrap gap-2" id="activeFiltersList">
+                            <!-- Les filtres actifs apparaîtront ici -->
+                        </div>
+                        <button onclick="clearAllFilters()" class="text-sm text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-times mr-1"></i>
+                            Tout effacer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Alertes Personnalisées - VERSION CORRIGÉE -->
+        <div class="indicator-card mb-6 fade-in" id="alerts-section">
+            <div class="indicator-header p-6">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-bell text-amber-400 mr-3"></i>
+                    Alertes Personnalisées
+                    <span class="badge-new ml-2">Beta</span>
+                </h2>
+                <p class="text-slate-300 text-sm mt-1">
+                    Surveillance automatique selon vos critères géopolitiques
+                </p>
+            </div>
+
+            <div class="p-6">
+                <!-- Statistiques rapides -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-red-600" id="alert-critical-count">0</div>
+                        <div class="text-sm font-medium text-red-800">Critiques</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-600" id="alert-warning-count">0</div>
+                        <div class="text-sm font-medium text-amber-800">Avertissements</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="alert-info-count">0</div>
+                        <div class="text-sm font-medium text-blue-800">Informations</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-slate-600" id="alert-total-count">0</div>
+                        <div class="text-sm font-medium text-slate-800">Total</div>
+                    </div>
+                </div>
+
+                <!-- Onglets -->
+                <div class="flex border-b border-slate-200 mb-6">
+                    <button class="alert-tab active" data-tab="alerts-list">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Alertes Actives
+                        <span id="active-alerts-badge" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
+                    </button>
+                    <button class="alert-tab" data-tab="alert-config">
+                        <i class="fas fa-cog mr-2"></i>Configuration
+                    </button>
+                    <button class="alert-tab" data-tab="alert-rules">
+                        <i class="fas fa-list-check mr-2"></i>Règles
+                        <span id="rules-count" class="ml-2 bg-blue-500 text-white text-xs rounded-full px-2 py-1">0</span>
+                    </button>
+                    <button class="alert-tab" data-tab="alert-history">
+                        <i class="fas fa-history mr-2"></i>Historique
                     </button>
                 </div>
-            `;
 
-            container.appendChild(toast);
+                <!-- Contenu des onglets -->
+                <!-- 1. Alertes Actives -->
+                <div id="alerts-list" class="alert-tab-content active">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-slate-700">Alertes non lues</h3>
+                        <button id="markAllRead" class="px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white text-sm rounded-lg transition-all duration-300">
+                            <i class="fas fa-check-double mr-2"></i>Tout marquer comme lu
+                        </button>
+                    </div>
 
-            // Supprimer automatiquement après 5 secondes
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.classList.add('notification-fadeout');
-                    setTimeout(() => toast.remove(), 500);
-                }
-            }, 5000);
-        }
+                    <div class="space-y-3" id="active-alerts-container">
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-check-circle text-2xl mb-4"></i>
+                            <p>Aucune alerte active</p>
+                            <p class="text-sm mt-2">Tout est normal pour le moment</p>
+                        </div>
+                    </div>
+                </div>
 
-        function getConditionText(condition, value, threshold) {
-            switch (condition) {
-                case 'above': return `Dépasse ${value}`;
-                case 'below': return `Descend sous ${value}`;
-                case 'change_up': return `Hausse > ${threshold}%`;
-                case 'change_down': return `Baisse > ${threshold}%`;
-                default: return condition;
-            }
-        }
+                <!-- 2. Configuration -->
+                <div id="alert-config" class="alert-tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Nouvelle alerte -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <i class="fas fa-plus-circle text-green-500 mr-2"></i>
+                                Créer une nouvelle alerte
+                            </h3>
 
-        function formatNumber(num) {
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-            return num.toString();
-        }
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">Nom de l'alerte</label>
+                                    <input type="text" id="alert-name"
+                                           class="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                                           placeholder="Ex: Crash CAC40, Risque France, etc.">
+                                </div>
 
-        // === POLLING ===
-        function startPolling() {
-            // Vérifier les alertes toutes les minutes
-            setInterval(async () => {
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">Catégorie</label>
+                                    <select id="alert-category" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                                        <option value="financial">Marchés Financiers</option>
+                                        <option value="travel">Avis de Voyage</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">Sévérité</label>
+                                    <div class="flex space-x-4">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="severity" value="info" class="mr-2">
+                                            <span class="severity-badge severity-info px-3">Information</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="severity" value="warning" class="mr-2" checked>
+                                            <span class="severity-badge severity-warning px-3">Avertissement</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="severity" value="critical" class="mr-2">
+                                            <span class="severity-badge severity-critical px-3">Critique</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">Condition</label>
+                                    <div class="space-y-2">
+                                        <select id="condition-template" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                                            <option value="">-- Sélectionner un modèle --</option>
+                                            <optgroup label="Financier">
+                                                <option value="data.change_percent < -7">Crash marché (&lt; -7%)</option>
+                                                <option value="data.change_percent < -5">Baisse significative (&lt; -5%)</option>
+                                                <option value="abs(data.change_percent) > 3">Haute volatilité (&gt; ±3%)</option>
+                                                <option value="data.change_percent > 5">Forte hausse (&gt; +5%)</option>
+                                            </optgroup>
+                                            <optgroup label="Voyage">
+                                                <option value="data.risk_level == 4">Ne pas voyager (niveau 4)</option>
+                                                <option value="data.risk_level == 3">Réenvisager voyage (niveau 3)</option>
+                                                <option value="previous and data.risk_level > previous.risk_level">Risque augmenté</option>
+                                                <option value="previous and data.risk_level < previous.risk_level">Risque diminué</option>
+                                            </optgroup>
+                                        </select>
+
+                                        <div class="relative">
+                                            <input type="text" id="alert-condition"
+                                                   class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-sm"
+                                                   placeholder="Ex: data.change_percent < -5">
+                                            <div class="absolute right-2 top-2">
+                                                <button onclick="testCondition()" class="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                                                    <i class="fas fa-vial mr-1"></i>Tester
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-xs text-slate-500">
+                                            <p><strong>Variables disponibles:</strong></p>
+                                            <p><code>data</code> : données actuelles</p>
+                                            <p><code>previous</code> : données précédentes (si disponibles)</p>
+                                            <p><strong>Exemples:</strong></p>
+                                            <p><code>data.change_percent &lt; -5</code> (baisse de 5%)</p>
+                                            <p><code>data.risk_level == 4</code> (risque maximum)</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">Message</label>
+                                    <input type="text" id="alert-message"
+                                           class="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                                           placeholder="Ex: {name} chute de {change_percent}%">
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        Utilisez <code>{variable}</code> pour insérer des données
+                                    </p>
+                                </div>
+
+                                <div class="flex justify-between pt-4 border-t border-slate-200">
+                                    <button id="save-alert" class="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-300">
+                                        <i class="fas fa-save mr-2"></i>Créer l'alerte
+                                    </button>
+                                    <button id="test-alert" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300">
+                                        <i class="fas fa-vial mr-2"></i>Tester avec données actuelles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alertes prédéfinies -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <i class="fas fa-magic text-purple-500 mr-2"></i>
+                                Modèles Prédéfinis
+                            </h3>
+
+                            <div class="space-y-3">
+                                <!-- Modèles Financiers -->
+                                <div>
+                                    <h4 class="font-medium text-slate-700 mb-2 flex items-center">
+                                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                                        Marchés Financiers
+                                    </h4>
+                                    <div class="space-y-2">
+                                        <button class="w-full text-left p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-300 transition-colors"
+                                                onclick="loadTemplate('market_crash', 'Crash boursier', 'financial', 'critical', 'data.change_percent < -7', 'CRASH: {name} chute de {change_percent}%')">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-medium">Crash boursier</div>
+                                                    <div class="text-sm text-slate-500">Variation &lt; -7%</div>
+                                                </div>
+                                                <span class="severity-badge severity-critical">Critique</span>
+                                            </div>
+                                        </button>
+
+                                        <button class="w-full text-left p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-300 transition-colors"
+                                                onclick="loadTemplate('high_vol', 'Haute volatilité', 'financial', 'info', 'abs(data.change_percent) > 3', 'Volatilité: {name} {change_percent:+.2f}%')">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-medium">Haute volatilité</div>
+                                                    <div class="text-sm text-slate-500">Variation &gt; ±3%</div>
+                                                </div>
+                                                <span class="severity-badge severity-info">Information</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Modèles Voyage -->
+                                <div>
+                                    <h4 class="font-medium text-slate-700 mb-2 flex items-center">
+                                        <i class="fas fa-plane-departure text-blue-500 mr-2"></i>
+                                        Avis de Voyage
+                                    </h4>
+                                    <div class="space-y-2">
+                                        <button class="w-full text-left p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-300 transition-colors"
+                                                onclick="loadTemplate('no_travel', 'Ne pas voyager', 'travel', 'critical', 'data.risk_level == 4', '⚠️ {country_name}: NIVEAU 4 - Ne pas voyager')">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-medium">Ne pas voyager</div>
+                                                    <div class="text-sm text-slate-500">Niveau risque 4</div>
+                                                </div>
+                                                <span class="severity-badge severity-critical">Critique</span>
+                                            </div>
+                                        </button>
+
+                                        <button class="w-full text-left p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-300 transition-colors"
+                                                onclick="loadTemplate('risk_up', 'Risque augmenté', 'travel', 'warning', 'previous and data.risk_level > previous.risk_level', '📈 {country_name}: Risque {previous.risk_level}→{data.risk_level}')">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-medium">Risque augmenté</div>
+                                                    <div class="text-sm text-slate-500">Détection amélioration</div>
+                                                </div>
+                                                <span class="severity-badge severity-warning">Avertissement</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Paramètres globaux - CORRIGÉ -->
+                                <div class="pt-4 border-t border-slate-200">
+                                    <h4 class="font-medium text-slate-700 mb-3 flex items-center">
+                                        <i class="fas fa-sliders-h text-amber-500 mr-2"></i>
+                                        Paramètres globaux
+                                    </h4>
+
+                                    <div class="space-y-3">
+                                        <!-- Correction : div au lieu de label -->
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium">Notifications visuelles</div>
+                                                <div class="text-sm text-slate-500">Afficher les popups d'alerte</div>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="show-toasts" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <!-- Même correction ici -->
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium">Son d'alerte</div>
+                                                <div class="text-sm text-slate-500">Jouer un son pour alertes critiques</div>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="play-sound">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm text-slate-600 mb-2">Archivage automatique</label>
+                                            <select id="archive-days" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                                                <option value="7">7 jours</option>
+                                                <option value="30" selected>30 jours</option>
+                                                <option value="90">90 jours</option>
+                                                <option value="365">1 an</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Règles d'alerte -->
+                <div id="alert-rules" class="alert-tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-slate-700">Règles configurées</h3>
+                        <div class="text-sm text-slate-500">
+                            <span id="enabled-rules-count">0</span> activées / <span id="total-rules-count">0</span> total
+                        </div>
+                    </div>
+
+                    <div class="space-y-3" id="rules-container">
+                        <!-- Règles chargées dynamiquement -->
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-cogs text-2xl mb-4"></i>
+                            <p>Chargement des règles...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Historique des alertes -->
+                <div id="alert-history" class="alert-tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-slate-700">Historique des 30 derniers jours</h3>
+                        <button onclick="exportAlertHistory()" class="px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white text-sm rounded-lg transition-all duration-300">
+                            <i class="fas fa-file-export mr-2"></i>Exporter l'historique
+                        </button>
+                    </div>
+
+                    <div class="space-y-3" id="history-container">
+                        <!-- Historique chargé dynamiquement -->
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-history text-2xl mb-4"></i>
+                            <p>Chargement de l'historique...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 fade-in">
+            <!-- Travel Advisories Section -->
+            <div class="indicator-card">
+                <div class="indicator-header p-6">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 mr-3"></i>
+                        Avis aux Voyageurs
+                        <span class="badge-new ml-2">Scraping Léger</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm mt-1">Sources: UK Gov • Australia • France Diplomatie</p>
+                </div>
+                <div class="p-6" id="travel-container">
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                        <p>Chargement des avis...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Markets Section -->
+            <div class="indicator-card">
+                <div class="indicator-header p-6">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-chart-bar text-green-400 mr-3"></i>
+                        Marchés Financiers
+                        <span class="badge-economy ml-2">Temps Réel</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm mt-1">Indices • Commodities • Cryptos</p>
+                </div>
+                <div class="p-6">
+                    <canvas id="financial-chart" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- SDR Activity Section -->
+            <div class="indicator-card lg:col-span-2">
+                <div class="indicator-header p-6">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-wave-square text-purple-400 mr-3"></i>
+                        Activité SDR - Surveillance Spectrale
+                        <span class="badge-new ml-2">RTL-SDR</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm mt-1">Fréquences stratégiques et anomalies</p>
+                </div>
+                <div class="p-6" id="sdr-container">
+                    <div class="text-center py-8 text-slate-500">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                        <p>Chargement de l'activité SDR...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Statistiques de Persistance -->
+        <div class="indicator-card mb-8 fade-in">
+            <div class="indicator-header p-6">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-database text-cyan-400 mr-3"></i>
+                    Statistiques de Persistance
+                    <span class="badge-economy ml-2">SQLite</span>
+                </h2>
+                <p class="text-slate-300 text-sm mt-1">Base de données locale - Pas d'enregistrement requis</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-blue-600" id="db-travel-count">0</div>
+                        <div class="text-sm font-medium text-blue-800 mt-2">Avis en Base</div>
+                        <div class="text-xs text-blue-600 mt-1">Expire dans 24h</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-green-600" id="db-financial-count">0</div>
+                        <div class="text-sm font-medium text-green-800 mt-2">Instruments en Base</div>
+                        <div class="text-xs text-green-600 mt-1">Expire dans 5min</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-purple-600" id="db-sdr-count">0</div>
+                        <div class="text-sm font-medium text-purple-800 mt-2">Activités SDR en Base</div>
+                        <div class="text-xs text-purple-600 mt-1">Conservé 30 jours</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="loadStats()" class="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center shadow-lg hover:shadow-xl">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Voir les Statistiques Détaillées
+                    </button>
+                    <button onclick="forceUpdate()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center shadow-lg hover:shadow-xl">
+                        <i class="fas fa-sync-alt mr-3"></i>
+                        Forcer Mise à Jour
+                    </button>
+                    <button onclick="clearCache()" class="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center shadow-lg hover:shadow-xl">
+                        <i class="fas fa-trash-alt mr-3"></i>
+                        Nettoyer le Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Export de Données -->
+        <div class="indicator-card mb-8 fade-in">
+            <div class="indicator-header p-6">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-file-export text-emerald-400 mr-3"></i>
+                    Export de Données
+                    <span class="badge-economy ml-2">CSV/JSON</span>
+                </h2>
+                <p class="text-slate-300 text-sm mt-1">Téléchargez les données pour analyse hors ligne</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Carte Export Voyage -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 text-center hover:shadow-lg transition-all duration-300">
+                        <div class="text-blue-600 text-3xl mb-3">
+                            <i class="fas fa-plane-departure"></i>
+                        </div>
+                        <h3 class="font-bold text-blue-800 mb-2">Avis de Voyage</h3>
+                        <p class="text-sm text-blue-600 mb-4">Données géopolitiques et conseils</p>
+                        <button onclick="exportData('travel')" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i>
+                            Exporter CSV
+                        </button>
+                    </div>
+
+                    <!-- Carte Export Financier -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-5 text-center hover:shadow-lg transition-all duration-300">
+                        <div class="text-green-600 text-3xl mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="font-bold text-green-800 mb-2">Marchés Financiers</h3>
+                        <p class="text-sm text-green-600 mb-4">Indices, commodities, cryptos</p>
+                        <button onclick="exportData('financial')" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i>
+                            Exporter CSV
+                        </button>
+                    </div>
+
+                    <!-- Carte Export SDR -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5 text-center hover:shadow-lg transition-all duration-300">
+                        <div class="text-purple-600 text-3xl mb-3">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <h3 class="font-bold text-purple-800 mb-2">Surveillance SDR</h3>
+                        <p class="text-sm text-purple-600 mb-4">Fréquences et anomalies</p>
+                        <button onclick="exportData('sdr')" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i>
+                            Exporter CSV
+                        </button>
+                    </div>
+
+                    <!-- Carte Export Complet -->
+                    <div class="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5 text-center hover:shadow-lg transition-all duration-300">
+                        <div class="text-amber-600 text-3xl mb-3">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3 class="font-bold text-amber-800 mb-2">Export Complet</h3>
+                        <p class="text-sm text-amber-600 mb-4">Toutes les données (JSON)</p>
+                        <button onclick="exportData('all')" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <i class="fas fa-file-archive mr-2"></i>
+                            Exporter JSON
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Options avancées -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-cog text-slate-500 mr-2"></i>
+                        Options d'export
+                    </h4>
+                    <div class="flex flex-wrap gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-600 mb-1">Période</label>
+                            <select id="exportPeriod" class="px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                <option value="recent">7 derniers jours</option>
+                                <option value="month">30 derniers jours</option>
+                                <option value="all">Toutes les données</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-600 mb-1">Format</label>
+                            <select id="exportFormat" class="px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                <option value="csv">CSV (Excel)</option>
+                                <option value="json">JSON (API)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="exportWithOptions()" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300 flex items-center">
+                                <i class="fas fa-file-export mr-2"></i>
+                                Exporter avec options
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                        Instructions d'utilisation
+                    </h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• <strong>CSV</strong> : Ouverture recommandée avec Excel ou LibreOffice Calc</li>
+                        <li>• <strong>JSON</strong> : Format structuré pour analyse programmatique</li>
+                        <li>• Les données sont encodées en <strong>UTF-8</strong> (caractères français supportés)</li>
+                        <li>• Les fichiers incluent automatiquement la date d'export dans le nom</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="text-center">
+            <button id="refresh-btn" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 flex items-center mx-auto shadow-2xl hover:shadow-3xl transform hover:-translate-y-1">
+                <i class="fas fa-sync-alt mr-3"></i>
+                <span class="text-lg">Mettre à Jour Toutes les Données</span>
+            </button>
+            <p class="text-slate-500 text-sm mt-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                Système autonome avec scraping léger - Idéal pour usage scolaire
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // FONCTIONS GLOBALES (exposées)
+        // ============================================================================
+
+        window.clearCache = async function () {
+            if (confirm('⚠️ Voulez-vous vraiment nettoyer le cache ?')) {
                 try {
-                    const response = await fetch('/api/financial-tracking/check-alerts');
-                    if (response.ok) {
-                        const data = await response.json();
+                    const response = await fetch('/weak-indicators/api/clear-cache', {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
 
-                        // Afficher les nouvelles alertes déclenchées
-                        if (data.triggered_alerts && data.triggered_alerts.length > 0) {
-                            data.triggered_alerts.forEach(alert => {
-                                showToast(alert.message, 'warning');
-                            });
-
-                            // Mettre à jour les compteurs
-                            loadTrackingData();
+                    if (data.success) {
+                        alert('✅ Cache nettoyé avec succès');
+                        if (window.dashboard) {
+                            await window.dashboard.loadDashboardData();
+                            await window.dashboard.loadDatabaseStats();
                         }
                     }
                 } catch (error) {
-                    console.error('Erreur polling alertes:', error);
+                    console.error('Erreur nettoyage cache:', error);
+                    alert('❌ Erreur lors du nettoyage du cache');
                 }
-            }, 60000); // Toutes les minutes
+            }
+        };
+
+        window.forceUpdate = async function () {
+            try {
+                const response = await fetch('/weak-indicators/api/force-update', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Mise à jour forcée effectuée');
+                    if (window.dashboard) {
+                        await window.dashboard.loadDashboardData();
+                        await window.dashboard.loadDatabaseStats();
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur force update:', error);
+                alert('❌ Erreur lors de la mise à jour');
+            }
+        };
+
+        window.loadStats = function () {
+            if (window.dashboard) {
+                window.dashboard.loadDatabaseStats();
+                alert('📊 Statistiques rechargées');
+            } else {
+                alert('❌ Dashboard non initialisé');
+            }
+        };
+
+        window.exportData = function (dataType) {
+            if (window.dashboard && typeof window.dashboard.exportData === 'function') {
+                window.dashboard.exportData(dataType);
+            } else {
+                console.error('❌ Dashboard non initialisé');
+                alert('Système non initialisé. Rafraîchissez la page.');
+            }
+        };
+
+        window.exportWithOptions = function () {
+            if (window.dashboard && typeof window.dashboard.exportData === 'function') {
+                window.dashboard.exportData('all');
+            } else {
+                alert('Système non initialisé');
+            }
+        };
+
+        window.clearAllFilters = function () {
+            if (window.dashboard && window.dashboard.resetFilters) {
+                window.dashboard.resetFilters();
+            }
+        };
+
+        window.testCondition = function () {
+            if (window.alertSystem && window.alertSystem.testCondition) {
+                window.alertSystem.testCondition();
+            } else {
+                alert('Système d\'alertes non initialisé');
+            }
+        };
+
+        window.exportAlertHistory = function () {
+            if (window.alertSystem && window.alertSystem.exportAlertHistory) {
+                window.alertSystem.exportAlertHistory();
+            }
+        };
+
+        // Fonction helper pour charger les templates
+        window.loadTemplate = function (id, name, category, severity, condition, message) {
+            if (window.alertSystem && window.alertSystem.loadTemplate) {
+                window.alertSystem.loadTemplate(id, name, category, severity, condition, message);
+            }
+        };
+
+        // ============================================================================
+        // CLASSES PRINCIPALES
+        // ============================================================================
+
+        class WeakIndicatorsDashboard {
+            constructor() {
+                this.financialChart = null;
+                this.currentFilters = {
+                    travel: {},
+                    financial: {},
+                    sdr: {},
+                    global: {}
+                };
+                this.activeFilters = [];
+                this.availableFilters = null;
+            }
+
+            async init() {
+                console.log('🚀 Initialisation Dashboard...');
+
+                // Mettre à jour l'heure
+                this.updateTime();
+                setInterval(() => this.updateTime(), 1000);
+
+                // Charger les données
+                try {
+                    await Promise.all([
+                        this.loadDashboardData(),
+                        this.loadDatabaseStats(),
+                        this.loadAvailableFilters()
+                    ]);
+
+                    this.setupEventListeners();
+                    this.setupFilterEventListeners();
+
+                    console.log('✅ Dashboard initialisé');
+                } catch (error) {
+                    console.error('❌ Erreur initialisation:', error);
+                }
+            }
+
+            updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const dateString = now.toLocaleDateString('fr-FR', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short'
+                });
+
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = `${dateString} • ${timeString}`;
+                }
+            }
+
+            async loadDashboardData() {
+                try {
+                    const response = await fetch('/weak-indicators/api/dashboard');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.updateStats(result.data);
+                        this.renderTravelAdvisories(result.data.travel);
+                        this.renderFinancialChart(result.data.financial);
+                        this.renderSDRActivity(result.data.sdr);
+                    } else {
+                        console.error('Erreur:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Erreur réseau:', error);
+                }
+            }
+
+            async loadDatabaseStats() {
+                try {
+                    const response = await fetch('/weak-indicators/api/stats');
+                    const result = await response.json();
+
+                    if (result.success && result.stats) {
+                        document.getElementById('db-travel-count').textContent = result.stats.travel || 0;
+                        document.getElementById('db-financial-count').textContent = result.stats.financial || 0;
+                        document.getElementById('db-sdr-count').textContent = result.stats.sdr || 0;
+                        const total = (result.stats.travel || 0) + (result.stats.financial || 0) + (result.stats.sdr || 0);
+                        document.getElementById('db-total').textContent = total;
+                    }
+                } catch (error) {
+                    console.error('Erreur stats DB:', error);
+                }
+            }
+
+            async loadAvailableFilters() {
+                try {
+                    const response = await fetch('/weak-indicators/api/available-filters');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.availableFilters = result.filters;
+                        this.populateFilterOptions();
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement filtres:', error);
+                }
+            }
+
+            populateFilterOptions() {
+                if (this.availableFilters?.travel?.sources) {
+                    const sourceSelect = document.getElementById('sourceFilter');
+                    if (sourceSelect) {
+                        sourceSelect.innerHTML = '<option value="all">Toutes sources</option>';
+                        this.availableFilters.travel.sources.forEach(source => {
+                            const option = document.createElement('option');
+                            option.value = source;
+                            option.textContent = this.formatSourceName(source);
+                            sourceSelect.appendChild(option);
+                        });
+                    }
+                }
+            }
+
+            formatSourceName(source) {
+                const names = {
+                    'uk_gov': 'UK Government',
+                    'fr_diplomatie': 'France Diplomatie',
+                    'au_smartraveller': 'Australia Smartraveller',
+                    'us_state_dept': 'US State Department',
+                    'fallback': 'Données simulées'
+                };
+                return names[source] || source;
+            }
+
+            updateStats(data) {
+                document.getElementById('travel-count').textContent = data.travel?.length || 0;
+                document.getElementById('financial-count').textContent = data.financial?.length || 0;
+                document.getElementById('sdr-count').textContent = data.sdr?.length || 0;
+
+                if (data.travel?.length > 0) {
+                    const sources = [...new Set(data.travel.map(t => t.source))];
+                    document.getElementById('travel-source').textContent = `Sources: ${sources.join(', ')}`;
+                }
+                if (data.financial?.length > 0) {
+                    document.getElementById('financial-source').textContent = 'Source: yfinance';
+                }
+                if (data.sdr?.length > 0) {
+                    document.getElementById('sdr-source').textContent = 'Source: Simulation RTL-SDR';
+                }
+            }
+
+            renderTravelAdvisories(advisories) {
+                const container = document.getElementById('travel-container');
+                if (!container) return;
+
+                if (!advisories || advisories.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-info-circle text-2xl mb-4"></i>
+                            <p>Aucun avis de voyage disponible</p>
+                            <p class="text-sm mt-2">Vérifiez la connexion réseau</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '<div class="space-y-4">';
+                advisories.sort((a, b) => (b.risk_level || 0) - (a.risk_level || 0));
+                advisories.slice(0, 8).forEach(advisory => {
+                    const riskLevel = advisory.risk_level || 1;
+                    const riskClass = `risk-badge-${riskLevel}`;
+                    const riskText = ['', 'Précautions normales', 'Prudence accrue', 'Réenvisager le voyage', 'Ne pas voyager'][riskLevel] || 'Inconnu';
+
+                    html += `
+                        <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <div class="font-semibold text-slate-800">${advisory.country_name || 'Pays inconnu'}</div>
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ml-3 ${riskClass}">
+                                        ${riskText}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-slate-600 mb-2">${advisory.summary || 'Aucun résumé disponible'}</div>
+                                <div class="flex items-center text-xs text-slate-500">
+                                    <i class="fas fa-database mr-1"></i>
+                                    <span>Source: ${advisory.source || 'inconnue'}</span>
+                                    <span class="mx-2">•</span>
+                                    <i class="far fa-clock mr-1"></i>
+                                    <span>${advisory.last_updated ? new Date(advisory.last_updated).toLocaleDateString('fr-FR') : 'Date inconnue'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right ml-4">
+                                <div class="text-2xl font-bold text-slate-700">Niv. ${riskLevel}</div>
+                                <div class="text-xs text-slate-500 mt-1">Risque</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            renderFinancialChart(financialData) {
+                const ctx = document.getElementById('financial-chart');
+                if (!ctx) return;
+
+                if (this.financialChart) {
+                    this.financialChart.destroy();
+                }
+
+                if (!financialData || financialData.length === 0) {
+                    ctx.parentElement.innerHTML = `
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-info-circle text-2xl mb-4"></i>
+                            <p>Aucune donnée financière disponible</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const indices = financialData.filter(item => item.category === 'index');
+                const commodities = financialData.filter(item => item.category === 'commodity');
+                const crypto = financialData.filter(item => item.category === 'crypto');
+
+                const allData = [...indices, ...commodities, ...crypto];
+                const labels = allData.map(item =>
+                    (item.name || item.symbol || '').length > 15 ?
+                        (item.name || item.symbol || '').substring(0, 12) + '...' :
+                        (item.name || item.symbol || '')
+                );
+                const changes = allData.map(item => item.change_percent || 0);
+
+                this.financialChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Variation (%)',
+                            data: changes,
+                            backgroundColor: changes.map(change =>
+                                change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                            ),
+                            borderColor: changes.map(change =>
+                                change >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                            ),
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                titleColor: '#f59e0b',
+                                bodyColor: '#e2e8f0',
+                                borderColor: '#475569',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = context.parsed.y;
+                                        const color = value >= 0 ? '🟢' : '🔴';
+                                        return `${color} Variation: ${value.toFixed(2)}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                                ticks: {
+                                    callback: function (value) { return value + '%'; },
+                                    color: '#64748b'
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748b' }
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+            }
+
+            renderSDRActivity(activities) {
+                const container = document.getElementById('sdr-container');
+                if (!container) return;
+
+                if (!activities || activities.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-info-circle text-2xl mb-4"></i>
+                            <p>Aucune activité SDR disponible</p>
+                            <p class="text-sm mt-2">Activation de la simulation</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">';
+
+                activities.forEach(activity => {
+                    const isAnomaly = activity.is_anomaly || false;
+                    const activityCount = activity.activity_count || 0;
+                    const activityLevel = Math.min(100, Math.max(0, activityCount));
+                    const intensity = activityLevel > 75 ? 'Haute' : activityLevel > 25 ? 'Moyenne' : 'Basse';
+
+                    html += `
+                        <div class="${isAnomaly ? 'sdr-anomaly' : 'bg-white border border-slate-200'} rounded-xl p-4 transition-all duration-300 hover:shadow-lg">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <div class="font-bold text-slate-800">${activity.name || 'Inconnu'}</div>
+                                    <div class="font-mono text-sm ${isAnomaly ? 'text-rose-600' : 'text-blue-600'} font-bold">
+                                        ${(activity.frequency_khz || 0).toLocaleString()} kHz
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-slate-700">${activityCount}</div>
+                                    <div class="text-xs text-slate-500">Détections</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium text-slate-700">Intensité</span>
+                                    <span class="font-bold ${intensity === 'Haute' ? 'text-rose-600' : intensity === 'Moyenne' ? 'text-amber-600' : 'text-emerald-600'}">
+                                        ${intensity}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full ${isAnomaly ? 'bg-gradient-to-r from-rose-500 to-rose-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'}"
+                                         style="width: ${activityLevel}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="text-slate-500">
+                                    <i class="far fa-clock mr-1"></i>
+                                    ${activity.last_seen ? new Date(activity.last_seen).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Inconnu'}
+                                </div>
+                                ${isAnomaly ?
+                            '<div class="px-2 py-1 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-full font-bold">ANOMALIE</div>' :
+                            '<div class="px-2 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full font-bold">NORMAL</div>'
+                        }
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            setupEventListeners() {
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', async () => {
+                        const icon = refreshBtn.querySelector('i');
+                        const originalClass = icon.className;
+                        icon.className = 'fas fa-spinner fa-spin mr-3';
+                        refreshBtn.disabled = true;
+
+                        await Promise.all([
+                            this.loadDashboardData(),
+                            this.loadDatabaseStats()
+                        ]);
+
+                        setTimeout(() => {
+                            icon.className = originalClass;
+                            refreshBtn.disabled = false;
+                        }, 1000);
+                    });
+                }
+            }
+
+            setupFilterEventListeners() {
+                // Toggle filtres avancés
+                const toggleBtn = document.getElementById('toggleAdvancedFilters');
+                const filterPanel = document.getElementById('advancedFiltersPanel');
+                const filterArrow = document.getElementById('filterArrow');
+
+                if (toggleBtn && filterPanel) {
+                    toggleBtn.addEventListener('click', () => {
+                        const isHidden = filterPanel.classList.contains('hidden');
+                        if (isHidden) {
+                            filterPanel.classList.remove('hidden');
+                            filterPanel.classList.add('slide-down');
+                            filterArrow.style.transform = 'rotate(180deg)';
+                        } else {
+                            filterPanel.classList.add('slide-up');
+                            filterArrow.style.transform = 'rotate(0deg)';
+                            setTimeout(() => {
+                                filterPanel.classList.add('hidden');
+                                filterPanel.classList.remove('slide-down', 'slide-up');
+                            }, 300);
+                        }
+                    });
+                }
+
+                // Appliquer filtres
+                const applyBtn = document.getElementById('applyFilters');
+                if (applyBtn) {
+                    applyBtn.addEventListener('click', () => this.applyFilters());
+                }
+
+                // Réinitialiser filtres
+                const resetBtn = document.getElementById('resetFilters');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => this.resetFilters());
+                }
+            }
+
+            async applyFilters() {
+                // Implémentation simplifiée pour le moment
+                alert('Filtres appliqués (fonctionnalité en développement)');
+            }
+
+            resetFilters() {
+                alert('Filtres réinitialisés');
+            }
+
+            async exportData(dataType) {
+                try {
+                    const response = await fetch(`/weak-indicators/api/export/${dataType}`);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `export_${dataType}_${new Date().toISOString().slice(0, 10)}.csv`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }
+                } catch (error) {
+                    console.error('Erreur export:', error);
+                    alert('Erreur lors de l\'export');
+                }
+            }
         }
 
-        // Exposer certaines fonctions globalement
-        window.addAlertForInstrument = function (instrumentId) {
-            // Basculer vers l'onglet alertes et pré-remplir
-            document.getElementById('tab-tracking-alerts').click();
-            document.getElementById('alertInstrument').value = instrumentId;
-            document.getElementById('alertName').focus();
-        };
+        class AlertSystem {
+            constructor() {
+                console.log('🔔 Système d\'alertes initialisé');
+            }
 
-        window.loadAlertsForInstrument = function (instrumentId) {
-            // Basculer vers l'onglet alertes
-            document.getElementById('tab-tracking-alerts').click();
-            // Filtrer les alertes pour cet instrument
-            const instrumentAlerts = alerts.filter(a => a.instrument_id === instrumentId);
-            renderAlertsList(instrumentAlerts);
-        };
+            init() {
+                console.log('Système d\'alertes prêt');
+            }
 
-        window.markNotificationRead = markNotificationRead;
-        window.showToast = showToast;
+            loadTemplate(id, name, category, severity, condition, message) {
+                document.getElementById('alert-name').value = name;
+                document.getElementById('alert-category').value = category;
+                document.getElementById('alert-condition').value = condition;
+                document.getElementById('alert-message').value = message;
 
-        console.log('🎯 Surveillance - Interface Initialisée');
-    });
-</script>
-{% endblock %}
+                document.querySelectorAll('input[name="severity"]').forEach(radio => {
+                    radio.checked = radio.value === severity;
+                });
+            }
+
+            testCondition() {
+                const condition = document.getElementById('alert-condition').value;
+                if (!condition) {
+                    alert('Entrez une condition');
+                    return;
+                }
+
+                alert(`Condition testée: ${condition}\n\n(Fonctionnalité en développement)`);
+            }
+
+            exportAlertHistory() {
+                alert('Export en développement');
+            }
+        }
+
+        // ============================================================================
+        // INITIALISATION AU CHARGEMENT DE LA PAGE
+        // ============================================================================
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialiser le dashboard
+            window.dashboard = new WeakIndicatorsDashboard();
+            window.dashboard.init();
+
+            // Initialiser le système d'alertes
+            window.alertSystem = new AlertSystem();
+            window.alertSystem.init();
+
+            // Configuration Chart.js
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.font.family = "'Segoe UI', 'Inter', system-ui, sans-serif";
+                Chart.defaults.color = '#374151';
+                Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+                Chart.defaults.plugins.tooltip.titleColor = '#f59e0b';
+                Chart.defaults.plugins.tooltip.bodyColor = '#e2e8f0';
+                Chart.defaults.plugins.tooltip.borderColor = '#475569';
+                Chart.defaults.plugins.tooltip.borderWidth = 1;
+            }
+
+            console.log('🎯 Indicateurs Faibles - Mission Control Initialisé');
+        });
+    </script>
+</body>
+</html>
