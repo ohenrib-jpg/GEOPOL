@@ -1,108 +1,36 @@
 """
-Gestionnaire de base de données pour Archiviste v3.0
+Base de données pour Archiviste v3.0 - VERSION ENRICHIE
+Ajout: stockage embeddings, requêtes vectorielles optimisées
 """
 
 import sqlite3
 import json
 import logging
-import pickle
-from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime
-import os
-import sys
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
-# Ajouter le chemin pour pouvoir importer HistoricalItem
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-# Importer HistoricalItem
-try:
-    from historical_item import HistoricalItem
-    logger.info("✅ HistoricalItem importé dans archiviste_database")
-except ImportError as e:
-    logger.error(f"❌ Erreur import HistoricalItem dans archiviste_database: {e}")
-    
-    # Classe de secours
-    class HistoricalItem:
-        def __init__(self, archive_data):
-            self.identifier = archive_data.get('identifier', '')
-            self.title = archive_data.get('title', '')
-            self.description = archive_data.get('description', '')
-            self.date = archive_data.get('date', '')
-            self.year = archive_data.get('year', 0)
-            self.language = archive_data.get('language', '')
-            self.creator = archive_data.get('creator', '')
-            self.publisher = archive_data.get('publisher', '')
-            self.subject = archive_data.get('subject', [])
-            self.downloads = archive_data.get('downloads', 0)
-            self.source_url = f"https://archive.org/details/{self.identifier}" if self.identifier else ''
-            self.content = ''
-            self.entities = []
-            self.themes = []
-            self.geopolitical_relevance = 0.0
-            self.processed_at = None
-        
-        @classmethod
-        def from_dict(cls, data):
-            archive_data = {
-                'identifier': data.get('identifier', ''),
-                'title': data.get('title', ''),
-                'description': data.get('description', ''),
-                'date': data.get('date', ''),
-                'year': data.get('year', 0),
-                'language': data.get('language', ''),
-                'creator': data.get('creator', ''),
-                'publisher': data.get('publisher', ''),
-                'subject': data.get('subject', []),
-                'downloads': data.get('downloads', 0)
-            }
-            item = cls(archive_data)
-            item.entities = data.get('entities', [])
-            item.themes = data.get('themes', [])
-            item.geopolitical_relevance = data.get('geopolitical_relevance', 0.0)
-            return item
-        
-        def to_dict(self):
-            return {
-                'identifier': self.identifier,
-                'title': self.title,
-                'description': self.description,
-                'date': self.date,
-                'year': self.year,
-                'language': self.language,
-                'creator': self.creator,
-                'publisher': self.publisher,
-                'subject': self.subject,
-                'downloads': self.downloads,
-                'source_url': self.source_url,
-                'content': self.content,
-                'entities': self.entities,
-                'themes': self.themes,
-                'geopolitical_relevance': self.geopolitical_relevance,
-                'processed_at': self.processed_at.isoformat() if self.processed_at else None
-            }
-
 class ArchivisteDatabase:
-    """Base de données spécialisée pour l'Archiviste v3.0"""
+    """Base de données enrichie avec support vectoriel"""
     
     def __init__(self, db_manager):
         self.db_manager = db_manager
         self._init_tables()
+        self._check_and_fix_columns()
     
     def _init_tables(self):
-        """Initialise les tables nécessaires pour Archiviste v3"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
+        """Initialise les tables avec toutes les colonnes nécessaires"""
+        conn = None
         try:
-            # Table des items historiques
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            # Table des items avec support embedding
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS archiviste_v3_items (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    identifier TEXT UNIQUE NOT NULL,
+                    identifier TEXT UNIQUE,
                     title TEXT,
                     description TEXT,
                     date TEXT,
@@ -113,461 +41,463 @@ class ArchivisteDatabase:
                     subject TEXT,
                     downloads INTEGER DEFAULT 0,
                     source_url TEXT,
-                    content TEXT,
+                    period_key TEXT,
+                    theme_id INTEGER,
+                    search_query TEXT,
+                    is_french BOOLEAN DEFAULT 1,
+                    
+                    -- Analyse NLP
                     entities TEXT,
-                    themes TEXT,
+                    embedding TEXT,
                     geopolitical_relevance REAL DEFAULT 0.0,
+                    
                     processed_at DATETIME,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            # Table des embeddings vectoriels
+            # Table des sessions
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS archiviste_v3_embeddings (
-                    item_identifier TEXT PRIMARY KEY,
-                    embedding_vector BLOB,
-                    entities TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (item_identifier) REFERENCES archiviste_v3_items(identifier)
-                )
-            """)
-            
-            # Table des analyses de période
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS archiviste_v3_period_analyses (
+                CREATE TABLE IF NOT EXISTS archiviste_v3_search_sessions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    period_key TEXT NOT NULL,
-                    theme_id INTEGER NOT NULL,
-                    total_items INTEGER DEFAULT 0,
-                    items_analyzed INTEGER DEFAULT 0,
-                    statistics TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (theme_id) REFERENCES themes(id)
+                    period_key TEXT,
+                    theme_id INTEGER,
+                    search_query TEXT,
+                    total_items_found INTEGER DEFAULT 0,
+                    new_items_added INTEGER DEFAULT 0,
+                    cached_items_used INTEGER DEFAULT 0,
+                    search_duration REAL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            # Table des analogies historiques
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS archiviste_v3_analogies (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    query_text TEXT,
-                    query_embedding BLOB,
-                    item_identifier TEXT,
-                    similarity_score REAL,
-                    shared_entities TEXT,
-                    summary TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (item_identifier) REFERENCES archiviste_v3_items(identifier)
-                )
-            """)
-            
-            # Index pour performances
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_archiviste_items_year ON archiviste_v3_items(year)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_archiviste_items_date ON archiviste_v3_items(date)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_archiviste_embeddings ON archiviste_v3_embeddings(item_identifier)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_archiviste_period_key ON archiviste_v3_period_analyses(period_key)")
+            # Index optimisés
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_period_theme ON archiviste_v3_items(period_key, theme_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_year ON archiviste_v3_items(year)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_identifier ON archiviste_v3_items(identifier)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_relevance ON archiviste_v3_items(geopolitical_relevance)")
             
             conn.commit()
-            logger.info("✅ Tables Archiviste v3 créées")
+            logger.info("✅ Tables Archiviste créées/réinitialisées")
             
         except Exception as e:
-            logger.error(f"❌ Erreur création tables Archiviste v3: {e}")
-            conn.rollback()
+            logger.error(f"❌ Erreur création tables: {e}")
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def save_historical_item(self, item: HistoricalItem) -> bool:
-        """Sauvegarde un item historique"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
+    def _check_and_fix_columns(self):
+        """Vérifie et ajoute les colonnes manquantes"""
+        conn = None
         try:
-            # Sauvegarder l'item principal
-            cursor.execute("""
-                INSERT OR REPLACE INTO archiviste_v3_items
-                (identifier, title, description, date, year, language, creator, publisher,
-                 subject, downloads, source_url, content, entities, themes, 
-                 geopolitical_relevance, processed_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                item.identifier,
-                item.title,
-                item.description,
-                item.date,
-                item.year,
-                item.language,
-                item.creator,
-                item.publisher,
-                json.dumps(item.subject) if isinstance(item.subject, (list, dict)) else str(item.subject),
-                item.downloads,
-                item.source_url,
-                item.content[:10000],  # Limiter la taille
-                json.dumps(item.entities),
-                json.dumps(item.themes),
-                item.geopolitical_relevance,
-                item.processed_at or datetime.now()
-            ))
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
             
-            # Sauvegarder l'embedding si disponible
-            if hasattr(item, 'embedding') and item.embedding:
-                cursor.execute("""
-                    INSERT OR REPLACE INTO archiviste_v3_embeddings
-                    (item_identifier, embedding_vector, entities)
-                    VALUES (?, ?, ?)
-                """, (
-                    item.identifier,
-                    pickle.dumps(item.embedding),
-                    json.dumps(item.entities)
-                ))
+            # Colonnes nécessaires
+            required_columns = [
+                ('period_key', 'TEXT'),
+                ('theme_id', 'INTEGER'),
+                ('search_query', 'TEXT'),
+                ('is_french', 'BOOLEAN DEFAULT 1'),
+                ('processed_at', 'DATETIME'),
+                ('entities', 'TEXT'),
+                ('embedding', 'TEXT'),
+                ('geopolitical_relevance', 'REAL DEFAULT 0.0')
+            ]
+            
+            # Vérifier chaque colonne
+            cursor.execute("PRAGMA table_info(archiviste_v3_items)")
+            existing_columns = [row[1] for row in cursor.fetchall()]
+            
+            for column_name, column_type in required_columns:
+                if column_name not in existing_columns:
+                    logger.warning(f"⚠️ Colonne {column_name} manquante, ajout...")
+                    try:
+                        cursor.execute(f"ALTER TABLE archiviste_v3_items ADD COLUMN {column_name} {column_type}")
+                        logger.info(f"✅ Colonne {column_name} ajoutée")
+                    except Exception as e:
+                        logger.error(f"❌ Erreur ajout colonne {column_name}: {e}")
             
             conn.commit()
-            logger.debug(f"✅ Item sauvegardé: {item.identifier}")
-            return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde item {item.identifier}: {e}")
-            conn.rollback()
-            return False
+            logger.error(f"❌ Erreur vérification colonnes: {e}")
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def get_historical_item(self, identifier: str) -> Optional[HistoricalItem]:
-        """Récupère un item historique par son identifiant"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
+    def get_cached_items(self, period_key: str, theme_id: int, limit: int = 50) -> List[Dict[str, Any]]:
+        """Récupère les items en cache"""
+        conn = None
         try:
-            cursor.execute("""
-                SELECT * FROM archiviste_v3_items WHERE identifier = ?
-            """, (identifier,))
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
             
-            row = cursor.fetchone()
-            if not row:
-                return None
+            query = """
+                SELECT identifier, title, description, date, year, 
+                       publisher, downloads, source_url, subject,
+                       entities, geopolitical_relevance
+                FROM archiviste_v3_items 
+                WHERE period_key = ? AND theme_id = ?
+                ORDER BY geopolitical_relevance DESC, downloads DESC
+                LIMIT ?
+            """
             
-            # Construire les données de l'item
-            columns = [description[0] for description in cursor.description]
-            item_data = dict(zip(columns, row))
+            cursor.execute(query, (period_key, theme_id, limit))
             
-            # Convertir les champs JSON
-            if item_data.get('subject'):
-                try:
-                    item_data['subject'] = json.loads(item_data['subject'])
-                except:
-                    item_data['subject'] = []
-            
-            if item_data.get('entities'):
-                try:
-                    item_data['entities'] = json.loads(item_data['entities'])
-                except:
-                    item_data['entities'] = []
-            
-            if item_data.get('themes'):
-                try:
-                    item_data['themes'] = json.loads(item_data['themes'])
-                except:
-                    item_data['themes'] = []
-            
-            # Créer l'instance HistoricalItem
-            return HistoricalItem.from_dict(item_data)
-            
-        except Exception as e:
-            logger.error(f"❌ Erreur récupération item {identifier}: {e}")
-            return None
-        finally:
-            conn.close()
-    
-    def get_theme_by_id(self, theme_id: int) -> Optional[Dict[str, Any]]:
-        """Récupère un thème par son ID - VERSION CORRIGÉE"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-    
-        try:
-            cursor.execute("""
-                SELECT id, name, keywords, color, description
-                FROM themes
-                WHERE id = ?
-            """, (theme_id,))
-        
-            row = cursor.fetchone()
-            if not row:
-                return None
-        
-        # Gestion ROBUSTE des mots-clés
-            keywords_raw = row[2]
-            keywords = []
-        
-            if keywords_raw:
-                try:
-                # Essayer JSON d'abord
-                    if isinstance(keywords_raw, str):
-                        parsed = json.loads(keywords_raw)
-                        if isinstance(parsed, list):
-                            keywords = parsed
-                        else:
-                        # Si c'est une string simple
-                            keywords = [k.strip() for k in str(keywords_raw).split(',') if k.strip()]
-                    elif isinstance(keywords_raw, list):
-                        keywords = keywords_raw
-                    else:
-                        keywords = [str(keywords_raw)]
-                except:
-                # Fallback: traitement comme texte
-                    keywords_str = str(keywords_raw)
-                    if ',' in keywords_str:
-                        keywords = [k.strip() for k in keywords_str.split(',') if k.strip()]
-                    else:
-                        keywords = [k.strip() for k in keywords_str.split('\n') if k.strip()]
-        
-            return {
-                'id': row[0],
-                'name': row[1],
-                'keywords': keywords,
-                'color': row[3] or '#6366f1',
-                'description': row[4] or ''
-            }
-        
-        except Exception as e:
-            logger.error(f"❌ Erreur récupération thème {theme_id}: {e}")
-            return None
-        finally:
-            conn.close()
-  
-    def find_similar_items(
-        self, 
-        query_embedding: List[float], 
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """Trouve les items les plus similaires par embedding"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
-        try:
-            # Récupérer tous les embeddings
-            cursor.execute("""
-                SELECT a.identifier, a.title, a.date, a.year, e.embedding_vector
-                FROM archiviste_v3_items a
-                JOIN archiviste_v3_embeddings e ON a.identifier = e.item_identifier
-                WHERE e.embedding_vector IS NOT NULL
-                LIMIT 500
-            """)
-            
-            results = []
+            items = []
             for row in cursor.fetchall():
                 try:
-                    stored_embedding = pickle.loads(row[4])
-                    
-                    # Calculer la similarité cosinus
-                    similarity = self._cosine_similarity(query_embedding, stored_embedding)
-                    
-                    if similarity > 0.3:  # Seuil minimal
-                        results.append({
-                            'identifier': row[0],
-                            'title': row[1],
-                            'date': row[2],
-                            'year': row[3],
-                            'similarity': similarity
-                        })
-                
+                    item = {
+                        'identifier': row[0] or '',
+                        'title': row[1] or '',
+                        'description': row[2] or '',
+                        'date': row[3] or '',
+                        'year': row[4] or 0,
+                        'publisher': row[5] or '',
+                        'downloads': row[6] or 0,
+                        'source_url': row[7] or '',
+                        'subject': json.loads(row[8]) if row[8] else [],
+                        'entities': json.loads(row[9]) if row[9] else [],
+                        'geopolitical_relevance': row[10] or 0.0
+                    }
+                    items.append(item)
                 except Exception as e:
-                    logger.debug(f"Erreur calcul similarité {row[0]}: {e}")
+                    logger.debug(f"⚠️ Erreur formatage item: {e}")
                     continue
             
-            # Trier par similarité et limiter
-            results.sort(key=lambda x: x['similarity'], reverse=True)
-            return results[:limit]
+            logger.debug(f"📂 {len(items)} items en cache pour {period_key}/{theme_id}")
+            return items
             
         except Exception as e:
-            logger.error(f"❌ Erreur recherche items similaires: {e}")
+            logger.error(f"❌ Erreur récupération cache: {e}")
             return []
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def find_historical_analogies(
-        self,
-        key_entities: List[str],
-        query_embedding: List[float],
-        threshold: float = 0.7,
-        max_results: int = 5
-    ) -> List[Dict[str, Any]]:
-        """Trouve des analogies historiques basées sur les entités et embeddings"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
+    def save_items_batch(
+        self, 
+        items: List[Dict[str, Any]], 
+        period_key: str, 
+        theme_id: int, 
+        search_query: str
+    ) -> int:
+        """Sauvegarde des items avec données NLP"""
+        if not items:
+            return 0
+        
+        conn = None
+        new_count = 0
         
         try:
-            # Recherche par entités d'abord
-            entity_matches = []
-            for entity in key_entities[:3]:  # Limiter à 3 entités clés
-                cursor.execute("""
-                    SELECT identifier, title, date, year, entities
-                    FROM archiviste_v3_items
-                    WHERE content LIKE ? OR entities LIKE ?
-                    LIMIT 50
-                """, (f'%{entity}%', f'%{entity}%'))
-                
-                for row in cursor.fetchall():
-                    try:
-                        entities_data = []
-                        if row[4]:
-                            try:
-                                entities_data = json.loads(row[4])
-                            except:
-                                pass
-                        
-                        item_entities = [e.get('text', '') if isinstance(e, dict) else str(e) for e in entities_data]
-                        shared_entities = set(key_entities) & set(item_entities)
-                        
-                        if shared_entities:
-                            entity_matches.append({
-                                'identifier': row[0],
-                                'title': row[1],
-                                'date': row[2],
-                                'year': row[3],
-                                'shared_entities': list(shared_entities),
-                                'entity_count': len(shared_entities)
-                            })
-                    except:
-                        continue
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
             
-            # Raffiner avec similarité vectorielle si disponible
-            analogies = []
-            for match in entity_matches[:20]:  # Limiter pour performances
-                cursor.execute("""
-                    SELECT embedding_vector FROM archiviste_v3_embeddings
-                    WHERE item_identifier = ?
-                """, (match['identifier'],))
-                
-                row = cursor.fetchone()
-                if row:
-                    try:
-                        stored_embedding = pickle.loads(row[0])
-                        similarity = self._cosine_similarity(query_embedding, stored_embedding)
-                        
-                        if similarity >= threshold:
-                            analogies.append({
-                                'identifier': match['identifier'],
-                                'title': match['title'],
-                                'date': match['date'],
-                                'year': match['year'],
-                                'shared_entities': match['shared_entities'],
-                                'similarity': similarity,
-                                'summary': self._generate_analogy_summary(match, similarity)
-                            })
-                    except:
+            for item in items:
+                try:
+                    identifier = item.get('identifier', '')
+                    if not identifier:
                         continue
+                    
+                    # Vérifier si existe
+                    cursor.execute(
+                        "SELECT id FROM archiviste_v3_items WHERE identifier = ?",
+                        (identifier,)
+                    )
+                    
+                    if not cursor.fetchone():
+                        # Préparer les données
+                        title = item.get('title', '')[:500]
+                        description = item.get('description', '')[:2000]
+                        date = item.get('date', '')
+                        year = item.get('year', 0)
+                        publisher = item.get('publisher', '')[:200]
+                        downloads = item.get('downloads', 0)
+                        source_url = item.get('source_url', '')
+                        subject = json.dumps(item.get('subject', []))
+                        
+                        # Données NLP
+                        entities = json.dumps(item.get('entities', []))
+                        embedding = json.dumps(item.get('embedding', [])) if item.get('embedding') else None
+                        geopolitical_relevance = item.get('geopolitical_relevance', 0.0)
+                        processed_at = item.get('processed_at')
+                        
+                        # Insérer
+                        cursor.execute("""
+                            INSERT INTO archiviste_v3_items 
+                            (identifier, title, description, date, year, 
+                             publisher, downloads, source_url, subject,
+                             period_key, theme_id, search_query, is_french,
+                             entities, embedding, geopolitical_relevance, processed_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            identifier, title, description, date, year,
+                            publisher, downloads, source_url, subject,
+                            period_key, theme_id, search_query[:500], 1,
+                            entities, embedding, geopolitical_relevance, processed_at
+                        ))
+                        new_count += 1
+                        
+                except Exception as e:
+                    logger.debug(f"⚠️ Erreur sauvegarde item {item.get('identifier', 'unknown')}: {e}")
+                    continue
             
-            # Trier par similarité
-            analogies.sort(key=lambda x: x['similarity'], reverse=True)
-            return analogies[:max_results]
+            conn.commit()
+            logger.info(f"💾 {new_count} nouveaux items sauvegardés")
+            return new_count
             
         except Exception as e:
-            logger.error(f"❌ Erreur recherche analogies: {e}")
+            logger.error(f"❌ Erreur sauvegarde batch: {e}")
+            if conn:
+                try:
+                    conn.rollback()
+                except:
+                    pass
+            return 0
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
+    
+    def get_all_items_with_content(self, limit: int = 1000) -> List[Dict[str, Any]]:
+        """Récupère tous les items avec leur contenu pour recherche vectorielle"""
+        conn = None
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            query = """
+                SELECT identifier, title, description, year, source_url,
+                       entities, geopolitical_relevance, period_key
+                FROM archiviste_v3_items
+                ORDER BY created_at DESC
+                LIMIT ?
+            """
+            
+            cursor.execute(query, (limit,))
+            
+            items = []
+            for row in cursor.fetchall():
+                items.append({
+                    'identifier': row[0],
+                    'title': row[1],
+                    'description': row[2],
+                    'year': row[3],
+                    'source_url': row[4],
+                    'entities': json.loads(row[5]) if row[5] else [],
+                    'geopolitical_relevance': row[6] or 0.0,
+                    'period_key': row[7]
+                })
+            
+            return items
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur récupération items: {e}")
             return []
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def save_period_analysis(
+    def save_search_session(
         self, 
         period_key: str, 
         theme_id: int, 
-        items: List[HistoricalItem],
-        statistics: Dict[str, Any]
+        search_query: str,
+        total_found: int, 
+        new_added: int, 
+        cached_used: int, 
+        duration: float
     ) -> int:
-        """Sauvegarde une analyse de période"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
+        """Sauvegarde une session de recherche"""
+        conn = None
         try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
             cursor.execute("""
-                INSERT INTO archiviste_v3_period_analyses
-                (period_key, theme_id, total_items, items_analyzed, statistics)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO archiviste_v3_search_sessions 
+                (period_key, theme_id, search_query, total_items_found, 
+                 new_items_added, cached_items_used, search_duration)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 period_key,
                 theme_id,
-                len(items),
-                len(items),
-                json.dumps(statistics)
+                search_query[:500],
+                total_found,
+                new_added,
+                cached_used,
+                duration
             ))
             
-            analysis_id = cursor.lastrowid
             conn.commit()
-            return analysis_id
+            session_id = cursor.lastrowid
+            logger.debug(f"📝 Session sauvegardée: {session_id}")
+            return session_id
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde analyse période: {e}")
-            conn.rollback()
+            logger.error(f"❌ Erreur sauvegarde session: {e}")
             return 0
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def get_period_analyses(
-        self, 
-        limit: int = 20
-    ) -> List[Dict[str, Any]]:
-        """Récupère les analyses de période récentes"""
-        conn = self.db_manager.get_connection()
-        cursor = conn.cursor()
-        
+    def get_search_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Historique des recherches"""
+        conn = None
         try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
             cursor.execute("""
-                SELECT pa.id, pa.period_key, pa.theme_id, pa.items_analyzed,
-                       pa.statistics, pa.created_at, t.name as theme_name
-                FROM archiviste_v3_period_analyses pa
-                JOIN themes t ON pa.theme_id = t.id
-                ORDER BY pa.created_at DESC
+                SELECT id, period_key, theme_id, total_items_found,
+                       new_items_added, cached_items_used, search_duration,
+                       created_at
+                FROM archiviste_v3_search_sessions
+                ORDER BY created_at DESC
                 LIMIT ?
             """, (limit,))
             
-            analyses = []
+            history = []
             for row in cursor.fetchall():
-                try:
-                    stats = json.loads(row[4]) if row[4] else {}
-                except:
-                    stats = {}
-                
-                analyses.append({
+                history.append({
                     'id': row[0],
                     'period_key': row[1],
                     'theme_id': row[2],
                     'items_analyzed': row[3],
-                    'statistics': stats,
-                    'created_at': row[5],
-                    'theme_name': row[6]
+                    'new_added': row[4],
+                    'cached_used': row[5],
+                    'duration': row[6],
+                    'created_at': row[7]
                 })
             
-            return analyses
+            return history
             
         except Exception as e:
-            logger.error(f"❌ Erreur récupération analyses: {e}")
+            logger.error(f"❌ Erreur historique: {e}")
             return []
         finally:
-            conn.close()
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
-        """Calcule la similarité cosinus entre deux vecteurs"""
-        import math
-        
-        if not vec1 or not vec2:
-            return 0.0
-        
-        if len(vec1) != len(vec2):
-            return 0.0
-        
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Statistiques du cache"""
+        conn = None
         try:
-            dot_product = sum(a * b for a, b in zip(vec1, vec2))
-            magnitude1 = math.sqrt(sum(a * a for a in vec1))
-            magnitude2 = math.sqrt(sum(b * b for b in vec2))
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
             
-            if magnitude1 == 0 or magnitude2 == 0:
-                return 0.0
+            stats = {}
             
-            return dot_product / (magnitude1 * magnitude2)
-        except:
-            return 0.0
+            # Total items
+            cursor.execute("SELECT COUNT(*) FROM archiviste_v3_items")
+            stats['total_items'] = cursor.fetchone()[0]
+            
+            # Items avec embeddings
+            cursor.execute("SELECT COUNT(*) FROM archiviste_v3_items WHERE embedding IS NOT NULL")
+            stats['items_with_embeddings'] = cursor.fetchone()[0]
+            
+            # Total sessions
+            cursor.execute("SELECT COUNT(*) FROM archiviste_v3_search_sessions")
+            stats['total_searches'] = cursor.fetchone()[0]
+            
+            # Items par période
+            cursor.execute("""
+                SELECT period_key, COUNT(*) 
+                FROM archiviste_v3_items 
+                WHERE period_key IS NOT NULL
+                GROUP BY period_key
+            """)
+            stats['items_by_period'] = dict(cursor.fetchall())
+            
+            # Pertinence moyenne
+            cursor.execute("SELECT AVG(geopolitical_relevance) FROM archiviste_v3_items")
+            avg_rel = cursor.fetchone()[0]
+            stats['avg_relevance'] = round(avg_rel, 3) if avg_rel else 0.0
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur stats cache: {e}")
+            return {}
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
-    def _generate_analogy_summary(self, match: Dict[str, Any], similarity: float) -> str:
-        """Génère un résumé pour une analogie"""
-        entities_str = ', '.join(match['shared_entities'][:2])
-        return f"Similaire par: {entities_str} ({similarity:.1%})"
+    def clear_old_cache(self, days: int = 30):
+        """Supprime les entrées de cache anciennes"""
+        conn = None
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            cutoff_date = datetime.now() - timedelta(days=days)
+            
+            cursor.execute("""
+                DELETE FROM archiviste_v3_items 
+                WHERE created_at < ?
+            """, (cutoff_date.isoformat(),))
+            
+            deleted = cursor.rowcount
+            conn.commit()
+            
+            logger.info(f"🗑️ {deleted} entrées anciennes supprimées")
+            return deleted
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur clear cache: {e}")
+            return 0
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
+    
+    def reset_database(self):
+        """Réinitialise complètement la base"""
+        conn = None
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute("DROP TABLE IF EXISTS archiviste_v3_items")
+            cursor.execute("DROP TABLE IF EXISTS archiviste_v3_search_sessions")
+            
+            conn.commit()
+            logger.info("🗑️ Base Archiviste réinitialisée")
+            
+            # Recréer les tables
+            self._init_tables()
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur réinitialisation: {e}")
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass

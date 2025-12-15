@@ -1,0 +1,605 @@
+﻿# Flask/geopol_data/routes.py - CORRECTION
+""" 
+Routes pour le module Geopol-Data
+API REST pour accéder aux données géopolitiques par pays
+"""
+
+from flask import Blueprint, jsonify, request, render_template
+from typing import Any, Dict
+import logging
+
+logger = logging.getLogger(__name__)
+
+def create_geopol_data_blueprint(db_manager, data_service):
+    """
+    Crée le blueprint Flask pour les routes Geopol-Data
+    
+    RETOURNE: Blueprint uniquement, pas un tuple
+    """
+    # Créer le blueprint avec un nom unique
+    bp = Blueprint('geopol_data_api', __name__, url_prefix='/api/geopol')
+    
+    # ============================================================
+    # ROUTES API
+    # ============================================================
+    
+    @bp.route('/country/<country_code>')
+    def get_country_data(country_code: str):
+        """Récupère les données d'un pays par son code ISO"""
+        try:
+            logger.info(f"API Request - Country data for {country_code.upper()}")
+            
+            snapshot = data_service.get_country_snapshot(country_code.upper())
+            
+            if snapshot:
+                return jsonify({
+                    'success': True,
+                    'snapshot': snapshot.to_dict(include_raw=False)
+                }), 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Aucune donnée disponible pour {country_code.upper()}'
+                }), 404
+                
+        except Exception as e:
+            logger.error(f"Erreur API /country/{country_code}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/countries')
+    def get_multiple_countries():
+        """Récupère les données de plusieurs pays"""
+        try:
+            codes_param = request.args.get('codes', '')
+            if not codes_param:
+                return jsonify({
+                    'success': False,
+                    'error': 'Paramètre "codes" requis (ex: ?codes=FR,US,DE)'
+                }), 400
+            
+            country_codes = [code.strip().upper() for code in codes_param.split(',')]
+            snapshots = data_service.get_multiple_snapshots(country_codes)
+            
+            result = {
+                code: snapshot.to_dict(include_raw=False)
+                for code, snapshot in snapshots.items()
+            }
+            
+            return jsonify({
+                'success': True,
+                'data': result,
+                'requested': len(country_codes),
+                'found': len(result)
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur API /countries: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/status')
+    def get_service_status():
+        """Récupère le statut du service Geopol-Data"""
+        try:
+            status = data_service.get_service_status()
+            return jsonify(status), 200
+        except Exception as e:
+            logger.error(f"Erreur API /status: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/health')
+    def health_check():
+        """Vérification de santé du module"""
+        return jsonify({
+            'status': 'ok',
+            'module': 'geopol_data',
+            'timestamp': __import__('datetime').datetime.utcnow().isoformat()
+        }), 200
+    
+    # ============================================================
+    # ROUTES TEMPLATES (avec gestion d'erreur)
+    # ============================================================
+    
+    @bp.route('/map')
+    def geopol_map_page():
+        """Page HTML interactive de la carte géopolitique"""
+        try:
+            # Utiliser current_app pour avoir le contexte
+            from flask import current_app
+            with current_app.app_context():
+                return render_template('geopol_data_map.html')
+        except Exception as e:
+            logger.error(f"Erreur chargement template: {e}")
+            # Retourner une page HTML simple
+            return '''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Carte Géopolitique - GEOPOL</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 2rem; background: #1e293b; color: #e2e8f0; }
+                    .container { max-width: 800px; margin: 0 auto; }
+                    h1 { color: #f59e0b; }
+                    .api-links { display: flex; gap: 1rem; margin: 2rem 0; }
+                    .api-link { padding: 1rem; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; }
+                    .api-link:hover { background: #2563eb; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🌍 Carte Géopolitique</h1>
+                    <p>Le module de carte est en cours de chargement. Vous pouvez utiliser l'API en attendant :</p>
+                    
+                    <div class="api-links">
+                        <a href="/api/geopol/country/FR" class="api-link">Données France</a>
+                        <a href="/api/geopol/status" class="api-link">Statut du service</a>
+                        <a href="/api/geopol/health" class="api-link">Santé du module</a>
+                    </div>
+                    
+                    <h2>Endpoints disponibles :</h2>
+                    <ul>
+                        <li><code>GET /api/geopol/country/&lt;code&gt;</code> - Données d'un pays</li>
+                        <li><code>GET /api/geopol/countries?codes=FR,US,DE</code> - Données multiples</li>
+                        <li><code>GET /api/geopol/status</code> - Statut du service</li>
+                        <li><code>GET /api/geopol/health</code> - Santé du module</li>
+                    </ul>
+                </div>
+            </body>
+            </html>
+            ''', 200
+    
+    # ============================================================
+    # ROUTES UTILITAIRES
+    # ============================================================
+    
+    @bp.route('/cache/stats')
+    def get_cache_stats():
+        """Récupère les statistiques du cache"""
+        try:
+            stats = data_service.get_cache_stats()
+            return jsonify(stats), 200
+        except Exception as e:
+            logger.error(f"Erreur API /cache/stats: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/cache/clear', methods=['POST'])
+    def clear_cache():
+        """Vide le cache du service"""
+        try:
+            data_service.clear_cache()
+            return jsonify({
+                'success': True,
+                'message': 'Cache vidé avec succès'
+            }), 200
+        except Exception as e:
+            logger.error(f"Erreur API /cache/clear: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # DEBUG: Ajout pour vérifier le type de retour
+    print(f"[DEBUG routes.py] Type de bp: {type(bp)}")
+    
+
+    # ============================================================================
+# ROUTES MÉTÉO (À AJOUTER AU BLUEPRINT)
+# ============================================================================
+
+def register_weather_routes(bp, data_service):
+    """
+    Enregistre les routes météo sur un blueprint existant
+    
+    Args:
+        bp: Blueprint Flask (geopol_data_api)
+        data_service: Instance de DataService
+    
+    Usage dans routes.py:
+        register_weather_routes(bp, data_service)
+    """
+    
+    # Import des connecteurs
+    from .connectors.open_meteo import OpenMeteoConnector, get_weather_for_country
+    from .overlays.weather_overlay import WeatherOverlay
+    from .constants import CAPITALS_GPS, PRIORITY_COUNTRIES
+    
+    # Initialiser les services
+    weather_connector = OpenMeteoConnector()
+    weather_overlay = WeatherOverlay()
+    
+    # ========================================================================
+    # ROUTE 1 : Météo d'un pays (par capitale)
+    # ========================================================================
+    
+    @bp.route('/weather/country/<country_code>')
+    def get_country_weather(country_code: str):
+        """
+        Récupère la météo pour la capitale d'un pays
+        
+        GET /api/geopol/weather/country/FR
+        
+        Response:
+        {
+            "success": true,
+            "country_code": "FR",
+            "weather": {
+                "temperature": 15.5,
+                "precipitation": 0.2,
+                "wind_speed": 12.3,
+                ...
+            },
+            "air_quality": {
+                "pm2_5": 18.5,
+                "aqi": 65,
+                "aqi_level": "MODERATE"
+            }
+        }
+        """
+        try:
+            country_code = country_code.upper()
+            logger.info(f"Requête météo pour {country_code}")
+            
+            # Récupérer les coordonnées
+            coords = CAPITALS_GPS.get(country_code)
+            if not coords:
+                return jsonify({
+                    'success': False,
+                    'error': f'Coordonnées inconnues pour {country_code}'
+                }), 404
+            
+            latitude, longitude = coords
+            
+            # Récupérer les données
+            weather_data = weather_connector.fetch_complete_data(latitude, longitude)
+            
+            # Formater la réponse
+            response = {
+                'success': True,
+                'country_code': country_code,
+                'coordinates': {
+                    'latitude': latitude,
+                    'longitude': longitude
+                }
+            }
+            
+            if weather_data['weather']:
+                response['weather'] = weather_data['weather'].to_dict()
+            
+            if weather_data['air_quality']:
+                response['air_quality'] = weather_data['air_quality'].to_dict()
+            
+            return jsonify(response), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur météo {country_code}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 2 : Météo par coordonnées GPS
+    # ========================================================================
+    
+    @bp.route('/weather/coordinates')
+    def get_weather_by_coords():
+        """
+        Récupère la météo pour des coordonnées GPS
+        
+        GET /api/geopol/weather/coordinates?lat=48.8566&lng=2.3522
+        
+        Query params:
+            lat: Latitude (float)
+            lng: Longitude (float)
+        """
+        try:
+            # Parser les paramètres
+            lat = request.args.get('lat', type=float)
+            lng = request.args.get('lng', type=float)
+            
+            if lat is None or lng is None:
+                return jsonify({
+                    'success': False,
+                    'error': 'Paramètres lat et lng requis'
+                }), 400
+            
+            # Valider les coordonnées
+            if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+                return jsonify({
+                    'success': False,
+                    'error': 'Coordonnées invalides'
+                }), 400
+            
+            logger.info(f"Requête météo coords: {lat}, {lng}")
+            
+            # Récupérer les données
+            weather_data = weather_connector.fetch_complete_data(lat, lng)
+            
+            response = {
+                'success': True,
+                'coordinates': {
+                    'latitude': lat,
+                    'longitude': lng
+                }
+            }
+            
+            if weather_data['weather']:
+                response['weather'] = weather_data['weather'].to_dict()
+            
+            if weather_data['air_quality']:
+                response['air_quality'] = weather_data['air_quality'].to_dict()
+            
+            return jsonify(response), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur météo coords: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 3 : Couches météo pour la carte (batch)
+    # ========================================================================
+    
+    @bp.route('/weather/layers')
+    def get_weather_layers():
+        """
+        Récupère les données météo pour tous les pays prioritaires
+        Format pour affichage en couches Leaflet
+        
+        GET /api/geopol/weather/layers?types=temperature,air_quality
+        
+        Query params:
+            types: Types de couches (csv) - temperature,precipitation,wind,air_quality
+        
+        Response:
+        {
+            "success": true,
+            "layers": {
+                "temperature": {
+                    "type": "temperature",
+                    "points": [...],
+                    "config": {...}
+                },
+                "air_quality": {...}
+            },
+            "countries_count": 50,
+            "timestamp": "2025-01-10T..."
+        }
+        """
+        try:
+            # Parser les types demandés
+            types_param = request.args.get('types', 'temperature')
+            requested_types = [t.strip() for t in types_param.split(',')]
+            
+            logger.info(f"Requête couches météo: {requested_types}")
+            
+            # Collecter les données pour tous les pays prioritaires
+            weather_data_all = []
+            air_quality_data_all = []
+            
+            for country_code in PRIORITY_COUNTRIES[:30]:  # Limiter à 30 pays pour éviter surcharge
+                coords = CAPITALS_GPS.get(country_code)
+                if not coords:
+                    continue
+                
+                lat, lng = coords
+                
+                try:
+                    data = weather_connector.fetch_complete_data(lat, lng)
+                    
+                    if data['weather']:
+                        weather_dict = data['weather'].to_dict()
+                        weather_data_all.append(weather_dict)
+                    
+                    if data['air_quality']:
+                        air_dict = data['air_quality'].to_dict()
+                        air_quality_data_all.append(air_dict)
+                
+                except Exception as e:
+                    logger.warning(f"Erreur collecte {country_code}: {e}")
+                    continue
+            
+            # Préparer les couches demandées
+            layers = {}
+            
+            if 'temperature' in requested_types:
+                layers['temperature'] = weather_overlay.prepare_temperature_layer(weather_data_all)
+            
+            if 'precipitation' in requested_types:
+                layers['precipitation'] = weather_overlay.prepare_precipitation_layer(weather_data_all)
+            
+            if 'wind' in requested_types:
+                layers['wind'] = weather_overlay.prepare_wind_layer(weather_data_all)
+            
+            if 'air_quality' in requested_types:
+                layers['air_quality'] = weather_overlay.prepare_air_quality_layer(air_quality_data_all)
+            
+            return jsonify({
+                'success': True,
+                'layers': layers,
+                'countries_count': len(weather_data_all),
+                'timestamp': __import__('datetime').datetime.utcnow().isoformat()
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur couches météo: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 4 : Configuration des couches
+    # ========================================================================
+    
+    @bp.route('/weather/layers/config')
+    def get_layers_config():
+        """
+        Récupère la configuration de toutes les couches météo disponibles
+        
+        GET /api/geopol/weather/layers/config
+        
+        Response:
+        {
+            "temperature": {
+                "name": "Température",
+                "visible": true,
+                "opacity": 0.7,
+                "unit": "°C",
+                ...
+            },
+            ...
+        }
+        """
+        try:
+            config = weather_overlay.get_all_layers_config()
+            return jsonify({
+                'success': True,
+                'layers': config
+            }), 200
+        except Exception as e:
+            logger.error(f"Erreur config couches: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 5 : Mise à jour configuration couche
+    # ========================================================================
+    
+    @bp.route('/weather/layers/config/<layer_type>', methods=['POST'])
+    def update_layer_config(layer_type: str):
+        """
+        Modifie la configuration d'une couche
+        
+        POST /api/geopol/weather/layers/config/temperature
+        Body: {
+            "visible": true,
+            "opacity": 0.8
+        }
+        """
+        try:
+            data = request.get_json()
+            
+            if 'visible' in data:
+                weather_overlay.set_layer_visibility(layer_type, data['visible'])
+            
+            if 'opacity' in data:
+                weather_overlay.set_layer_opacity(layer_type, data['opacity'])
+            
+            return jsonify({
+                'success': True,
+                'layer_type': layer_type,
+                'config': weather_overlay.get_layer_config(layer_type).to_dict()
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur update config {layer_type}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 6 : Snapshot pays enrichi (avec météo)
+    # ========================================================================
+    
+    @bp.route('/country/<country_code>/enriched')
+    def get_country_enriched(country_code: str):
+        """
+        Récupère le snapshot d'un pays enrichi avec données météo
+        
+        GET /api/geopol/country/FR/enriched
+        
+        Response:
+        {
+            "success": true,
+            "snapshot": {
+                "country_code": "FR",
+                "gdp": ...,
+                "calculated_indices": {
+                    "current_temperature": 15.5,
+                    "current_aqi": 65,
+                    ...
+                }
+            }
+        }
+        """
+        try:
+            country_code = country_code.upper()
+            logger.info(f"Requête snapshot enrichi: {country_code}")
+            
+            # Récupérer le snapshot de base
+            snapshot = data_service.get_country_snapshot(country_code)
+            if not snapshot:
+                return jsonify({
+                    'success': False,
+                    'error': f'Snapshot non disponible pour {country_code}'
+                }), 404
+            
+            # Récupérer les données météo
+            coords = CAPITALS_GPS.get(country_code)
+            if coords:
+                lat, lng = coords
+                weather_data = weather_connector.fetch_complete_data(lat, lng)
+                
+                # Enrichir le snapshot
+                from .overlays.weather_overlay import enrich_snapshot_with_weather
+                enrich_snapshot_with_weather(snapshot, weather_data)
+            
+            return jsonify({
+                'success': True,
+                'snapshot': snapshot.to_dict(include_raw=False)
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Erreur snapshot enrichi {country_code}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ========================================================================
+    # ROUTE 7 : Test connexion Open-Meteo
+    # ========================================================================
+    
+    @bp.route('/weather/test')
+    def test_weather_api():
+        """
+        Teste la connexion à l'API Open-Meteo
+        
+        GET /api/geopol/weather/test
+        """
+        try:
+            is_connected = weather_connector.test_connection()
+            
+            return jsonify({
+                'success': True,
+                'api_status': 'connected' if is_connected else 'disconnected',
+                'api_url': weather_connector.weather_url
+            }), 200
+            
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    logger.info("✅ Routes météo enregistrées sur le blueprint")
+
+
+    return bp  # RETOUR UNIQUEMENT LE BLUEPRINT, PAS DE TUPLE

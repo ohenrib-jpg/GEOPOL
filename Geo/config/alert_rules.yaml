@@ -1,0 +1,59 @@
+created: '2025-12-10T22:00:31.896513'
+rules:
+- category: financial
+  condition: data.change_percent < -7
+  enabled: true
+  id: market_crash_7
+  message_template: 'CRASH: {name} chute de {change_percent}% à {current_price}'
+  name: Crash boursier majeur
+  parameters:
+    asset_types:
+    - index
+    regions:
+    - global
+  severity: critical
+- category: financial
+  condition: data.change_percent < -5
+  enabled: true
+  id: significant_drop_5
+  message_template: '{name} baisse de {change_percent}%'
+  name: Baisse significative
+  severity: warning
+- category: financial
+  condition: abs(data.change_percent) > 3
+  enabled: true
+  id: high_volatility_3
+  message_template: 'Volatilité: {name} {change_percent:+.2f}%'
+  name: Haute volatilité
+  severity: info
+- category: travel
+  condition: data.risk_level == 4
+  enabled: true
+  id: do_not_travel
+  message_template: '⚠️ {country_name}: NIVEAU 4 - Ne pas voyager'
+  name: Ne pas voyager
+  parameters:
+    countries: []
+  severity: critical
+- category: travel
+  condition: data.risk_level == 3
+  enabled: true
+  id: reconsider_travel
+  message_template: '⚠️ {country_name}: NIVEAU 3 - Réenvisager'
+  name: Réenvisager le voyage
+  severity: warning
+- category: travel
+  condition: previous and data.risk_level > previous.risk_level
+  enabled: true
+  id: risk_increased
+  message_template: '📈 {country_name}: Risque {previous.risk_level}→{data.risk_level}'
+  name: Risque augmenté
+  severity: warning
+- category: travel
+  condition: data.risk_level >= 3 and (not previous or previous.risk_level < 3)
+  enabled: true
+  id: new_high_risk
+  message_template: 🆕 {country_name} maintenant risque {data.risk_level}
+  name: Nouveau pays haut risque
+  severity: info
+version: '1.0'
