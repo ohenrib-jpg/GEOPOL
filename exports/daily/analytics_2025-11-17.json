@@ -1,0 +1,13 @@
+{
+  "export_date": "2025-11-17",
+  "sentiment_analysis": {
+    "negative": 17,
+    "neutral_negative": 46,
+    "neutral_positive": 3,
+    "positive": 1
+  },
+  "theme_analysis": {},
+  "alerts_triggered": {},
+  "sdr_activity": {},
+  "articles_count": 67
+}
