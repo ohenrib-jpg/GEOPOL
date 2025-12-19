@@ -131,7 +131,7 @@ GEOPOL/
 - Analyse des narratifs médiatiques
 - Compréhension des indicateurs économiques
 - Introduction à l’OSINT et à la veille stratégique
-- 
+  
 6.2 Enseignement supérieur
   
 - Travaux dirigés en géopolitique, relations internationales, journalisme
@@ -163,7 +163,9 @@ Prérequis
 - Eventuellement : console CMD => pip install -r requirements.txt
 Lancement
 - Télécharger le dépôt
-- Télécharger un mod. d'IA GGUF (En créant un compte gratuit sur Gugging Face, par exemple.). VEILLEZ A UTILISER UNE QUANTIFICATION UTILISABLE SUR VOTRE CONFIGURATION.
+- Télécharger un mod. d'IA GGUF (En créant un compte gratuit sur "Hugging Face", par exemple.)
+
+  VEILLEZ A UTILISER UNE QUANTIFICATION UTILISABLE SUR VOTRE CONFIGURATION.
   PAR DEFAUT, LE SERVEUR LLAMA DEMARRE EN MODE CPU. VOUS POUVEZ LE MODIFIER DANS LE BATCH WINDOWS
  
 - Exécuter GEOPOLCMD.bat <- batch windows de dev.  affichant les cmd
