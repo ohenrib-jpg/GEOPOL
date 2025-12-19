@@ -158,7 +158,8 @@ GEOPOL/
 Prérequis
 - Windows 10/11 ou Linux
 - Python 3.10+
-- 10–12 Go de RAM recommandés
+- 12–16 Go de RAM recommandés (sur mon Ryzen5 5600U + 16 Go re RAM sans GPU, je suis limite. Avec GPU performant, divisez par deux)
+  
 - Aucun package système requis (environnement virtuel isolé)
 - Eventuellement : console CMD => pip install -r requirements.txt
 Lancement
