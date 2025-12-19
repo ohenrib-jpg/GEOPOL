@@ -174,7 +174,7 @@ Lancement
 - Attendre le démarrage des services (15/30 secondes)
   
 - Accéder à l’interface :
-                                      ###http://localhost:5000###
+                                      http://localhost:5000
 
 
 **Vous pouvez consulter ce fichier pour vous familiariser avec l'interface :**
