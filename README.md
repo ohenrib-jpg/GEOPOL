@@ -230,7 +230,7 @@ Semantic & Media Analysis
 - Named Entity Recognition (SpaCy)
 - Thematic classification with weighted keywords
 Multi‑Source Geopolitical Monitoring
-- RSS feeds (2,700+ available)
+- RSS feeds
 - Social media (X/Twitter via Nitter, Reddit)
 - Historical archives (Archive.org, Gallica, WebTimeMachine)
 - Economic indicators (World Bank, Eurostat, INSEE)
@@ -288,7 +288,7 @@ GEOPOL Analytics 是一款面向 教育机构、学术研究者与战略分析�
 - SpaCy 命名实体识别（NER）
 - 主题分类（关键词、权重、同义词）
 多源地缘政治监测
-- RSS 新闻源（超过 2700 个）
+- RSS 新闻源
 - 社交媒体（X/Twitter via Nitter、Reddit）
 - 历史档案（Archive.org、Gallica、WebTimeMachine）
 - 经济指标（世界银行、Eurostat、INSEE）
