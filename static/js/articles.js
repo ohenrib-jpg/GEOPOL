@@ -49,22 +49,31 @@ class ArticleManager {
             Formatters.truncateText(article.content, 200);
 
         return `
-            <div class="border-l-4 ${Formatters.getSentimentColor(article.sentiment)} 
-                        bg-white border border-gray-200 p-4 rounded-r-lg hover:shadow-md transition duration-200">
+            <div class="border-l-4 ${Formatters.getSentimentColor(article.sentiment)}
+                        bg-white border border-gray-200 p-4 rounded-r-lg hover:shadow-md transition duration-200 article-card"
+                        data-article-id="${article.id}" data-sentiment="${article.sentiment || 'neutral'}">
                 <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-semibold text-gray-800 text-lg">${article.title}</h4>
+                    <h4 class="font-semibold text-gray-800 text-lg article-title">${article.title}</h4>
                     <span class="text-xs text-gray-500 whitespace-nowrap ml-2">
                         ${Formatters.formatDate(article.pub_date)}
                     </span>
                 </div>
-                <p class="text-gray-600 text-sm mb-3">${content}</p>
+                <p class="text-gray-600 text-sm mb-3 article-content">${content}</p>
                 <div class="flex justify-between items-center">
-                    <span class="text-xs px-2 py-1 rounded-full ${Formatters.getSentimentBadge(article.sentiment)}">
-                        <i class="fas ${Formatters.getSentimentIcon(article.sentiment)} mr-1"></i>
-                        ${article.sentiment || 'neutral'}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs px-2 py-1 rounded-full ${Formatters.getSentimentBadge(article.sentiment)} sentiment sentiment-${article.sentiment || 'neutral'}">
+                            <i class="fas ${Formatters.getSentimentIcon(article.sentiment)} mr-1"></i>
+                            ${article.sentiment || 'neutral'}
+                        </span>
+                        <button class="feedback-correction-btn text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                data-article-id="${article.id}"
+                                data-current-sentiment="${article.sentiment || 'neutral'}"
+                                title="Corriger le sentiment">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
                     ${article.link ? `
-                    <a href="${article.link}" target="_blank" 
+                    <a href="${article.link}" target="_blank"
                        class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center">
                         Lire <i class="fas fa-external-link-alt ml-1 text-xs"></i>
                     </a>

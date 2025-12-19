@@ -16,14 +16,40 @@ class ArticleAnalysisFeedback {
      */
     initialize() {
         console.log('🔗 Initialisation collecte feedback articles...');
-        
+
         // Intercepter les analyses d'articles
         this.interceptArticleAnalysis();
-        
-        // Ajouter des boutons de correction dans l'interface
-        this.addCorrectionButtons();
-        
+
+        // Utiliser délégation d'événements pour les boutons de correction
+        this.setupEventDelegation();
+
         console.log('✅ Collecte feedback articles initialisée');
+    }
+
+    /**
+     * Configure la délégation d'événements pour les boutons de correction
+     */
+    setupEventDelegation() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.feedback-correction-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const articleId = btn.dataset.articleId;
+                const currentSentiment = btn.dataset.currentSentiment || 'neutral';
+
+                console.log('🔧 Clic sur bouton correction, article:', articleId);
+
+                // Trouver la carte d'article parente
+                const articleCard = btn.closest('[data-article-id]');
+                if (articleCard) {
+                    this.showCorrectionModal(articleCard);
+                }
+            }
+        });
+
+        console.log('✅ Délégation d\'événements configurée pour les boutons de correction');
     }
 
     /**
@@ -372,12 +398,15 @@ class ArticleAnalysisFeedback {
 // Instance globale
 window.ArticleAnalysisFeedback = new ArticleAnalysisFeedback();
 
-// Initialisation automatique
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
+// Initialisation automatique IMMÉDIATE (pas de délai)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
         window.ArticleAnalysisFeedback.initialize();
-    }, 1000);
-});
+    });
+} else {
+    // DOM déjà chargé, initialiser immédiatement
+    window.ArticleAnalysisFeedback.initialize();
+}
 
 // Styles pour les animations
 const style = document.createElement('style');

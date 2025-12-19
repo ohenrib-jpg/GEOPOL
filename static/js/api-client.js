@@ -10,6 +10,12 @@
 
     class ApiClient {
         static async get(url) {
+            // Ignorer les requêtes pendant le shutdown
+            if (window.isShuttingDown) {
+                console.log('🛑 Requête GET annulée (shutdown en cours):', url);
+                return Promise.resolve({ success: false, error: 'Shutdown en cours' });
+            }
+
             try {
                 console.log(`📡 ApiClient GET: ${url}`);
                 const response = await fetch(url);
@@ -20,12 +26,21 @@
                 console.log(`📡 ApiClient GET success:`, data);
                 return data;
             } catch (error) {
-                console.error(`❌ ApiClient GET error (${url}):`, error);
+                // Ne pas logger les erreurs pendant le shutdown
+                if (!window.isShuttingDown) {
+                    console.error(`❌ ApiClient GET error (${url}):`, error);
+                }
                 throw error;
             }
         }
 
         static async post(url, data) {
+            // Ignorer les requêtes pendant le shutdown (sauf pour /api/shutdown)
+            if (window.isShuttingDown && !url.includes('/api/shutdown')) {
+                console.log('🛑 Requête POST annulée (shutdown en cours):', url);
+                return Promise.resolve({ success: false, error: 'Shutdown en cours' });
+            }
+
             try {
                 console.log(`📡 ApiClient POST: ${url}`, data);
                 const response = await fetch(url, {
@@ -43,12 +58,21 @@
                 console.log(`📡 ApiClient POST success:`, result);
                 return result;
             } catch (error) {
-                console.error(`❌ ApiClient POST error (${url}):`, error);
+                // Ne pas logger les erreurs pendant le shutdown
+                if (!window.isShuttingDown) {
+                    console.error(`❌ ApiClient POST error (${url}):`, error);
+                }
                 throw error;
             }
         }
 
         static async put(url, data) {
+            // Ignorer les requêtes pendant le shutdown
+            if (window.isShuttingDown) {
+                console.log('🛑 Requête PUT annulée (shutdown en cours):', url);
+                return Promise.resolve({ success: false, error: 'Shutdown en cours' });
+            }
+
             try {
                 console.log(`📡 ApiClient PUT: ${url}`, data);
                 const response = await fetch(url, {
@@ -64,12 +88,20 @@
                 }
                 return await response.json();
             } catch (error) {
-                console.error(`❌ ApiClient PUT error (${url}):`, error);
+                if (!window.isShuttingDown) {
+                    console.error(`❌ ApiClient PUT error (${url}):`, error);
+                }
                 throw error;
             }
         }
 
         static async delete(url) {
+            // Ignorer les requêtes pendant le shutdown
+            if (window.isShuttingDown) {
+                console.log('🛑 Requête DELETE annulée (shutdown en cours):', url);
+                return Promise.resolve({ success: false, error: 'Shutdown en cours' });
+            }
+
             try {
                 console.log(`📡 ApiClient DELETE: ${url}`);
                 const response = await fetch(url, {
@@ -80,7 +112,9 @@
                 }
                 return await response.json();
             } catch (error) {
-                console.error(`❌ ApiClient DELETE error (${url}):`, error);
+                if (!window.isShuttingDown) {
+                    console.error(`❌ ApiClient DELETE error (${url}):`, error);
+                }
                 throw error;
             }
         }
