@@ -1,6 +1,8 @@
-🌍 GEOPOL - Analyseur Géopolitique Intelligent 
+#### 🌍 GEOPOL - Analyseur Géopolitique Intelligent 
 ===============================================
-#### ALLEZ A LA BRANCHE V0.8PP
+ main branch deprec. go to V0.8PP 
+ 
+ #### ALLEZ A LA BRANCHE V0.8PP
 
 
 Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles
