@@ -13,8 +13,8 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
-from Flask.database import DatabaseManager
-from Flask.sentiment_analyzer import SentimentAnalyzer
+from .database import DatabaseManager
+from .sentiment_analyzer import SentimentAnalyzer
 
 # Configuration des instances Nitter
 NITTER_INSTANCES = [

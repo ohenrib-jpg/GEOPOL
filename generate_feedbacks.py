@@ -16,16 +16,21 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 sys.path.insert(0, current_dir)
 
-# Import direct sans le point (pas de package relatif)
+# Import des modules avec gestion d'erreurs
 try:
+    # Essayer d'abord l'import absolu
     from Flask.database import DatabaseManager
     from Flask.sentiment_analyzer import SentimentAnalyzer
     print("✅ Imports depuis Flask package")
 except ImportError:
-    # Fallback si on exécute depuis Flask/
-    from database import DatabaseManager
-    from sentiment_analyzer import SentimentAnalyzer
-    print("✅ Imports directs")
+    try:
+        # Fallback vers imports relatifs
+        from database import DatabaseManager
+        from sentiment_analyzer import SentimentAnalyzer
+        print("✅ Imports directs")
+    except ImportError as e:
+        print(f"❌ Erreur imports: {e}")
+        sys.exit(1)
 
 def generate_initial_feedbacks(limit=100, confidence_threshold=0.6):
     """
@@ -154,6 +159,18 @@ def generate_initial_feedbacks(limit=100, confidence_threshold=0.6):
         
         if feedbacks_created >= 20:
             print(f"\n🎯 SEUIL ATTEINT ! L'apprentissage va se déclencher automatiquement.")
+            
+            # Déclencher manuellement l'apprentissage si possible
+            try:
+                # Import absolu pour éviter les erreurs
+                from Flask.continuous_learning import get_learning_engine
+                from Flask.sentiment_analyzer import SentimentAnalyzer as SA
+                
+                learning_engine = get_learning_engine(db_manager, SA())
+                learning_engine._check_and_trigger_learning()
+                print("🚀 Apprentissage déclenché manuellement")
+            except Exception as e:
+                print(f"⚠️ Erreur déclenchement manuel: {e}")
         else:
             print(f"\n⏳ Encore {20 - feedbacks_created} feedbacks nécessaires pour l'apprentissage.")
         
@@ -216,7 +233,7 @@ def check_feedback_status():
                 print(f"   {emoji} {sentiment}: {count}")
         
         # Vérifier si le modèle existe
-        model_path = os.path.join('instance', 'continuous_learning_model.pth')
+        model_path = os.path.join('instance', 'continuous_learning_model.json')
         model_exists = os.path.exists(model_path)
         
         print(f"\n🤖 Modèle d'apprentissage:")

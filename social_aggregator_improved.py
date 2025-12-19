@@ -14,8 +14,8 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
 from collections import Counter
-from Flask.database import DatabaseManager
-from Flask.sentiment_analyzer import SentimentAnalyzer
+from .database import DatabaseManager
+from .sentiment_analyzer import SentimentAnalyzer
 
 logger = logging.getLogger(__name__)
 

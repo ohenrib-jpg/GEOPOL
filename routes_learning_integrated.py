@@ -3,7 +3,7 @@
 Routes intégrées pour l'apprentissage continu
 """
 
-from flask import jsonify
+from flask import jsonify, request  # ← CORRECTION CRITIQUE: ajout de 'request'
 from .database import DatabaseManager
 from .continuous_learning import get_learning_engine
 

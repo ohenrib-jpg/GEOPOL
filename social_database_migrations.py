@@ -4,7 +4,7 @@ Migrations pour les tables des réseaux sociaux et stocks
 """
 
 import logging
-from Flask.database import DatabaseManager
+from .database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

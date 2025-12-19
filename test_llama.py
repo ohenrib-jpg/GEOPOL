@@ -10,7 +10,7 @@ import os
 # Ajouter le répertoire parent au path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Flask.llama_client import get_llama_client
+from .llama_client import get_llama_client
 from datetime import datetime
 
 def test_connection():

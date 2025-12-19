@@ -19,28 +19,28 @@ logger = logging.getLogger(__name__)
 class LlamaClient:
     """Client optimisé pour Mistral 7B v0.2 Q4_0 avec configuration CPU"""
     
-    def __init__(self, endpoint: str = "http://localhost:8080", timeout: int = 180):
+    def __init__(self, endpoint: str = "http://localhost:8080", timeout: int = 600):
         self.endpoint = endpoint.rstrip('/')
         self.timeout = timeout
         self.max_retries = 2
         self.retry_delay = 3
-        
-        # Configuration optimisée pour CPU Ryzen 5 5600U
+
+        # Configuration optimisée pour CPU Ryzen 5 5600U (SANS GPU)
         self.model_configs = {
             'default': {
                 'temperature': 0.3,
                 'top_p': 0.8,
                 'top_k': 40,
-                'max_tokens': 1500,
+                'max_tokens': 1200,  # Réduit de 1500 pour accélérer
                 'repeat_penalty': 1.1,
                 'stop': ["</s>", "[INST]", "[/INST]"],
-                'threads': 10
+                'threads': 6  # Réduit de 10 pour éviter contention CPU
             },
             'chat': {
                 'temperature': 0.4,
                 'top_p': 0.8,
-                'max_tokens': 400,
-                'threads': 8
+                'max_tokens': 350,  # Réduit de 400 pour accélérer
+                'threads': 4  # Réduit de 8 pour éviter contention CPU
             }
         }
     
@@ -472,8 +472,8 @@ Style concis et informatif. 300-500 mots."""
         
         raise Exception("Échec après tous les essais de reconnexion")
     
-    def _select_relevant_articles(self, articles: List[Dict], report_type: str, max_articles: int = 12) -> List[Dict]:
-        """Sélectionne les articles les plus pertinents (optimisation CPU)"""
+    def _select_relevant_articles(self, articles: List[Dict], report_type: str, max_articles: int = 8) -> List[Dict]:
+        """Sélectionne les articles les plus pertinents (optimisation CPU sans GPU)"""
         if len(articles) <= max_articles:
             return articles
         
@@ -671,7 +671,7 @@ Sois concis, utile et factuel dans tes réponses. Réponds en français en maxim
                     f"{self.endpoint}/completion",
                     json=request_data,
                     headers={"Content-Type": "application/json"},
-                    timeout=30  # Timeout court pour le chat
+                    timeout=120  # Augmenté à 120s pour CPU sans GPU
                 )
                 
                 if response.status_code == 200:

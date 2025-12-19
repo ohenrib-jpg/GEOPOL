@@ -80,7 +80,7 @@ def shutdown_endpoint():
         
         # Arrêter Flask après avoir envoyé la réponse
         def delayed_shutdown():
-            time.sleep(1)
+            time.sleep(2)  # Augmenté à 2s pour que le client reçoive la réponse
             os.kill(os.getpid(), signal.SIGTERM)
         
         # Lancer l'arrêt en arrière-plan

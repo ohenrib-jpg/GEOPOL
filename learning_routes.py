@@ -153,4 +153,25 @@ def create_learning_blueprint(db_manager: DatabaseManager) -> Blueprint:
             logger.error(f"❌ Erreur test prédiction: {e}")
             return jsonify({'error': str(e)}), 500
     
+    # NOUVELLE ROUTE POUR DÉCLENCHEMENT MANUEL
+    @learning_bp.route('/trigger-learning', methods=['POST'])
+    def trigger_learning():
+        """Déclencher manuellement une session d'apprentissage"""
+        try:
+            from .sentiment_analyzer import SentimentAnalyzer
+            sentiment_analyzer = SentimentAnalyzer()
+            learning_engine = get_learning_engine(db_manager, sentiment_analyzer)
+            
+            # Déclencher l'apprentissage
+            learning_engine._check_and_trigger_learning()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Apprentissage déclenché'
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur déclenchement apprentissage: {e}")
+            return jsonify({'error': str(e)}), 500
+    
     return learning_bp

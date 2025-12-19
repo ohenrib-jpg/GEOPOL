@@ -591,25 +591,25 @@ def get_corroborations_for_article(article_id, db_manager):
     @app.route('/api/generate-pdf', methods=['POST'])
     def generate_pdf_report():
         """Génère un PDF à partir du contenu HTML"""
-    try:
-        data = request.get_json()
-        html_content = data.get('html_content', '')
-        title = data.get('title', 'Rapport GEOPOL')
-        
-        if not html_content:
-            return jsonify({'success': False, 'error': 'Contenu HTML requis'}), 400
-        
-        # Utiliser une bibliothèque PDF comme weasyprint ou xhtml2pdf
-        # Solution temporaire : retourner le HTML pour le moment
-        return jsonify({
-            'success': True,
-            'message': 'Génération PDF à implémenter',
-            'html_content': html_content,
-            'title': title
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        try:
+            data = request.get_json()
+            html_content = data.get('html_content', '')
+            title = data.get('title', 'Rapport GEOPOL')
+
+            if not html_content:
+                return jsonify({'success': False, 'error': 'Contenu HTML requis'}), 400
+
+            # Utiliser une bibliothèque PDF comme weasyprint ou xhtml2pdf
+            # Solution temporaire : retourner le HTML pour le moment
+            return jsonify({
+                'success': True,
+                'message': 'Génération PDF à implémenter',
+                'html_content': html_content,
+                'title': title
+            }), 200
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
 
 
 

@@ -54,7 +54,7 @@ CONTEXTE DES ARTICLES:
 
 Génère un rapport structuré avec :
 1. Introduction et contexte
-2. Tendances principales (3-5 points)
+2. Tendances principales (4 points)
 3. Analyse par thème
 4. Recommandations
 5. Perspectives
@@ -109,7 +109,7 @@ Format HTML avec balises appropriées."""
 
     def _build_security_prompt(self, data_summary: str, articles_context: str) -> str:
         """Construit le prompt pour une analyse sécuritaire"""
-        return f"""Tu es un expert en sécurité internationale. Produis une analyse des enjeux de sécurité.
+        return f"""Tu es un expert en géopolitique internationale. Produis une analyse des enjeux de sécurité.
 
 DONNÉES:
 {data_summary}

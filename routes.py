@@ -1290,8 +1290,8 @@ def register_routes(app: Flask, db_manager: DatabaseManager, theme_manager: Them
                 'error': str(e)
             }), 500
 
-     # ===== API ROUTES - ANALYSE BATCH COHÉRENTE =====
-    
+    # ===== API ROUTES - ANALYSE BATCH COHÉRENTE =====
+
     @app.route('/api/batch/analyze-coherent', methods=['POST'])
     def batch_analyze_coherent():
         """

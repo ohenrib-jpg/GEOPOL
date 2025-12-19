@@ -456,7 +456,7 @@ def create_sdr_spectrum_blueprint(db_manager, sdr_service):
         """Retourne le GeoJSON SDR pour la carte"""
         try:
             # Importer et créer l'analyseur
-            from Flask.geopol_data.sdr_analyzer import SDRAnalyzer
+            from .geopol_data.sdr_analyzer import SDRAnalyzer
             
             analyzer = SDRAnalyzer(db_manager)
             geojson = analyzer.get_geojson_overlay()
@@ -529,7 +529,7 @@ def create_sdr_spectrum_blueprint(db_manager, sdr_service):
     def get_sdr_zones():
         """Liste des zones SDR surveillées"""
         try:
-            from Flask.geopol_data.sdr_analyzer import SDRAnalyzer
+            from .geopol_data.sdr_analyzer import SDRAnalyzer
             
             analyzer = SDRAnalyzer(db_manager)
             
@@ -564,7 +564,7 @@ def create_sdr_spectrum_blueprint(db_manager, sdr_service):
             data = request.get_json() or {}
             scan_data = data.get('scans', [])
             
-            from Flask.geopol_data.sdr_analyzer import SDRAnalyzer
+            from .geopol_data.sdr_analyzer import SDRAnalyzer
             analyzer = SDRAnalyzer(db_manager)
             
             metrics = analyzer.process_scan_data(scan_data)

@@ -6,7 +6,7 @@ Module de comparaison des sentiments RSS vs Réseaux Sociaux
 import logging
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
-from Flask.database import DatabaseManager
+from .database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
