@@ -40,7 +40,7 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Modèle IA GGUF (via llama.cpp) pour l'analyse des datas, générations de rapports, suivi des alertes configurées (Futur MAJ=>RaG), et assistance en temps réel. (j'utilise    Mistral 3.2 Q4 pour le développement => souveraineté numérique oblige)
 - Extraction d’entités géopolitiques (SpaCy NER)
 - Analyse thématique (mots‑clés, pondérations, synonymes)
-- 
+  
 *3.2 Veille géopolitique multisources*
   
 - Flux RSS configurables
