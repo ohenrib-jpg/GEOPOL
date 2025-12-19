@@ -32,24 +32,32 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Permettre une veille OSINT structurée, transparente et reproductible.
 
 ## 3. Fonctionnalités principales
+
 *3.1 Analyse sémantique*
+
 - Modèle RoBERTa pour la classification des sentiments
 - Modèle interne “Mini‑moi” (LLM local) pour l’affinage automatique
 - Modèle IA GGUF (via llama.cpp) pour l'analyse des datas, générations de rapports, suivi des alertes configurées (Futur MAJ=>RaG), et assistance en temps réel. (j'utilise    Mistral 3.2 Q4 pour le développement => souveraineté numérique oblige)
 - Extraction d’entités géopolitiques (SpaCy NER)
 - Analyse thématique (mots‑clés, pondérations, synonymes)
+- 
 *3.2 Veille géopolitique multisources*
+  
 - Flux RSS configurables
 - Réseaux sociaux (X/Twitter via Nitter, Reddit =>totalement operationnel en mode "Server", mais pas de résilience des datas lors de la coupure du logiciel pour l'instant)
 - Archives historiques (Archive.org, Gallica, WebTimeMachine)
 - Indicateurs économiques (World Bank, Eurostat, INSEE)
 - Indicateurs environnementaux (Open‑Meteo, qualité de l’air, climat, seismes, émissions EM)
+- 
 *3.3 Cartographie GEO‑DATA*
+  
 - Surcouches interactives : pays, blocs géopolitiques, NER, météo, SDR
 - Données Natural Earth (frontières, zones disputées)
 - Indicateurs économiques et environnementaux par pays
 - Timeline et évolution temporelle
+- 
 *3.4 Module SDR (nouveau – Phase 5)*
+  
 - Détection d’anomalies spectrales à faible latence
 - Surveillance de la couverture SDR mondiale
 - Algorithme statistique (moyenne mobile + écart‑type)
@@ -59,7 +67,9 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Recherche analogique dans les archives historiques
 - Mise en relation des situations actuelles avec des précédents historiques
 - Vectorisation sémantique (en cours d’amélioration)
+- 
 *3.6 Tableau de bord analytique*
+  
 - Statistiques par thème, sentiment, période
 - Comparaison RSS vs réseaux sociaux
 - Facteur_Z (dissonance narrative)
@@ -110,28 +120,37 @@ GEOPOL/
 
 
 ## 6. Cas d’usage
+
 6.1 Enseignement secondaire (HGGSP, SES)
+
 - Étude des blocs géopolitiques
 - Analyse des narratifs médiatiques
 - Compréhension des indicateurs économiques
 - Introduction à l’OSINT et à la veille stratégique
+- 
 6.2 Enseignement supérieur
+  
 - Travaux dirigés en géopolitique, relations internationales, journalisme
 - Analyse de corpus médiatiques
 - Études de cas historiques comparées
 - Projets de data science appliquée
+- 
 6.3 Recherche académique
+  
 - Analyse temporelle des tendances géopolitiques
 - Études de dissonance narrative (Facteur_Z)
 - Corrélation entre indicateurs économiques, environnementaux et médiatiques
 - Études sur la résilience informationnelle
+- 
 6.4 OSINT et veille stratégique
+  
 - Surveillance multisource (RSS, réseaux sociaux, archives)
 - Détection d’événements émergents
 - Analyse spectrale SDR (activité radio, anomalies)
 - Cartographie dynamique des risques
 
 ## 7. Installation
+
 Prérequis
 - Windows 10/11 ou Linux
 - Python 3.10+
@@ -153,6 +172,7 @@ https://docs.google.com/document/d/16En08evIWGONLgTneTCkD1uWiB2Qb9V4/edit?usp=sh
 
 
 ## 8. Roadmap (V0.8PP → V1.0)
+
 Stabilisation des fonctions.
 Rajout des db pour utilisations ponctuelles.
 Rajout des surcouches leaflet
@@ -162,6 +182,7 @@ Migration "Big-Bang vers PostgreSQL
 API REST ?
 
 ## **!!9. Limitations actuelles!!**
+
 - Certaines fonctions sont encore simulées (mock)
 - Archiviste en cours d’amélioration
 - Pas encore de base de données résiliente pour les réseaux sociaux
@@ -172,6 +193,7 @@ Projet open‑source sous licence MIT.
 Utilisation **libre pour l’enseignement, la recherche et l’analyse**.
 
 ## 11. Contribution
+
 Les contributions sont les bienvenues :
 - Documentation
 - Connecteurs de données
@@ -182,6 +204,7 @@ Les contributions sont les bienvenues :
 
 
 #### GEOPOL Analytics
+
 Open‑Source Platform for Geopolitical, Media and Environmental Analysis
 (Open‑source license strictly limited to Education and Research use)
 Overview
@@ -239,6 +262,7 @@ OSINT & Strategic Monitoring
 
 
 #### GEOPOL Analytics
+
 地缘政治、媒体与环境分析的开源平台
 （开源许可仅限教育与科研用途）
 概述
