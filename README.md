@@ -1,6 +1,11 @@
-                                                 **GEOPOL Analytics**
+                                                        **GEOPOL Analytics**
                                                  
-**Plateforme Open‑Source d’analyse Géopolitique et de veille stratégique, avec des fonctions d'OSINT, et utilisant des IA locales**
+**Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles**
+
+Open‑Source Platform for Geopolitical Analysis and Strategic Monitoring, with OSINT Capabilities and Local AI Models
+
+具备 OSINT 功能、使用本地人工智能模型的地缘政治分析与战略监测开源平台
+
 
 Version : V0.8PPStable(En dev.)
 
