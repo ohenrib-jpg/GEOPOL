@@ -3,31 +3,29 @@
   "indicators": {
     "inflation": {
       "value": 0.9,
-      "period": "novembre 2025",
+      "period": "janvier 2025",
       "name": "Inflation (glissement annuel)",
       "unit": "%",
-      "source": "INSEE homepage",
-      "confidence": "medium"
+      "source": "INSEE (scraping)",
+      "last_update": "2025-11-29T19:34:48.337283"
     },
     "unemployment": {
-      "value": 7.7,
-      "period": "2025-Q4",
+      "value": 0.9,
+      "period": "janvier 2025",
       "name": "Taux de chômage",
       "unit": "%",
-      "source": "INSEE homepage",
-      "confidence": "medium"
+      "source": "INSEE (scraping)",
+      "last_update": "2025-11-29T19:34:48.342880"
     },
     "growth": {
-      "value": 0.5,
-      "period": "2025-Q4",
+      "value": 0.9,
+      "period": "janvier 2025",
       "name": "Croissance du PIB",
-      "unit": "% (variation trimestrielle)",
-      "source": "INSEE homepage",
-      "confidence": "medium"
+      "unit": "% (variation annuelle)",
+      "source": "INSEE (scraping)",
+      "last_update": "2025-11-29T19:34:48.348567"
     }
   },
-  "timestamp": "2025-12-17T10:47:28.646022",
-  "source": "INSEE scraping direct",
-  "scraped_url": "https://www.insee.fr/fr/accueil",
-  "note": "Données extraites de la page d'accueil INSEE"
+  "timestamp": "2025-11-29T19:34:48.348567",
+  "source": "INSEE scraping"
 }

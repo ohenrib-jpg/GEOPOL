@@ -1,0 +1,354 @@
+<!-- Panneau Satellite -->
+<div id="satellite-panel" class="panel">
+    <div class="panel-header">
+        <h3>🛰️ Imagerie Satellite</h3>
+        <div id="satellite-credentials-status" class="credentials-status">
+            <!-- Statut des identifiants sera mis à jour par JavaScript -->
+        </div>
+    </div>
+    
+    <div class="panel-content">
+        <!-- Onglets -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('layers')">Couches</button>
+            <button class="tab-btn" onclick="switchTab('dates')">Dates</button>
+            <button class="tab-btn" onclick="switchTab('info')">Info</button>
+        </div>
+        
+        <!-- Contenu des onglets -->
+        <div id="layers-tab" class="tab-content active">
+            <div id="satellite-layers-container">
+                <!-- Les couches seront chargées ici -->
+                <div class="loading">Chargement des couches...</div>
+            </div>
+            
+            <div class="actions">
+                <button onclick="satelliteIntegration.clearAllLayers()" class="btn">
+                    🗑️ Retirer toutes les couches
+                </button>
+            </div>
+        </div>
+        
+        <div id="dates-tab" class="tab-content">
+            <div class="form-group advanced-feature">
+                <label>Période:</label>
+                <input type="date" id="start-date" value="">
+                <input type="date" id="end-date" value="">
+                <button onclick="searchAvailableDates()" class="btn-small">Rechercher</button>
+            </div>
+            
+            <div id="dates-results">
+                <p>Sélectionnez une période pour voir les dates disponibles.</p>
+            </div>
+        </div>
+        
+        <div id="info-tab" class="tab-content">
+            <div class="info-section">
+                <h4>Mode Basique</h4>
+                <p>Utilise des mosaïques globales gratuites sans inscription.</p>
+                <ul>
+                    <li>Sentinel-2 Cloudless (2020, 2023)</li>
+                    <li>Landsat 8 Composite</li>
+                    <li>Résolution: 10m-60m</li>
+                </ul>
+            </div>
+            
+            <div class="info-section advanced-feature">
+                <h4>Mode Avancé</h4>
+                <p>Accès aux données Sentinel à la demande avec votre compte Copernicus.</p>
+                <ul>
+                    <li>Images récentes (jusqu'à 5 jours)</li>
+                    <li>Calculs d'indices (NDVI, NDWI, etc.)</li>
+                    <li>Comparaison temporelle</li>
+                    <li>Résolution jusqu'à 10m</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h4>Comment obtenir des identifiants ?</h4>
+                <ol>
+                    <li>Créez un compte gratuit sur <a href="https://dataspace.copernicus.eu/" target="_blank">dataspace.copernicus.eu</a></li>
+                    <li>Allez dans le Sentinel Hub Dashboard</li>
+                    <li>Créez un OAuth Client</li>
+                    <li>Copiez le Client ID et Client Secret</li>
+                    <li>Collez-les dans le formulaire ci-dessus</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fonctions pour l'interface utilisateur
+function switchTab(tabName) {
+    // Masquer tous les onglets
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Désactiver tous les boutons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Activer l'onglet sélectionné
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function searchAvailableDates() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        alert('Veuillez sélectionner une période complète');
+        return;
+    }
+    
+    const bounds = window.map.getBounds();
+    const bbox = [
+        bounds.getWest(), 
+        bounds.getSouth(), 
+        bounds.getEast(), 
+        bounds.getNorth()
+    ];
+    
+    satelliteIntegration.getAvailableDates(bbox, startDate, endDate)
+        .then(dates => {
+            displayDatesResults(dates);
+        });
+}
+
+function displayDatesResults(dates) {
+    const container = document.getElementById('dates-results');
+    
+    if (dates.length === 0) {
+        container.innerHTML = '<p>Aucune date disponible pour cette période.</p>';
+        return;
+    }
+    
+    let html = '<div class="dates-list">';
+    dates.forEach(dateInfo => {
+        html += `
+            <div class="date-item">
+                <strong>${dateInfo.date}</strong>
+                ${dateInfo.cloud_cover !== undefined ? `<span>Couverture nuageuse: ${dateInfo.cloud_cover}%</span>` : ''}
+                <button onclick="satelliteIntegration.addLayerToMap('${dateInfo.layer || 's2cloudless'}', '${dateInfo.date}')" 
+                        class="btn-small">Ajouter</button>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// Initialiser les dates par défaut
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    document.getElementById('start-date').valueAsDate = thirtyDaysAgo;
+    document.getElementById('end-date').valueAsDate = today;
+});
+</script>
+
+<style>
+/* Styles pour le panneau satellite */
+#satellite-panel {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.credentials-status {
+    font-size: 0.9em;
+}
+
+.credentials-status .status-active {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.credentials-status .status-inactive {
+    color: #6c757d;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    border-bottom-color: #007bff;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.layers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.layer-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.layer-card h4 {
+    margin: 0 0 5px 0;
+    font-size: 1em;
+}
+
+.layer-card p {
+    font-size: 0.85em;
+    color: #666;
+    margin: 5px 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.actions {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section h4 {
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
+.info-section ul {
+    padding-left: 20px;
+}
+
+.dates-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.date-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.date-item:last-child {
+    border-bottom: none;
+}
+
+.advanced-feature.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Styles pour la modale */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Styles pour les boutons */
+.btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.btn-small {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-small:hover {
+    background-color: #545b62;
+}
+</style>
