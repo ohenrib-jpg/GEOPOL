@@ -67,7 +67,11 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Recherche analogique dans les archives historiques
 - Mise en relation des situations actuelles avec des précédents historiques
 - Vectorisation sémantique (en cours d’amélioration)
-  
+
+*3.5 Surveillance satellite grace aux sources publiques Copernicus et autres*
+
+- En cours de test. Les fichiers sont dans ce repo, mais le blueprint n'est pas encore dans app_factory.py
+
 *3.6 Tableau de bord analytique*
   
 - Statistiques par thème, sentiment, période
