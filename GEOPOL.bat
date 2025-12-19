@@ -50,8 +50,8 @@ echo [2/3] Demarrage du serveur IA Mistral 7B...
 echo   (fenetre minimisee dans la barre des taches)
 echo.
 
-REM Démarrage du serveur IA en mode MINIMISÉ
-start "Serveur IA - Mistral 7B" /MIN /D "%LLAMA_DIR%" cmd /c "%SERVER_EXE% -m models\%MODEL_FILE% --host 0.0.0.0 --port %LLAMA_PORT% --ctx-size 4096 --threads 10 --temp 0.1 --repeat-penalty 1.1"
+REM Démarrage du serveur IA en mode MINIMISÉ - OPTIMISÉ POUR CPU SANS GPU
+start "Serveur IA - Mistral 7B" /MIN /D "%LLAMA_DIR%" cmd /c "%SERVER_EXE% -m models\%MODEL_FILE% --host 0.0.0.0 --port %LLAMA_PORT% --ctx-size 2048 --threads 4 --batch-size 512 --n-gpu-layers 0 --temp 0.1 --repeat-penalty 1.1 --keep -1"
 
 echo   [OK] Serveur IA demarre (minimise)
 echo.

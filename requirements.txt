@@ -9,7 +9,7 @@ flask-cors==4.0.0
 werkzeug==3.0.1
 
 # Base de données
-sqlite3  # Intégré à Python
+# sqlite3 est intégré à Python, pas besoin de l'installer via pip
 
 # Traitement de données
 pandas==2.1.4

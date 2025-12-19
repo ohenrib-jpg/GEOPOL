@@ -411,6 +411,21 @@
             font-size: 0.85em;
         }
 
+        .feedback-correction-btn {
+            margin-left: 8px;
+            padding: 2px 6px;
+            background: #4f46e5; /* indigo-600 */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+            .feedback-correction-btn:hover {
+                background: #4338ca; /* indigo-700 */
+            }
+
     </style>
 </head>
 <body class="bg-slate-50">
@@ -587,18 +602,21 @@
                         <span class="font-medium">Archiviste comparatif</span>
                     </a>
 
-                    <!-- BOUTON INDICATEURS FRANÇAIS MAJ0412-->
-                    <a href="/indicators/france" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white bg-gradient-to-r from-blue-900/30 to-blue-700/30 border-l-4 border-blue-500">
-                        <i class="nav-icon fas fa-flag"></i>
-                        <span class="font-medium">Indicateurs Eco. Français</span>
-                        <span class="badge-economy">🇫🇷</span>
-                    </a>
-
-                    <!-- BOUTON INDICATEURS INTERNATIONAUX MAJ0412-->
-                    <a href="/indicators" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white bg-gradient-to-r from-purple-900/30 to-purple-700/30 border-l-4 border-purple-500">
-                        <i class="nav-icon fas fa-globe"></i>
-                        <span class="font-medium">Indicateurs Eco. Inter.</span>
-                        <span class="badge-economy">🌍</span>
+                    <!-- UN SEUL BOUTON PRINCIPAL POUR LES INDICATEURS indicators_france_dashboard ET indicators_international VIA indicators_dashboard.html -->
+                    <a href="/indicators/dashboard" class="nav-item flex items-center space-x-3 p-3 text-slate-200 hover:text-white bg-gradient-to-r from-emerald-900/30 via-blue-900/30 to-purple-900/30 border-l-4 border-emerald-500">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <div class="flex-1">
+                            <div class="font-medium flex items-center">
+                                <span>Indicateurs Économiques</span>
+                                <span class="ml-2 flex space-x-1">
+                                    <span class="badge bg-blue-500 text-white px-2 py-1 rounded-full text-xs">🇫🇷</span>
+                                    <span class="badge bg-purple-500 text-white px-2 py-1 rounded-full text-xs">🌍</span>
+                                    <span class="badge bg-green-500 text-white px-2 py-1 rounded-full text-xs">📊</span>
+                                </span>
+                            </div>
+                            <div class="text-xs text-emerald-300/80 mt-0.5">Dashboard complet (France, International, Eurostat)</div>
+                        </div>
+                        <span class="badge-dashboard">Nouveau</span>
                     </a>
 
                     <!-- MODULE DEMOGRAPHIE ET STATS - Style Économique -->
@@ -631,23 +649,32 @@
                     <div class="text-slate-400 text-xs font-mono">
                         <div class="flex justify-between items-center mb-2">
                             <span>Système</span>
-                            <span class="text-green-400">● ACTIF</span>
+                            <span id="system-status" class="text-green-400">● ACTIF</span>
                         </div>
                         <div class="space-y-1">
                             <div class="flex justify-between">
-                                <span>Charge IA:</span>
-                                <span class="text-yellow-400">38%</span>
+                                <span>CPU:</span>
+                                <span id="cpu-usage" class="text-yellow-400">--</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Mémoire:</span>
-                                <span class="text-blue-400">2.4GB</span>
+                                <span id="memory-usage" class="text-blue-400">--</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>Éco. Inter.:</span>
-                                <span class="text-green-400">● CONNECTÉ</span>
+                                <span>IA Mistral:</span>
+                                <span id="llama-status" class="text-gray-400">● INACTIF</span>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Bouton d'arrêt du système -->
+                <div class="mt-4">
+                    <button id="shutdownBtn"
+                            class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 border border-red-500">
+                        <i class="fas fa-power-off text-lg"></i>
+                        <span>Arrêt du système</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -692,6 +719,7 @@
     <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
     <script src="{{ url_for('static', filename='js/filters.js') }}"></script>
     <script src="{{ url_for('static', filename='js/continuous-learning.js') }}"></script>
+    <script src="/static/js/article-analysis-feedback.js"></script>
     <script src="{{ url_for('static', filename='js/continuous-learning-integration.js') }}"></script>
     <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
     <script src="{{ url_for('static', filename='js/advanced-analysis.js') }}"></script>
@@ -701,6 +729,8 @@
     <script src="{{ url_for('static', filename='js/ticker-banner.js') }}"></script>
     <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
     <script src="/static/js/archiviste-enhanced.js"></script>
+    <script src="{{ url_for('static', filename='js/shutdown.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/system-monitor.js') }}"></script>
     {% if request.path == '/dashboard' %}
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     {% endif %}
@@ -801,9 +831,9 @@
                 };
 
                 if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', () => setTimeout(initLearning,500));
+                    document.addEventListener('DOMContentLoaded', () => setTimeout(initLearning, 500));
                 } else {
-                    setTimeout(initLearning,500);
+                    setTimeout(initLearning, 500);
                 }
             })();
 

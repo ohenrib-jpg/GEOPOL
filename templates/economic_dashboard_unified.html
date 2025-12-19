@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Économique Unifié - GEOPOL Analytics{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+
+    <!-- Header -->
+    <div class="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Dashboard Économique Unifié</h1>
+                        <p class="text-sm text-slate-400">Analyse complète - France • International • Bourse Personnalisée</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-green-500/20 border border-green-500/50 rounded-lg px-3 py-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-green-400">Connecté</span>
+                    </div>
+                    <a href="/" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fas fa-home mr-2"></i>Accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="bg-slate-800/30 backdrop-blur-sm border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-1" role="tablist">
+                <button onclick="switchTab('france')" id="tab-france"
+                        class="tab-button active px-6 py-4 text-sm font-semibold transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
+                    <i class="fas fa-flag mr-2"></i>🇫🇷 France
+                </button>
+                <button onclick="switchTab('international')" id="tab-international"
+                        class="tab-button px-6 py-4 text-sm font-semibold transition-all duration-200 border-b-2 border-transparent hover:border-purple-500">
+                    <i class="fas fa-globe mr-2"></i>🌍 International
+                </button>
+                <button onclick="switchTab('stocks')" id="tab-stocks"
+                        class="tab-button px-6 py-4 text-sm font-semibold transition-all duration-200 border-b-2 border-transparent hover:border-green-500">
+                    <i class="fas fa-chart-area mr-2"></i>📈 Bourse Perso
+                </button>
+                <button onclick="switchTab('settings')" id="tab-settings"
+                        class="tab-button px-6 py-4 text-sm font-semibold transition-all duration-200 border-b-2 border-transparent hover:border-yellow-500">
+                    <i class="fas fa-cog mr-2"></i>⚙️ Configuration
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ========================================================================= -->
+        <!-- ONGLET 1 : FRANCE -->
+        <!-- ========================================================================= -->
+        <div id="content-france" class="tab-content active">
+
+            <!-- Status Bar France -->
+            <div class="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-blue-400 text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold text-blue-200">Sources actives</h4>
+                            <p class="text-sm text-blue-300/70">Eurostat • INSEE • Yahoo Finance</p>
+                        </div>
+                    </div>
+                    <button onclick="refreshFranceData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i>Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Indicateurs Eurostat -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-blue-400"></i>
+                    Indicateurs Eurostat Officiels
+                </h3>
+                <div id="eurostatIndicatorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Cartes générées dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Indicateurs INSEE -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-star mr-2 text-yellow-400"></i>
+                    Indicateurs INSEE (temps réel)
+                </h3>
+                <div id="inseeIndicatorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cartes générées dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Graphique CAC 40 -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-red-400"></i>
+                    Évolution CAC 40
+                </h3>
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+                    <div id="cac40Info" class="text-sm text-slate-400">Chargement...</div>
+                    <select id="periodSelectFrance" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="1mo">1 mois</option>
+                        <option value="3mo">3 mois</option>
+                        <option value="6mo" selected>6 mois</option>
+                        <option value="1y">1 an</option>
+                        <option value="2y">2 ans</option>
+                    </select>
+                </div>
+                <div class="h-80">
+                    <canvas id="chartFrance"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ONGLET 2 : INTERNATIONAL -->
+        <!-- ========================================================================= -->
+        <div id="content-international" class="tab-content hidden">
+
+            <!-- Status Bar International -->
+            <div class="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/30 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-purple-400 text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold text-purple-200">Marchés internationaux</h4>
+                            <p class="text-sm text-purple-300/70">Indices boursiers en temps réel</p>
+                        </div>
+                    </div>
+                    <button onclick="refreshInternationalData()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i>Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Indices Internationaux -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-globe mr-2 text-purple-400"></i>
+                    Indices Boursiers Internationaux
+                </h3>
+                <div id="internationalIndices" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Indices générés dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Indices Européens -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-euro-sign mr-2 text-blue-400"></i>
+                    Indices Européens
+                </h3>
+                <div id="europeanIndices" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Indices européens -->
+                </div>
+            </div>
+
+            <!-- Graphique Indice Sélectionnable -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-area mr-2 text-green-400"></i>
+                    Évolution Indice
+                </h3>
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+                    <div id="indexInfo" class="text-sm text-slate-400">Chargement...</div>
+                    <div class="flex gap-3">
+                        <select id="indexSelector" onchange="changeInternationalIndex()" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <option value="^GSPC">S&P 500</option>
+                            <option value="^DJI">Dow Jones</option>
+                            <option value="^IXIC">Nasdaq</option>
+                            <option value="^FCHI">CAC 40</option>
+                            <option value="^GDAXI">DAX</option>
+                            <option value="^FTSE">FTSE 100</option>
+                            <option value="^N225">Nikkei 225</option>
+                            <option value="^HSI">Hang Seng</option>
+                        </select>
+                        <select id="periodSelectInternational" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <option value="1mo">1 mois</option>
+                            <option value="3mo">3 mois</option>
+                            <option value="6mo" selected>6 mois</option>
+                            <option value="1y">1 an</option>
+                            <option value="2y">2 ans</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-80">
+                    <canvas id="chartInternational"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ONGLET 3 : BOURSE PERSONNALISÉE -->
+        <!-- ========================================================================= -->
+        <div id="content-stocks" class="tab-content hidden">
+
+            <!-- Indicateurs Fixes -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-tachometer-alt mr-2 text-yellow-400"></i>
+                    Indicateurs Clés
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- VIX -->
+                    <div class="bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-400">VIX (Volatilité)</span>
+                            <i class="fas fa-bolt text-red-400"></i>
+                        </div>
+                        <div id="vixValue" class="text-2xl font-bold text-white">--</div>
+                        <div id="vixChange" class="text-sm mt-1">--</div>
+                    </div>
+                    <!-- Or -->
+                    <div class="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-400">Or (Gold)</span>
+                            <i class="fas fa-coins text-yellow-400"></i>
+                        </div>
+                        <div id="goldValue" class="text-2xl font-bold text-white">--</div>
+                        <div id="goldChange" class="text-sm mt-1">--</div>
+                    </div>
+                    <!-- Pétrole -->
+                    <div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-400">Pétrole (WTI)</span>
+                            <i class="fas fa-oil-can text-blue-400"></i>
+                        </div>
+                        <div id="oilValue" class="text-2xl font-bold text-white">--</div>
+                        <div id="oilChange" class="text-sm mt-1">--</div>
+                    </div>
+                    <!-- Uranium -->
+                    <div class="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-400">Uranium (URA)</span>
+                            <i class="fas fa-atom text-green-400"></i>
+                        </div>
+                        <div id="uraniumValue" class="text-2xl font-bold text-white">--</div>
+                        <div id="uraniumChange" class="text-sm mt-1">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sélecteur d'Indice Principal -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-chart-line mr-2 text-purple-400"></i>
+                        Indice de Référence
+                    </h3>
+                    <select id="mainIndexSelector" onchange="changeMainIndex()" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white">
+                        <option value="^FCHI">CAC 40</option>
+                        <option value="^GSPC">S&P 500</option>
+                        <option value="^IXIC">Nasdaq</option>
+                        <option value="^DJI">Dow Jones</option>
+                        <option value="^GDAXI">DAX</option>
+                        <option value="^FTSE">FTSE 100</option>
+                        <option value="^N225">Nikkei 225</option>
+                    </select>
+                </div>
+                <div class="h-64">
+                    <canvas id="chartMainIndex"></canvas>
+                </div>
+            </div>
+
+            <!-- Secteurs Personnalisés -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-th-large mr-2 text-green-400"></i>
+                        Mes Secteurs Personnalisés
+                    </h3>
+                    <button onclick="openSectorModal()" id="addSectorBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
+                        <i class="fas fa-plus mr-2"></i>Ajouter un secteur
+                    </button>
+                </div>
+
+                <div id="sectorsContainer" class="space-y-4">
+                    <!-- Secteurs générés dynamiquement -->
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fas fa-folder-open text-4xl mb-4"></i>
+                        <p>Aucun secteur configuré</p>
+                        <p class="text-sm mt-2">Cliquez sur "Ajouter un secteur" pour commencer</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ONGLET 4 : CONFIGURATION -->
+        <!-- ========================================================================= -->
+        <div id="content-settings" class="tab-content hidden">
+
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8">
+                <h3 class="text-xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-sliders-h mr-2 text-yellow-400"></i>
+                    Paramètres Globaux
+                </h3>
+
+                <!-- Rafraîchissement -->
+                <div class="mb-6 pb-6 border-b border-slate-700">
+                    <h4 class="font-semibold text-white mb-3">Actualisation des données</h4>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-400">Intervalle de rafraîchissement automatique</span>
+                        <select id="refreshInterval" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <option value="0">Désactivé</option>
+                            <option value="30">30 secondes</option>
+                            <option value="60" selected>1 minute</option>
+                            <option value="300">5 minutes</option>
+                            <option value="600">10 minutes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Export -->
+                <div class="mb-6 pb-6 border-b border-slate-700">
+                    <h4 class="font-semibold text-white mb-3">Export des données</h4>
+                    <div class="flex gap-3">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-file-csv mr-2"></i>Exporter CSV
+                        </button>
+                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-file-excel mr-2"></i>Exporter Excel
+                        </button>
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-file-pdf mr-2"></i>Exporter PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div class="mb-6">
+                    <h4 class="font-semibold text-white mb-3">Gestion des alertes</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="emailAlerts" checked class="mr-2 rounded">
+                            <span class="text-sm text-slate-300">Recevoir les alertes par email</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="browserAlerts" checked class="mr-2 rounded">
+                            <span class="text-sm text-slate-300">Notifications navigateur</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Liste des alertes actives -->
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-bell mr-2 text-red-400"></i>
+                    Alertes Actives
+                </h3>
+                <div id="activeAlertsList" class="space-y-3">
+                    <!-- Alertes générées dynamiquement -->
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fas fa-bell-slash text-3xl mb-3"></i>
+                        <p>Aucune alerte configurée</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal Configuration Secteur -->
+<div id="sectorModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-white">
+                <i class="fas fa-folder-plus mr-2 text-green-400"></i>
+                <span id="modalTitle">Nouveau Secteur</span>
+            </h3>
+            <button onclick="closeSectorModal()" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form id="sectorForm" onsubmit="saveSector(event)">
+            <input type="hidden" id="sectorId" value="">
+
+            <!-- Nom du secteur -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Nom du secteur</label>
+                <input type="text" id="sectorName" required maxlength="50"
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Ex: Technologie, Santé, Énergie...">
+            </div>
+
+            <!-- Valeurs boursières -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Valeurs à suivre (max 5)</label>
+                <div id="stockInputs" class="space-y-3">
+                    <!-- Inputs générés dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeSectorModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition">
+                    Annuler
+                </button>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-save mr-2"></i>Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Tabs Styling */
+.tab-button {
+    color: #94a3b8;
+}
+
+.tab-button.active {
+    color: white;
+    border-bottom-color: currentColor;
+}
+
+.tab-button:hover {
+    color: white;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover effects */
+.indicator-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.indicator-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix pour les inputs et selects - meilleure visibilité */
+input[type="text"],
+input[type="range"],
+select {
+    color: #ffffff !important;
+    background-color: #334155 !important;
+}
+
+input[type="text"]::placeholder {
+    color: #94a3b8 !important;
+}
+
+select option {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+/* Fix pour les checkbox */
+input[type="checkbox"] {
+    background-color: #334155;
+    border-color: #64748b;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* Labels toujours visibles */
+label {
+    color: #cbd5e1 !important;
+}
+
+/* Boutons - s'assurer qu'ils sont visibles */
+button {
+    color: #ffffff !important;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal backdrop */
+.modal {
+    backdrop-filter: blur(8px);
+}
+</style>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/economic_dashboard_unified.js') }}"></script>
+
+{% endblock %}

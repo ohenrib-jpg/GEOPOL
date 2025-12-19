@@ -82,23 +82,32 @@
 
         /* Container principal */
         .container {
-            display: flex;
+            position: relative;
+            width: 100%;
             height: calc(100vh - 80px);
         }
 
-        /* Carte */
+        /* Carte - TOUJOURS plein écran */
         #map {
-            flex: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
             z-index: 1;
         }
 
-        /* Panneau latéral */
+        /* Panneau latéral - Flotte au-dessus de la carte */
         .sidebar {
+            position: fixed;
+            top: 80px;
+            right: 0;
             width: 400px;
+            height: calc(100vh - 80px);
             background: rgba(30, 41, 59, 0.98);
             border-left: 2px solid #475569;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
             z-index: 2;
@@ -264,7 +273,7 @@
 
         /* Toggle sidebar button */
         .toggle-sidebar {
-            position: absolute;
+            position: fixed;
             top: 100px;
             right: 420px;
             z-index: 3;
@@ -273,14 +282,14 @@
             border-radius: 8px 0 0 8px;
             padding: 1rem 0.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: right 0.3s ease, background 0.3s ease;
         }
 
             .toggle-sidebar:hover {
                 background: rgba(51, 65, 85, 0.95);
             }
 
-        .sidebar.hidden + .toggle-sidebar {
+        .sidebar.hidden ~ .toggle-sidebar {
             right: 10px;
         }
 
@@ -311,6 +320,276 @@
             color: #64748b;
         }
 
+        /* Layer Control Panel - Amélioré */
+        .layer-control {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(30, 41, 59, 0.98);
+            border: 2px solid #475569;
+            border-radius: 12px;
+            padding: 0;
+            min-width: 280px;
+            max-width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .layer-control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 10px 10px 0 0;
+            border-bottom: 2px solid #475569;
+        }
+
+        .layer-control-header h4 {
+            color: #f59e0b;
+            font-size: 0.95rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .collapse-all-btn {
+            background: rgba(71, 85, 105, 0.5);
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .collapse-all-btn:hover {
+            background: rgba(100, 116, 139, 0.7);
+        }
+
+        /* Section Layer */
+        .layer-section {
+            border-bottom: 1px solid #334155;
+        }
+
+        .layer-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: rgba(51, 65, 85, 0.5);
+        }
+
+        .section-icon {
+            color: #64748b;
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            width: 12px;
+        }
+
+        .section-header.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-title {
+            flex: 1;
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .section-status {
+            font-size: 0.5rem;
+            color: #64748b;
+            transition: color 0.3s;
+        }
+
+        .section-status.active {
+            color: #10b981;
+        }
+
+        .section-content {
+            padding: 0.5rem 1rem 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.3);
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            padding: 0 1rem;
+        }
+
+        /* Layer Item */
+        .layer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .layer-item:hover {
+            background: rgba(51, 65, 85, 0.5);
+            border-left-color: #f59e0b;
+        }
+
+        .layer-item label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+        }
+
+        .layer-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .layer-name {
+            flex: 1;
+        }
+
+        .status-indicator {
+            font-size: 0.6rem;
+            color: #64748b;
+            margin-left: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .status-indicator.active {
+            color: #10b981;
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-indicator.inactive {
+            color: #64748b;
+        }
+
+        .layer-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .layer-info {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            padding: 0.5rem;
+            background: rgba(100, 116, 139, 0.1);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            border-left: 2px solid #60a5fa;
+        }
+
+        /* Legend */
+        .layer-legend {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.35rem;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        /* Weather Legend */
+        .weather-legend {
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid #475569;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            min-width: 180px;
+        }
+
+        .weather-legend h4 {
+            color: #f59e0b;
+            font-size: 0.875rem;
+            margin: 0 0 0.75rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .weather-legend .legend-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .weather-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .weather-legend .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        /* Weather Popup */
+        .weather-popup h4 {
+            margin: 0 0 0.5rem 0;
+            color: #f59e0b;
+            font-size: 1rem;
+        }
+
+        .weather-popup p {
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -322,6 +601,16 @@
 
             .toggle-sidebar {
                 right: 10px;
+            }
+
+            .layer-control {
+                top: 80px;
+                left: 10px;
+            }
+
+            .weather-legend {
+                min-width: 150px;
+                padding: 0.75rem;
             }
         }
     </style>
@@ -379,32 +668,275 @@
         ⚙️ Configurer les alertes
     </button>
 
-    <!-- 📡 Couches SDR -->
+    <!-- 📡 Contrôle des Couches Amélioré -->
     <div class="layer-control">
-        <h4>📡 Couches SDR</h4>
-        <label>
-            <input type="checkbox" id="sdr-layer-toggle" checked>
-            Santé réseau SDR
-        </label>
-        <div class="sdr-legend">
-            <div class="legend-item">
-                <span class="legend-color" style="background:#ff0000"></span>
-                Critique
+        <div class="layer-control-header">
+            <h4>🗺️ Panneau de Contrôle</h4>
+            <button class="collapse-all-btn" onclick="collapseAllSections()" title="Réduire tout">▼</button>
+        </div>
+
+        <!-- Section Données Géopolitiques -->
+        <div class="layer-section">
+            <div class="section-header" onclick="toggleSection('geopolitical-section')">
+                <span class="section-icon">▼</span>
+                <span class="section-title">🌍 Données Géopolitiques</span>
+                <span class="section-status" id="geopolitical-status">●</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background:#ff6b00"></span>
-                Haut risque
+            <div class="section-content" id="geopolitical-section">
+                <!-- Zones Géopolitiques -->
+                <div class="layer-item">
+                    <label>
+                        <input type="checkbox" id="geopolitical-entities-toggle" checked onchange="toggleGeopoliticalEntities(this.checked); updateLayerStatus('geopolitical')">
+                        <span class="layer-name">Zones Géopolitiques</span>
+                    </label>
+                    <span class="status-indicator active" id="geopolitical-entities-status">●</span>
+                </div>
+
+                <!-- Légende Zones Géopolitiques -->
+                <div class="layer-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ff0000"></span>
+                        <span>Critique</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ff6b00"></span>
+                        <span>Haut risque</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ffd700"></span>
+                        <span>Avertissement</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#90ee90"></span>
+                        <span>Stable</span>
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background:#ffd700"></span>
-                Avertissement
+        </div>
+
+        <!-- Section Surveillance -->
+        <div class="layer-section">
+            <div class="section-header" onclick="toggleSection('surveillance-section')">
+                <span class="section-icon">▼</span>
+                <span class="section-title">📡 Surveillance</span>
+                <span class="section-status" id="surveillance-status">●</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background:#90ee90"></span>
-                Stable
+            <div class="section-content" id="surveillance-section">
+                <!-- Récepteurs SDR -->
+                <div class="layer-item">
+                    <label>
+                        <input type="checkbox" id="sdr-receivers-toggle" onchange="toggleSDRReceivers(this.checked); updateLayerStatus('surveillance')">
+                        <span class="layer-name">Récepteurs SDR Globaux</span>
+                    </label>
+                    <span class="status-indicator inactive" id="sdr-receivers-status">●</span>
+                </div>
+
+                <!-- Légende SDR -->
+                <div class="layer-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#00ff00"></span>
+                        <span>Actif (< 5 min)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ffd700"></span>
+                        <span>Ralenti (5-30 min)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ff0000"></span>
+                        <span>Inactif (> 30 min)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Environnement -->
+        <div class="layer-section">
+            <div class="section-header" onclick="toggleSection('environment-section')">
+                <span class="section-icon">▼</span>
+                <span class="section-title">🌦️ Environnement</span>
+                <span class="section-status" id="environment-status">●</span>
+            </div>
+            <div class="section-content" id="environment-section">
+                <!-- Qualité de l'Air (AQI) -->
+                <div class="layer-item">
+                    <label>
+                        <input type="checkbox" id="meteo-layer-toggle" onchange="toggleWeatherLayer(this.checked); updateLayerStatus('environment')">
+                        <span class="layer-name">Qualité de l'Air (AQI)</span>
+                    </label>
+                    <span class="status-indicator inactive" id="meteo-layer-status">●</span>
+                </div>
+
+                <!-- Info AQI -->
+                <div class="layer-info">
+                    ℹ️ Indicateur faible géopolitique/macroéconomique
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Séismes -->
+        <div class="layer-section">
+            <div class="section-header" onclick="toggleSection('earthquakes-section')">
+                <span class="section-icon">▼</span>
+                <span class="section-title">🌍 Séismes (Temps Réel)</span>
+                <span class="section-status" id="earthquakes-status">●</span>
+            </div>
+            <div class="section-content" id="earthquakes-section">
+                <!-- Couche Séismes -->
+                <div class="layer-item">
+                    <label>
+                        <input type="checkbox" id="earthquakes-layer-toggle" onchange="toggleEarthquakesLayer(this.checked); updateLayerStatus('earthquakes')">
+                        <span class="layer-name">Afficher les Séismes</span>
+                    </label>
+                    <span class="status-indicator inactive" id="earthquakes-layer-status">●</span>
+                </div>
+
+                <!-- Contrôle Magnitude -->
+                <div class="layer-info" style="background: rgba(245, 158, 11, 0.1); border-left: 2px solid #f59e0b;">
+                    <label for="magnitude-slider" style="display: block; margin-bottom: 0.5rem; color: #fbbf24; font-weight: 600;">
+                        Magnitude minimale: <span id="magnitude-value">4.5</span>
+                    </label>
+                    <input type="range"
+                           id="magnitude-slider"
+                           min="1"
+                           max="9"
+                           step="0.5"
+                           value="4.5"
+                           onchange="updateEarthquakeMagnitude(this.value)"
+                           style="width: 100%; cursor: pointer;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem;">
+                        <span>1.0 (Mineur)</span>
+                        <span>5.0</span>
+                        <span>9.0+ (Majeur)</span>
+                    </div>
+                </div>
+
+                <!-- Info Séismes -->
+                <div class="layer-info">
+                    ℹ️ Données USGS - Dernière semaine - Actualisées en temps réel
+                </div>
+
+                <!-- Légende Séismes -->
+                <div class="layer-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#00ff00"></span>
+                        <span>< 3.0 Mineur</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ffff00"></span>
+                        <span>3.0-4.0 Léger</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ffa500"></span>
+                        <span>4.0-5.0 Modéré</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ff4500"></span>
+                        <span>5.0-6.0 Fort</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#ff0000"></span>
+                        <span>6.0-7.0 Majeur</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background:#8b0000"></span>
+                        <span>7.0+ Catastrophique</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Panel de Gestion des Profils -->
+    <div class="profile-manager-panel" id="profileManagerPanel" style="display: none;">
+        <div class="profile-manager-header">
+            <h3>⚙️ Gestion des Profils</h3>
+            <button class="close-profile-panel" onclick="closeProfileManager()">×</button>
+        </div>
+
+        <div class="profile-manager-content">
+            <!-- Section: Profils par Défaut -->
+            <div class="profile-section">
+                <h4>📋 Profils Par Défaut</h4>
+                <div class="profile-list">
+                    <div class="profile-item" data-profile="default">
+                        <div class="profile-info">
+                            <strong>🎯 Default</strong>
+                            <p>Vue basique avec pays et zones géopolitiques</p>
+                        </div>
+                        <button onclick="loadProfileFromUI('default')" class="btn-load">Charger</button>
+                    </div>
+
+                    <div class="profile-item" data-profile="analyst">
+                        <div class="profile-info">
+                            <strong>🔬 Analyst</strong>
+                            <p>Toutes les couches activées pour analyse approfondie</p>
+                        </div>
+                        <button onclick="loadProfileFromUI('analyst')" class="btn-load">Charger</button>
+                    </div>
+
+                    <div class="profile-item" data-profile="meteo">
+                        <div class="profile-info">
+                            <strong>🌤️ Meteo</strong>
+                            <p>Focus sur données environnementales et climatiques</p>
+                        </div>
+                        <button onclick="loadProfileFromUI('meteo')" class="btn-load">Charger</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Profils Personnalisés -->
+            <div class="profile-section">
+                <h4>💾 Profils Personnalisés</h4>
+                <div id="customProfilesList" class="profile-list">
+                    <p class="empty-message">Aucun profil personnalisé</p>
+                </div>
+            </div>
+
+            <!-- Section: Sauvegarder Profil Actuel -->
+            <div class="profile-section">
+                <h4>💾 Sauvegarder l'État Actuel</h4>
+                <div class="save-profile-form">
+                    <input type="text" id="profileName" placeholder="Nom du profil" required>
+                    <textarea id="profileDescription" placeholder="Description (optionnel)" rows="2"></textarea>
+                    <button onclick="saveCurrentProfile()" class="btn-save">💾 Sauvegarder</button>
+                </div>
+            </div>
+
+            <!-- Section: Profil Actif -->
+            <div class="profile-section">
+                <h4>✅ Profil Actif</h4>
+                <div id="activeProfileInfo" class="active-profile-info">
+                    <p id="activeProfileName">Aucun profil chargé</p>
+                </div>
+            </div>
+
+            <!-- Section: Export/Import -->
+            <div class="profile-section">
+                <h4>📤 Export / Import</h4>
+                <div class="export-import-controls">
+                    <button onclick="exportActiveProfile()" class="btn-export" title="Exporter le profil actif en JSON">
+                        📤 Exporter le profil actif
+                    </button>
+
+                    <div class="import-zone">
+                        <label for="importFileInput" class="btn-import" title="Importer un profil depuis un fichier JSON">
+                            📥 Importer un profil
+                        </label>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importProfileFromFile(this)">
+                    </div>
+
+                    <p class="help-text">💡 Partagez vos profils en exportant/important des fichiers JSON</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton Flottant pour Ouvrir le Gestionnaire de Profils -->
+    <button class="floating-profile-btn" id="profileBtn" onclick="openProfileManager()" title="Gestion des Profils">
+        ⚙️ Profils
+        <span id="dirtyBadge" class="dirty-badge" style="display: none;" title="Modifications non sauvegardées">●</span>
+    </button>
+
     <!-- Modal flottante -->
     <div id="alertsConfigModal" class="modal hidden">
         <div class="modal-content">
@@ -470,6 +1002,294 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 1000;
+        }
+
+        /* Bouton Flottant Gestion des Profils */
+        .floating-profile-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .floating-profile-btn:hover {
+                background: #059669;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            }
+
+        /* Badge "modifié" sur le bouton Profils */
+        .dirty-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            margin-left: 6px;
+            animation: pulse-badge 2s infinite;
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Panel de Gestion des Profils */
+        .profile-manager-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 1002;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-manager-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .profile-manager-header h3 {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+        .close-profile-panel {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+            .close-profile-panel:hover {
+                transform: scale(1.2);
+            }
+
+        .profile-manager-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .profile-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+            .profile-section:last-child {
+                border-bottom: none;
+            }
+
+            .profile-section h4 {
+                margin: 0 0 1rem 0;
+                color: #1e293b;
+                font-size: 1.1rem;
+            }
+
+        .profile-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .profile-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+            .profile-item:hover {
+                background: #f1f5f9;
+                border-color: #cbd5e1;
+                transform: translateX(4px);
+            }
+
+        .profile-info {
+            flex: 1;
+        }
+
+            .profile-info strong {
+                display: block;
+                color: #1e293b;
+                margin-bottom: 0.25rem;
+                font-size: 1rem;
+            }
+
+            .profile-info p {
+                margin: 0;
+                color: #64748b;
+                font-size: 0.85rem;
+            }
+
+        .btn-load, .btn-delete, .btn-save {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-load {
+            background: #3b82f6;
+            color: white;
+        }
+
+            .btn-load:hover {
+                background: #2563eb;
+            }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            margin-left: 0.5rem;
+        }
+
+            .btn-delete:hover {
+                background: #dc2626;
+            }
+
+        .btn-save {
+            background: #10b981;
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+            .btn-save:hover {
+                background: #059669;
+            }
+
+        .save-profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+            .save-profile-form input,
+            .save-profile-form textarea {
+                padding: 0.75rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                font-family: inherit;
+                font-size: 0.95rem;
+            }
+
+                .save-profile-form input:focus,
+                .save-profile-form textarea:focus {
+                    outline: none;
+                    border-color: #10b981;
+                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+                }
+
+        .active-profile-info {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+            .active-profile-info p {
+                margin: 0;
+                color: #065f46;
+                font-weight: 600;
+            }
+
+        .empty-message {
+            color: #94a3b8;
+            font-style: italic;
+            margin: 0;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* Export/Import Controls */
+        .export-import-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-export, .btn-import {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .btn-export {
+            background: #3b82f6;
+            color: white;
+        }
+
+            .btn-export:hover {
+                background: #2563eb;
+            }
+
+        .btn-import {
+            background: #8b5cf6;
+            color: white;
+            display: block;
+        }
+
+            .btn-import:hover {
+                background: #7c3aed;
+            }
+
+        .import-zone {
+            position: relative;
+        }
+
+        .help-text {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: center;
         }
 
         .modal {
@@ -566,11 +1386,11 @@
             const data = await res.json();
             const list = document.getElementById("activeAlertsList");
             list.innerHTML = data.alerts.map(alert => `
-                                      <div style="border:1px solid #ddd; padding:10px; margin:5px 0; border-radius:5px;">
-                                        <strong>${alert.name}</strong> - ${alert.country_code} : ${alert.indicator} ${alert.condition} ${alert.threshold}
-                                        <button onclick="deleteAlert(${alert.id})" style="float:right; color:red;">🗑️</button>
-                                      </div>
-                                    `).join("");
+                                          <div style="border:1px solid #ddd; padding:10px; margin:5px 0; border-radius:5px;">
+                                            <strong>${alert.name}</strong> - ${alert.country_code} : ${alert.indicator} ${alert.condition} ${alert.threshold}
+                                            <button onclick="deleteAlert(${alert.id})" style="float:right; color:red;">🗑️</button>
+                                          </div>
+                                        `).join("");
         }
 
         // Supprimer une alerte
@@ -586,107 +1406,233 @@
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Script Gestionnaire de Configuration -->
+    <script src="{{ url_for('static', filename='js/config_manager.js') }}"></script>
+
     <!-- Script principal -->
     <script src="{{ url_for('static', filename='js/geopol_map.js') }}"></script>
 
-    <!-- 🆕 MODULE MÉTÉO -->
-    <script src="{{ url_for('static', filename='js/weather_layers.js') }}"></script>
-
-    <!-- 🆕 INITIALISATION INTÉGRÉE -->
+    <!-- Scripts leaf-heat.map -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  
+    <!-- INITIALISATION UNIQUE (geopol_map.js gère déjà DOMContentLoaded) -->
     <script>
+        // Note: L'initialisation est faite dans geopol_map.js
+        // Pas besoin de double DOMContentLoaded
 
-        let weatherManager;
-
-        document.addEventListener('DOMContentLoaded', async function () {
-            try {
-                // 1. Initialiser la carte géopolitique (existant)
-                console.log('🗺️ Initialisation carte...');
-                initMap(); // Votre fonction existante
-
-                // 2. Attendre que la carte soit prête
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // 3. Initialiser les couches météo
-                console.log('🌦️ Initialisation météo...');
-                weatherManager = await initializeWeatherLayers(map);
-
-                if (weatherManager) {
-                    // Mettre à jour le statut
-                    document.getElementById('weather-status').textContent = 'Météo: actif';
-                    console.log('✅ Système météo opérationnel');
-                } else {
-                    document.getElementById('weather-status').textContent = 'Météo: erreur';
-                }
-
-            } catch (error) {
-                console.error('❌ Erreur initialisation:', error);
-                document.getElementById('weather-status').textContent = 'Météo: erreur';
-            }
-        });
-
-        // Fonction utilitaire pour ajouter météo au clic pays
-        async function onCountryClickEnriched(countryCode) {
-            console.log(`🌍 Clic pays: ${countryCode}`);
-
-            // 1. Afficher les données géopolitiques (existant)
-            await loadCountryData(countryCode); // Votre fonction existante
-
-            // 2. Enrichir avec météo
-            try {
-                const response = await fetch(`/api/geopol/weather/country/${countryCode}`);
-                const data = await response.json();
-
-                if (data.success && data.weather) {
-                    // Ajouter section météo au sidebar
-                    const weatherSection = `
-                                        <div class="data-section weather-section">
-                                            <h3>🌤️ Météo actuelle</h3>
-                                            <div class="data-row">
-                                                <span class="data-label">Température</span>
-                                                <span class="data-value">${data.weather.temperature?.toFixed(1) || 'N/A'}°C</span>
-                                            </div>
-                                            ${data.weather.precipitation !== null ? `
-                                            <div class="data-row">
-                                                <span class="data-label">Précipitations</span>
-                                                <span class="data-value">${data.weather.precipitation.toFixed(1)} mm</span>
-                                            </div>
-                                            ` : ''}
-                                            ${data.weather.wind_speed !== null ? `
-                                            <div class="data-row">
-                                                <span class="data-label">Vent</span>
-                                                <span class="data-value">${data.weather.wind_speed.toFixed(0)} km/h</span>
-                                            </div>
-                                            ` : ''}
-                                            ${data.air_quality && data.air_quality.aqi !== null ? `
-                                            <div class="data-row">
-                                                <span class="data-label">Qualité air</span>
-                                                <span class="data-value">
-                                                    <span class="score-badge score-${getAqiClass(data.air_quality.aqi)}">
-                                                        ${data.air_quality.aqi_level}
-                                                    </span>
-                                                </span>
-                                            </div>
-                                            ` : ''}
-                                        </div>
-                                    `;
-
-                    // Injecter dans le sidebar
-                    const sidebarContent = document.getElementById('sidebar-content');
-                    if (sidebarContent) {
-                        sidebarContent.insertAdjacentHTML('beforeend', weatherSection);
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Erreur chargement météo pays:', error);
+        // Fonction pour mettre à jour le statut météo
+        function updateWeatherStatus(status) {
+            const statusElement = document.getElementById('weather-status');
+            if (statusElement) {
+                statusElement.textContent = `Météo: ${status}`;
             }
         }
 
-        // Fonction helper pour classe AQI
-        function getAqiClass(aqi) {
-            if (aqi <= 50) return 'low';
-            else if (aqi <= 100) return 'medium';
-            else if (aqi <= 150) return 'high';
-            else return 'critical';
+        // Initialiser le statut
+        updateWeatherStatus('non disponible');
+
+        // ========================================
+        // FONCTIONS GESTION DES PROFILS
+        // ========================================
+
+        /**
+         * Ouvre le panel de gestion des profils
+         */
+        function openProfileManager() {
+            const panel = document.getElementById('profileManagerPanel');
+            if (panel) {
+                panel.style.display = 'flex';
+                refreshProfilesList();
+                updateActiveProfileDisplay();
+            }
+        }
+
+        /**
+         * Ferme le panel de gestion des profils
+         */
+        function closeProfileManager() {
+            const panel = document.getElementById('profileManagerPanel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }
+
+        /**
+         * Charge un profil depuis l'interface utilisateur
+         */
+        async function loadProfileFromUI(profileName) {
+            console.log(`📂 Chargement du profil "${profileName}"...`);
+
+            if (window.configManager) {
+                const success = await window.configManager.loadProfile(profileName, true);
+                if (success) {
+                    alert(`✅ Profil "${profileName}" chargé avec succès !`);
+                    updateActiveProfileDisplay();
+                } else {
+                    alert(`❌ Erreur lors du chargement du profil "${profileName}"`);
+                }
+            } else {
+                console.error('❌ ConfigManager non disponible');
+                alert('❌ Gestionnaire de configuration non disponible');
+            }
+        }
+
+        /**
+         * Sauvegarde le profil actuel
+         */
+        async function saveCurrentProfile() {
+            const nameInput = document.getElementById('profileName');
+            const descInput = document.getElementById('profileDescription');
+
+            if (!nameInput || !nameInput.value.trim()) {
+                alert('⚠️ Veuillez entrer un nom de profil');
+                return;
+            }
+
+            const name = nameInput.value.trim();
+            const description = descInput ? descInput.value.trim() : '';
+
+            console.log(`💾 Sauvegarde du profil "${name}"...`);
+
+            if (window.configManager) {
+                const success = await window.configManager.saveCurrentAsProfile(name, description);
+                if (success) {
+                    alert(`✅ Profil "${name}" sauvegardé avec succès !`);
+                    nameInput.value = '';
+                    if (descInput) descInput.value = '';
+                    refreshProfilesList();
+                    updateActiveProfileDisplay();
+                } else {
+                    alert(`❌ Erreur lors de la sauvegarde du profil "${name}"`);
+                }
+            } else {
+                console.error('❌ ConfigManager non disponible');
+                alert('❌ Gestionnaire de configuration non disponible');
+            }
+        }
+
+        /**
+         * Supprime un profil personnalisé
+         */
+        async function deleteProfileFromUI(profileName) {
+            if (!confirm(`🗑️ Voulez-vous vraiment supprimer le profil "${profileName}" ?`)) {
+                return;
+            }
+
+            console.log(`🗑️ Suppression du profil "${profileName}"...`);
+
+            if (window.configManager) {
+                const success = await window.configManager.deleteProfile(profileName);
+                if (success) {
+                    alert(`✅ Profil "${profileName}" supprimé`);
+                    refreshProfilesList();
+                } else {
+                    alert(`❌ Erreur lors de la suppression du profil "${profileName}"`);
+                }
+            } else {
+                console.error('❌ ConfigManager non disponible');
+                alert('❌ Gestionnaire de configuration non disponible');
+            }
+        }
+
+        /**
+         * Rafraîchit la liste des profils personnalisés
+         */
+        async function refreshProfilesList() {
+            const customProfilesList = document.getElementById('customProfilesList');
+            if (!customProfilesList || !window.configManager) return;
+
+            const profiles = await window.configManager.listProfiles();
+            const customProfiles = profiles.filter(p => p.type === 'custom');
+
+            if (customProfiles.length === 0) {
+                customProfilesList.innerHTML = '<p class="empty-message">Aucun profil personnalisé</p>';
+            } else {
+                customProfilesList.innerHTML = customProfiles.map(profile => `
+                        <div class="profile-item" data-profile="${profile.name}">
+                            <div class="profile-info">
+                                <strong>📌 ${profile.name}</strong>
+                                <p>${profile.description || 'Aucune description'}</p>
+                            </div>
+                            <div>
+                                <button onclick="loadProfileFromUI('${profile.name}')" class="btn-load">Charger</button>
+                                <button onclick="deleteProfileFromUI('${profile.name}')" class="btn-delete">Supprimer</button>
+                            </div>
+                        </div>
+                    `).join('');
+            }
+        }
+
+        /**
+         * Met à jour l'affichage du profil actif
+         */
+        function updateActiveProfileDisplay() {
+            const activeProfileName = document.getElementById('activeProfileName');
+            if (!activeProfileName || !window.configManager) return;
+
+            const activeProfile = window.configManager.activeProfile;
+            if (activeProfile) {
+                activeProfileName.textContent = `Profil actif : ${activeProfile.name}`;
+            } else {
+                activeProfileName.textContent = 'Aucun profil chargé';
+            }
+        }
+
+        // Écouter l'événement de profil appliqué
+        window.addEventListener('profileApplied', function (event) {
+            console.log('✅ Profil appliqué:', event.detail.profile.name);
+            updateActiveProfileDisplay();
+        });
+
+        // ========================================
+        // FONCTIONS EXPORT/IMPORT
+        // ========================================
+
+        /**
+         * Exporte le profil actif en JSON
+         */
+        async function exportActiveProfile() {
+            if (!window.configManager || !window.configManager.activeProfile) {
+                alert('⚠️ Aucun profil actif à exporter');
+                return;
+            }
+
+            const profileName = window.configManager.activeProfile.name;
+            console.log(`📤 Export du profil "${profileName}"...`);
+
+            const success = await window.configManager.exportProfile(profileName);
+            if (success) {
+                alert(`✅ Profil "${profileName}" exporté avec succès !`);
+            } else {
+                alert('❌ Erreur lors de l\'export du profil');
+            }
+        }
+
+        /**
+         * Importe un profil depuis un fichier JSON
+         */
+        async function importProfileFromFile(input) {
+            const file = input.files[0];
+            if (!file) {
+                return;
+            }
+
+            console.log(`📥 Import du fichier "${file.name}"...`);
+
+            if (!file.name.endsWith('.json')) {
+                alert('⚠️ Veuillez sélectionner un fichier JSON');
+                input.value = ''; // Réinitialiser l'input
+                return;
+            }
+
+            if (window.configManager) {
+                const success = await window.configManager.importProfileFromFile(file);
+                // Réinitialiser l'input pour permettre d'importer le même fichier à nouveau
+                input.value = '';
+            } else {
+                alert('❌ Gestionnaire de configuration non disponible');
+                input.value = '';
+            }
         }
     </script>
 </body>

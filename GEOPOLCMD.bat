@@ -50,8 +50,8 @@ echo.
 echo [2/3] Demarrage du serveur IA Llama...
 echo.
 
-REM Démarrer le serveur Llama dans une nouvelle fenêtre
-start "Serveur IA Llama 3.2" /D "%LLAMA_DIR%" cmd /k "%SERVER_EXE% -m models\%MODEL_FILE% -c 2048 -b 256 -t 6 --host 0.0.0.0 --port %LLAMA_PORT% --ctx-size 2048"
+REM Démarrer le serveur Llama dans une nouvelle fenêtre - OPTIMISÉ POUR CPU SANS GPU
+start "Serveur IA Mistral 7B" /D "%LLAMA_DIR%" cmd /k "%SERVER_EXE% -m models\%MODEL_FILE% --host 0.0.0.0 --port %LLAMA_PORT% --ctx-size 2048 --threads 4 --batch-size 512 --n-gpu-layers 0 --temp 0.1 --repeat-penalty 1.1 --keep -1"
 
 echo   [OK] Serveur IA demarre sur http://localhost:%LLAMA_PORT%
 echo   Patientez 10 secondes pour l'initialisation...

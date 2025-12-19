@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",
-    "@tailwindcss/postcss": "^4.1.16"
+    "@tailwindcss/postcss": "^4.1.16",
+    "leaflet.heat": "^0.2.0"
   },
   "name": "geo",
   "version": "1.0.0",
