@@ -1,4 +1,4 @@
-                                                            GEOPOL Analytic
+                                                            GEOPOL Analytics
                                                     
                                                  
 ## Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles
