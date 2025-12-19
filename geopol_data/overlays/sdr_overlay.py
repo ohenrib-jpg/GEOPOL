@@ -8,6 +8,7 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 import json
+import numpy as np 
 
 logger = logging.getLogger(__name__)
 
@@ -60,13 +61,61 @@ class SDROverlay:
         }
     })
     
-    def get_geojson_data(self, sdr_analyzer) -> Dict[str, Any]:
-        """Génère les données GeoJSON pour Leaflet"""
-        if not sdr_analyzer:
-            return self._get_empty_geojson()
-        
+    def get_geojson_data(self, sdr_analyzer=None) -> Dict[str, Any]:
+        """Génère les données GeoJSON pour Leaflet avec vraies stations"""
         try:
-            return sdr_analyzer.get_geojson_overlay()
+        # Récupérer les stations réelles
+            from ..connectors.sdr_scrapers import SDRScrapers
+            scraper = SDRScrapers()
+            stations = scraper.get_stations_as_dict()
+        
+            features = []
+        
+        # Créer des points pour chaque station
+            for station in stations:
+            # Déterminer le statut et la couleur
+                status = station.get('status', 'unknown')
+                status_colors = {
+                    'active': '#00ff00',
+                    'online': '#00ff00', 
+                    'stable': '#90ee90',
+                    'warning': '#ffd700',
+                    'offline': '#ff6b00',
+                    'unknown': '#cccccc'
+                }
+            
+                color = status_colors.get(status, '#cccccc')
+            
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [station['lon'], station['lat']]
+                    },
+                    'properties': {
+                        'id': station['id'],
+                        'name': station['name'],
+                        'status': status,
+                        'country': station.get('country', 'Unknown'),
+                        'source': station.get('source', 'Unknown'),
+                        'last_seen': station.get('last_seen'),
+                        'color': color,
+                        'radius': 8 if status == 'active' else 6
+                    }
+                })
+        
+        # Ajouter les zones géopolitiques si analyzer disponible
+            if sdr_analyzer:
+                zone_features = sdr_analyzer.get_geojson_overlay().get('features', [])
+                features.extend(zone_features)
+        
+            return {
+                'type': 'FeatureCollection',
+                'features': features,
+                'timestamp': datetime.utcnow().isoformat(),
+                'station_count': len(stations)
+            }
+        
         except Exception as e:
             logger.error(f"❌ Erreur génération GeoJSON: {e}")
             return self._get_empty_geojson()

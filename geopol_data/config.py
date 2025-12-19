@@ -9,22 +9,35 @@ from pathlib import Path
 from datetime import timedelta
 
 # ============================================================================
-# CHEMINS DE FICHIERS
+# CHEMINS DE FICHIERS - CORRECTIFS
 # ============================================================================
 
-# Dossier racine du projet
-BASE_DIR = Path(__file__).parent.parent.parent
-FLASK_DIR = BASE_DIR / 'Flask'
+# Dossier racine du projet - CORRECTION ICI
+BASE_DIR = Path(__file__).parent.parent  # Un niveau de moins
+FLASK_DIR = BASE_DIR
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATES_DIR = BASE_DIR / 'templates'
+
+# Vérifier et créer les dossiers
+print(f"BASE_DIR: {BASE_DIR.absolute()}")
+print(f"STATIC_DIR: {STATIC_DIR.absolute()}")
+print(f"STATIC_DIR exists: {STATIC_DIR.exists()}")
 
 # Dossier de données
 DATA_DIR = STATIC_DIR / 'data'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+print(f"DATA_DIR: {DATA_DIR.absolute()}")
+print(f"DATA_DIR exists: {DATA_DIR.exists()}")
+
 # Fichiers GeoJSON
 GEOJSON_FILE = DATA_DIR / 'countries.geojson'
 SIMPLIFIED_GEOJSON_FILE = DATA_DIR / 'countries_simplified.geojson'
+
+print(f"GEOJSON_FILE: {GEOJSON_FILE.absolute()}")
+print(f"GEOJSON_FILE exists: {GEOJSON_FILE.exists()}")
+print(f"SIMPLIFIED_GEOJSON_FILE: {SIMPLIFIED_GEOJSON_FILE.absolute()}")
+print(f"SIMPLIFIED_GEOJSON_FILE exists: {SIMPLIFIED_GEOJSON_FILE.exists()}")
 
 # ============================================================================
 # CONFIGURATION CACHE
@@ -143,6 +156,29 @@ class IndicatorsConfig:
     
     # Nombre minimum d'indicateurs requis pour valider un pays
     MIN_INDICATORS = int(os.getenv('GEOPOL_MIN_INDICATORS', 3))
+
+# =====================================================================
+# CONFIGURATION SCRAPER SDR
+# =====================================================================
+
+class SDRConfig:
+    """Configuration du module SDR"""
+    
+    # Intervalle de scraping (minutes)
+    SCRAPE_INTERVAL = int(os.getenv('SDR_SCRAPE_INTERVAL', 15))
+    
+    # Timeout pour les requêtes
+    REQUEST_TIMEOUT = int(os.getenv('SDR_REQUEST_TIMEOUT', 20))
+    
+    # Sources SDR activées
+    ENABLED_SOURCES = os.getenv(
+        'SDR_ENABLED_SOURCES', 
+        'rx_tx_info,kiwisdr,sdr_hu,websdr'
+    ).split(',')
+    
+    # Cache TTL (minutes)
+    CACHE_TTL_MINUTES = int(os.getenv('SDR_CACHE_TTL', 15))
+
 
 # ============================================================================
 # CONFIGURATION GÉNÉRALE

@@ -301,4 +301,49 @@ def create_sdr_api_blueprint(db_manager, sdr_analyzer, sdr_service):
                 'error': str(e)
             }), 500
     
+    # SDR Stations Endpoints
+
+    @bp.route('/stations', methods=['GET'])
+    def get_sdr_stations():
+        """Récupère toutes les stations SDR actives"""
+        try:
+        # Créer un scraper temporaire si aucun n'est disponible
+            from .connectors.sdr_scrapers import SDRScrapers
+            scraper = SDRScrapers()
+        
+            force_refresh = request.args.get('force_refresh', 'false').lower() == 'true'
+            stations = scraper.get_stations_as_dict(force_refresh)
+        
+            return jsonify({
+                'success': True,
+                'stations': stations,
+                'total': len(stations),
+                'cache_info': scraper.get_cache_info(),
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        
+        except Exception as e:
+            logger.error(f"❌ Erreur récupération stations SDR: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'stations': []
+            }), 500
+
+    @bp.route('/stations/health', methods=['GET'])
+    def get_sdr_stations_health():
+        """Récupère le statut santé des sources SDR"""
+        try:
+            from .connectors.sdr_scrapers import SDRScrapers
+            scraper = SDRScrapers()
+        
+            return jsonify(scraper.get_health_status())
+        
+        except Exception as e:
+            logger.error(f"❌ Erreur statut SDR: {e}")
+            return jsonify({
+                'status': 'error',
+                'error': str(e)
+            }), 500
+
     return bp

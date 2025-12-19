@@ -11,16 +11,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_geopol_data_blueprint(db_manager, data_service):
+def create_geopol_data_blueprint(db_manager, data_service, sdr_scraper=None):
     """
     Crée le blueprint Flask pour les routes Geopol-Data
-    
+
     CORRECTION: Retourne TOUJOURS un Blueprint, jamais None
-    
+
     Args:
         db_manager: Instance du DatabaseManager
         data_service: Instance du DataService
-    
+        sdr_scraper: Instance du SDRScraper (optionnel)
+
     Returns:
         Blueprint Flask (JAMAIS None)
     """
@@ -137,7 +138,76 @@ def create_geopol_data_blueprint(db_manager, data_service):
             'data_service': 'initialized',
             'timestamp': __import__('datetime').datetime.utcnow().isoformat()
         }), 200
-    
+
+    @bp.route('/sdr-receivers')
+    def get_sdr_receivers():
+        """
+        Récupère la liste des récepteurs SDR actifs dans le monde
+        Pour surveillance de la santé du réseau SDR global
+
+        Query params:
+            force_refresh (bool): Force le rafraîchissement du cache
+
+        Format de retour:
+        {
+            "success": true,
+            "receivers": [
+                {
+                    "id": "receiver_id",
+                    "name": "Station Name",
+                    "lat": 48.8566,
+                    "lon": 2.3522,
+                    "country": "FR",
+                    "last_seen": "2025-12-17T10:30:00Z",
+                    "status": "active",
+                    "frequency_range": "0-30 MHz",
+                    "url": "http://..."
+                },
+                ...
+            ],
+            "total": 150,
+            "cache_info": {...},
+            "timestamp": "2025-12-17T10:35:00Z"
+        }
+        """
+        try:
+            from datetime import datetime
+
+            # Paramètres
+            force_refresh = request.args.get('force_refresh', 'false').lower() == 'true'
+
+            # Utiliser le scraper si disponible, sinon fallback
+            if sdr_scraper:
+                logger.info("📡 Récupération des récepteurs SDR via scraper...")
+                receivers = sdr_scraper.get_receivers_as_dict(force_refresh=force_refresh)
+                cache_info = sdr_scraper.get_cache_info()
+                mode = 'scraper'
+            else:
+                logger.warning("⚠️ SDR scraper non initialisé, utilisation de données de fallback")
+                # Import du scraper pour utiliser les données de fallback
+                from .connectors.sdr_scraper import SDRScraper
+                temp_scraper = SDRScraper()
+                receivers = temp_scraper.get_receivers_as_dict()
+                cache_info = temp_scraper.get_cache_info()
+                mode = 'fallback'
+
+            return jsonify({
+                'success': True,
+                'receivers': receivers,
+                'total': len(receivers),
+                'mode': mode,
+                'cache_info': cache_info,
+                'timestamp': datetime.utcnow().isoformat() + 'Z'
+            }), 200
+
+        except Exception as e:
+            logger.error(f"❌ Erreur API /sdr-receivers: {e}", exc_info=True)
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'receivers': []
+            }), 500
+
     # ============================================================
     # ROUTES TEMPLATES
     # ============================================================
