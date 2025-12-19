@@ -146,6 +146,12 @@ Lancement
 - Accéder à l’interface :
                                       ###http://localhost:5000###
 
+
+**Vous pouvez consulter ce fichier pour vous familiariser avec l'interface :**
+
+https://docs.google.com/document/d/16En08evIWGONLgTneTCkD1uWiB2Qb9V4/edit?usp=sharing&ouid=115737246611272047832&rtpof=true&sd=true
+
+
 ## 8. Roadmap (V0.8PP → V1.0)
 Stabilisation des fonctions.
 Rajout des db pour utilisation ponctuelles.
