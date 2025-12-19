@@ -154,7 +154,7 @@ https://docs.google.com/document/d/16En08evIWGONLgTneTCkD1uWiB2Qb9V4/edit?usp=sh
 
 ## 8. Roadmap (V0.8PP → V1.0)
 Stabilisation des fonctions.
-Rajout des db pour utilisation ponctuelles.
+Rajout des db pour utilisations ponctuelles.
 Rajout des surcouches leaflet
 Fabrique de l'orchestrateur (RAG)
 Mise en conformite académique
