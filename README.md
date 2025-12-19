@@ -1,6 +1,6 @@
-                                                 ***GEOPOL Analytics***
+                                                 **GEOPOL Analytics**
                                                  
-Plateforme open‑source d’analyse géopolitique, médiatique et environnementale
+**Plateforme Open‑Source d’analyse Géopolitique et de veille stratégique, avec des fonctions d'OSINT, et utilisant des IA locales**
 
 Version : V0.8PPStable(En dev.)
 
