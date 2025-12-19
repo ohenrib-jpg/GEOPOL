@@ -1,5 +1,6 @@
 #### 🌍 GEOPOL - Analyseur Géopolitique Intelligent 
 ===============================================
+ 
  main branch deprec. go to V0.8PP 
  
  #### ALLEZ A LA BRANCHE V0.8PP
