@@ -1,7 +1,9 @@
                                                  ***GEOPOL Analytics***
                                                  
 Plateforme open‑source d’analyse géopolitique, médiatique et environnementale
+
 Version : V0.8PPStable(En dev.)
+
 Contact : ohenri.b@gmail.com 
 
 (Readme in english below / 以下为本项目的中文 Readme)
