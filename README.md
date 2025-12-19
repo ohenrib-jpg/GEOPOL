@@ -1,6 +1,6 @@
-                                                        **GEOPOL Analytics**
+                                                        # GEOPOL Analytics
                                                  
-**Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles**
+##Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles##
 
 Open‑Source Platform for Geopolitical Analysis and Strategic Monitoring, with OSINT Capabilities and Local AI Models
 
@@ -9,11 +9,11 @@ Open‑Source Platform for Geopolitical Analysis and Strategic Monitoring, with 
 
 Version : V0.8PPStable(En dev.)
 
-Contact : ohenri.b@gmail.com 
+#Contact : ohenri.b@gmail.com
 
 (Readme in english below / 以下为本项目的中文 Readme)
 
-**1. Présentation générale**
+##1. Présentation générale
 GEOPOL Analytics est un logiciel open‑source conçu pour l’enseignement, la recherche et l’analyse stratégique.
 Il combine :
 - Analyse sémantique avancée (RoBERTa, modèles LLM locaux, SpaCy NER)
@@ -24,13 +24,13 @@ Il combine :
 - Tableau de bord analytique complet
 Le logiciel fonctionne localement, sans installation système, et peut être déployé sur un serveur pour un fonctionnement continu.
 
-**2. Objectifs du projet**
+##2. Objectifs du projet**
 - Fournir un outil pédagogique pour les lycées, universités et écoles spécialisées.
 - Offrir une plateforme de recherche pour les analystes, journalistes et laboratoires.
 - Proposer un cadre open‑source pour l’étude des tendances géopolitiques.
 - Permettre une veille OSINT structurée, transparente et reproductible.
 
-**3. Fonctionnalités principales**
+##3. Fonctionnalités principales
 *3.1 Analyse sémantique*
 - Modèle RoBERTa pour la classification des sentiments
 - Modèle interne “Mini‑moi” (LLM local) pour l’affinage automatique
@@ -65,7 +65,7 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Indicateurs économiques et environnementaux
 - Panneau de configuration avancé
 
-**4. Architecture du projet**
+##4. Architecture du projet
 GEOPOL/
 │
 ├── Flask/
@@ -90,7 +90,7 @@ GEOPOL/
 └── GEOPOLCMD.bat        <- batch windows provisoire avec fenetres cmd apparentes 
 
 
-**5. Comparatif avec d’autres outils**
+##5. Comparatif avec d’autres outils##
 
 | Critère                        | GEOPOL | OSINT classiques | Dashboards éco | IA généralistes |
 |-------------------------------|--------|------------------|----------------|------------------|
@@ -108,7 +108,7 @@ GEOPOL/
 | Extensibilité                 | Élevée | Faible           | Faible         | Moyenne          |
 
 
-**6. Cas d’usage**
+##6. Cas d’usage##
 6.1 Enseignement secondaire (HGGSP, SES)
 - Étude des blocs géopolitiques
 - Analyse des narratifs médiatiques
@@ -130,7 +130,7 @@ GEOPOL/
 - Analyse spectrale SDR (activité radio, anomalies)
 - Cartographie dynamique des risques
 
-**7. Installation**
+##7. Installation##
 Prérequis
 - Windows 10/11 ou Linux
 - Python 3.10+
@@ -143,9 +143,9 @@ Lancement
 - Attendre le démarrage des services (15/30 secondes)
   
 - Accéder à l’interface :
-                                      **http://localhost:5000**
+                                      ###http://localhost:5000###
 
-**8. Roadmap (V0.8PP → V1.0)**
+##8. Roadmap (V0.8PP → V1.0)
 Stabilisation des fonctions.
 Rajout des db pour utilisation ponctuelles.
 Rajout des surcouches leaflet
@@ -154,17 +154,17 @@ Mise en conformite académique
 Migration "Big-Bang vers PostgreSQL
 API REST ?
 
-**!!9. Limitations actuelles!!**
+##**!!9. Limitations actuelles!!**
 - Certaines fonctions sont encore simulées (mock)
 - Archiviste en cours d’amélioration
 - Pas encore de base de données résiliente pour les réseaux sociaux
 - Pas de captures d’écran dans le README (limitation GitHub actuelle)
 
-**10. Licence**
+##10. Licence##
 Projet open‑source sous licence MIT.
-Utilisation libre pour l’enseignement, la recherche et l’analyse.
+Utilisation **libre pour l’enseignement, la recherche et l’analyse**.
 
-**11. Contribution**
+##11. Contribution##
 Les contributions sont les bienvenues :
 - Documentation
 - Connecteurs de données
@@ -174,7 +174,7 @@ Les contributions sont les bienvenues :
 
 
 
-**GEOPOL Analytics**
+####GEOPOL Analytics
 Open‑Source Platform for Geopolitical, Media and Environmental Analysis
 (Open‑source license strictly limited to Education and Research use)
 Overview
@@ -231,7 +231,7 @@ OSINT & Strategic Monitoring
 
 
 
-**GEOPOL Analytics**
+####GEOPOL Analytics
 地缘政治、媒体与环境分析的开源平台
 （开源许可仅限教育与科研用途）
 概述
