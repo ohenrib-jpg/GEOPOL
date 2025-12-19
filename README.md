@@ -48,14 +48,14 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Archives historiques (Archive.org, Gallica, WebTimeMachine)
 - Indicateurs économiques (World Bank, Eurostat, INSEE)
 - Indicateurs environnementaux (Open‑Meteo, qualité de l’air, climat, seismes, émissions EM)
-- 
+  
 *3.3 Cartographie GEO‑DATA*
   
 - Surcouches interactives : pays, blocs géopolitiques, NER, météo, SDR
 - Données Natural Earth (frontières, zones disputées)
 - Indicateurs économiques et environnementaux par pays
 - Timeline et évolution temporelle
-- 
+  
 *3.4 Module SDR (nouveau – Phase 5)*
   
 - Détection d’anomalies spectrales à faible latence
@@ -67,7 +67,7 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Recherche analogique dans les archives historiques
 - Mise en relation des situations actuelles avec des précédents historiques
 - Vectorisation sémantique (en cours d’amélioration)
-- 
+  
 *3.6 Tableau de bord analytique*
   
 - Statistiques par thème, sentiment, période
@@ -75,7 +75,7 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Facteur_Z (dissonance narrative)
 - Indicateurs économiques et environnementaux
 - Panneau de configuration avancé
-
+  
 ## 4. Architecture du projet
 GEOPOL/
 │
@@ -134,14 +134,14 @@ GEOPOL/
 - Analyse de corpus médiatiques
 - Études de cas historiques comparées
 - Projets de data science appliquée
-- 
+  
 6.3 Recherche académique
   
 - Analyse temporelle des tendances géopolitiques
 - Études de dissonance narrative (Facteur_Z)
 - Corrélation entre indicateurs économiques, environnementaux et médiatiques
 - Études sur la résilience informationnelle
-- 
+  
 6.4 OSINT et veille stratégique
   
 - Surveillance multisource (RSS, réseaux sociaux, archives)
