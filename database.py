@@ -40,7 +40,10 @@ class DatabaseManager:
                     sentiment_confidence REAL DEFAULT 0.5,
                     bayesian_confidence REAL,
                     bayesian_evidence_count INTEGER DEFAULT 0,
-                    analyzed_at TIMESTAMP
+                    analyzed_at TIMESTAMP,
+                    harmonized INTEGER DEFAULT 0,
+                    cluster_size INTEGER DEFAULT 1,
+                    analysis_metadata TEXT
                 )
             """)
 

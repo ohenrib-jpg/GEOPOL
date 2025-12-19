@@ -24,6 +24,7 @@ class DatabaseMigrations:
             ("01_add_bayesian_columns", self._add_bayesian_columns),
             ("02_create_corroboration_table", self._create_corroboration_table),
             ("03_add_indices", self._add_performance_indices),
+            ("04_add_batch_analysis_columns", self._add_batch_analysis_columns),
         ]
         
         for name, migration_func in migrations:
@@ -169,7 +170,38 @@ class DatabaseMigrations:
             
         finally:
             conn.close()
-    
+
+    def _add_batch_analysis_columns(self):
+        """Ajoute les colonnes pour l'analyse batch harmonisée"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Ajouter les colonnes si elles n'existent pas
+            columns_to_add = [
+                ("harmonized", "INTEGER DEFAULT 0"),
+                ("cluster_size", "INTEGER DEFAULT 1"),
+                ("analysis_metadata", "TEXT"),
+            ]
+
+            for column_name, column_type in columns_to_add:
+                try:
+                    cursor.execute(f"""
+                        ALTER TABLE articles
+                        ADD COLUMN {column_name} {column_type}
+                    """)
+                    logger.info(f"  ➕ Colonne ajoutée: {column_name}")
+                except Exception as e:
+                    if "duplicate column" in str(e).lower():
+                        logger.debug(f"  ⏭️  Colonne {column_name} existe déjà")
+                    else:
+                        raise
+
+            conn.commit()
+
+        finally:
+            conn.close()
+
     def get_migration_status(self) -> dict:
         """Retourne le statut des migrations"""
         conn = self.db_manager.get_connection()

@@ -2,10 +2,11 @@
 
 import sys
 import os
+import json
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory, Response
 import signal
 import psutil
 import time
@@ -35,11 +36,76 @@ def create_app():
     # Créer l'application Flask
     app = Flask(__name__,
                 template_folder=template_dir,
-                static_folder=static_dir)
+                static_folder=static_dir,
+                static_url_path='/static')  # AJOUT CRITIQUE
 
     # Configuration existante
     from .config import DB_PATH
     app.config['DATABASE_PATH'] = DB_PATH
+
+    # ============================================================
+    # CONFIGURATION CORRECTE DES FICHIERS STATIQUES
+    # ============================================================
+    print(f"\n📁 Configuration des dossiers:")
+    print(f"   Base dir: {base_dir}")
+    print(f"   Static dir: {static_dir}")
+    print(f"   Template dir: {template_dir}")
+    
+    # Vérifier le dossier data
+    data_dir = os.path.join(static_dir, 'data')
+    if not os.path.exists(data_dir):
+        print(f"⚠️ Création du dossier data: {data_dir}")
+        os.makedirs(data_dir, exist_ok=True)
+    
+    print(f"   Data dir: {data_dir}")
+    print(f"   Data dir exists: {os.path.exists(data_dir)}")
+
+    # ============================================================
+    # ROUTE SPÉCIALISÉE POUR LES FICHIERS GEOJSON
+    # ============================================================
+    @app.route('/static/data/<path:filename>')
+    def serve_geojson(filename):
+        """Route explicite pour servir les fichiers GeoJSON"""
+        try:
+            data_dir = os.path.join(app.static_folder, 'data')
+            if not os.path.exists(data_dir):
+                os.makedirs(data_dir, exist_ok=True)
+            
+            return send_from_directory(data_dir, filename, 
+                                     mimetype='application/geo+json')
+        except FileNotFoundError:
+            # Fichier non trouvé - créer un GeoJSON minimal
+            if filename in ['countries.geojson', 'countries_simplified.geojson']:
+                minimal_geojson = {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+                return jsonify(minimal_geojson)
+            return {"error": f"Fichier {filename} non trouvé"}, 404
+
+    # ============================================================
+    # ROUTE DE DIAGNOSTIC POUR LES FICHIERS STATIQUES
+    # ============================================================
+    @app.route('/debug/static-files')
+    def debug_static_files():
+        """Diagnostic des fichiers statiques"""
+        static_dir = app.static_folder
+        data_dir = os.path.join(static_dir, 'data')
+        
+        files_info = {
+            'static_folder': static_dir,
+            'static_url_path': app.static_url_path,
+            'data_dir_exists': os.path.exists(data_dir),
+        }
+        
+        if os.path.exists(data_dir):
+            files_info['data_files'] = os.listdir(data_dir)
+            for file in files_info['data_files']:
+                file_path = os.path.join(data_dir, file)
+                if os.path.exists(file_path):
+                    files_info[f'{file}_size'] = os.path.getsize(file_path)
+        
+        return jsonify(files_info)
 
     # ============================================================
     # DÉTECTION DU MODE RÉEL
@@ -69,6 +135,10 @@ def create_app():
     # Exécuter les migrations existantes
     from .database_migrations import run_migrations
     run_migrations(db_manager)
+
+    # Exécuter la migration pour les portfolios boursiers
+    from .migration_stocks_portfolio import run_stocks_portfolio_migration
+    run_stocks_portfolio_migration(db_manager)
 
     # ============================================================
     # 🆕 INITIALISATION DU MODULE GÉOPOLITIQUE
@@ -294,20 +364,29 @@ def create_app():
     except Exception as e:
         print(f"ℹ️ Routes Stock non disponibles: {e}")
 
-    # Routes apprentissage
+#  section apprentissage passif :
     try:
         from .learning_routes import create_learning_blueprint
-        from .continuous_learning import start_passive_learning
+        from .continuous_learning import start_passive_learning, get_learning_engine
 
+        # Démarrer l'apprentissage passif
         learning_engine = start_passive_learning(db_manager, sentiment_analyzer)
+    
+        # Stocker dans app.config
         app.config['LEARNING_ENGINE'] = learning_engine
         app.config['SENTIMENT_ANALYZER'] = sentiment_analyzer
 
+        # Créer et enregistrer le blueprint
         learning_bp = create_learning_blueprint(db_manager)
         app.register_blueprint(learning_bp)
+    
         print("✅ Routes apprentissage enregistrées")
+        print("🤖 Apprentissage passif démarré")
+    
     except Exception as e:
         print(f"⚠️ Routes apprentissage non disponibles: {e}")
+        import traceback
+        traceback.print_exc()
 
     # ============================================================
     # MODULES DEVELOPPES SUPPLEMENTAIRES (injection de dev.)
@@ -537,16 +616,27 @@ def create_app():
     except Exception as e:
         print(f"⚠️ Indicateurs Français: {e}")
 
-    # ==============================================================
-    # Indicateurs internationaux
-    # ==============================================================
+    # ============================================================================
+    # Indicateurs internationaux + Dashboard (mis à jour)
+    # ============================================================================
     try:
         from .routes_indicators import create_indicators_blueprint
         indicators_intl_bp = create_indicators_blueprint(db_manager)
         app.register_blueprint(indicators_intl_bp)
-        print("✅ Indicateurs Internationaux enregistré")
+        print("✅ Indicateurs Internationaux & Dashboard enregistré")
     except Exception as e:
         print(f"⚠️ Indicateurs Internationaux: {e}")
+
+    # ============================================================================
+    # Portfolios Boursiers Personnalisés
+    # ============================================================================
+    try:
+        from .routes_stocks_portfolio import create_stocks_portfolio_blueprint
+        stocks_portfolio_bp = create_stocks_portfolio_blueprint(db_manager)
+        app.register_blueprint(stocks_portfolio_bp)
+        print("✅ Portfolios Boursiers Personnalisés enregistré")
+    except Exception as e:
+        print(f"⚠️ Portfolios Boursiers: {e}")
 
     # ============================================================
     # Assistant IA
@@ -1140,7 +1230,7 @@ def create_app():
                 print(f"  ⚠️ Erreur arrêt apprentissage: {e}")
 
             def shutdown_services():
-                time.sleep(0.5)
+                time.sleep(2)  # Augmenté à 2s pour garantir l'envoi de la réponse HTTP
 
                 try:
                     # Arrêter le serveur Llama (Mistral)
@@ -1200,6 +1290,132 @@ def create_app():
                 'real_mode': REAL_MODE
             }
         }), 200
+
+    @app.route('/api/system-stats', methods=['GET'])
+    def get_system_stats():
+        """Endpoint pour récupérer les statistiques système en temps réel"""
+        cpu_percent = 0
+        memory_used_gb = 0
+        memory_total_gb = 0
+        memory_percent = 0
+        process_memory_mb = 0
+        llama_active = False
+        llama_memory_mb = 0
+        disk_percent = 0
+
+        try:
+            print("🔍 Début récupération stats système...")
+
+            # CPU
+            try:
+                cpu_percent = psutil.cpu_percent(interval=0.1)
+                print(f"  ✓ CPU: {cpu_percent}%")
+            except Exception as e:
+                print(f"  ✗ Erreur CPU: {e}")
+
+            # Mémoire
+            try:
+                memory = psutil.virtual_memory()
+                memory_used_gb = memory.used / (1024 ** 3)
+                memory_total_gb = memory.total / (1024 ** 3)
+                memory_percent = memory.percent
+                print(f"  ✓ Mémoire: {memory_used_gb:.2f}GB / {memory_total_gb:.2f}GB ({memory_percent}%)")
+            except Exception as e:
+                print(f"  ✗ Erreur mémoire: {e}")
+
+            # Processus Python actuel
+            try:
+                process = psutil.Process(os.getpid())
+                process_memory_mb = process.memory_info().rss / (1024 ** 2)
+                print(f"  ✓ Processus Flask: {process_memory_mb:.1f}MB")
+            except Exception as e:
+                print(f"  ✗ Erreur processus: {e}")
+
+            # Chercher si le serveur Llama/Mistral est actif
+            try:
+                for proc in psutil.process_iter(['pid', 'name']):
+                    try:
+                        proc_name = proc.info.get('name', '')
+                        if proc_name and 'llama-server' in proc_name.lower():
+                            llama_active = True
+                            try:
+                                mem_info = proc.memory_info()
+                                llama_memory_mb = mem_info.rss / (1024 ** 2)
+                            except:
+                                pass
+                            print(f"  ✓ Llama détecté: {llama_memory_mb:.1f}MB")
+                            break
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, AttributeError):
+                        continue
+
+                if not llama_active:
+                    print(f"  ⓘ Llama non détecté")
+            except Exception as e:
+                print(f"  ✗ Erreur détection Llama: {e}")
+
+            # Disque (compatible Windows et Linux)
+            try:
+                if os.name == 'nt':  # Windows
+                    disk = psutil.disk_usage('C:\\')
+                else:  # Linux/Mac
+                    disk = psutil.disk_usage('/')
+                disk_percent = disk.percent
+                print(f"  ✓ Disque: {disk_percent}%")
+            except Exception as e:
+                print(f"  ✗ Erreur lecture disque: {e}")
+
+            print("✅ Stats système récupérées avec succès")
+
+            result = {
+                'success': True,
+                'cpu': {
+                    'percent': round(cpu_percent, 1),
+                    'status': 'high' if cpu_percent > 80 else 'medium' if cpu_percent > 50 else 'low'
+                },
+                'memory': {
+                    'used_gb': round(memory_used_gb, 2),
+                    'total_gb': round(memory_total_gb, 2),
+                    'percent': round(memory_percent, 1),
+                    'process_mb': round(process_memory_mb, 1)
+                },
+                'llama': {
+                    'active': llama_active,
+                    'memory_mb': round(llama_memory_mb, 1) if llama_active else 0
+                },
+                'disk': {
+                    'percent': round(disk_percent, 1)
+                },
+                'timestamp': time.time()
+            }
+
+            print(f"📤 Envoi de la réponse: {result}")
+
+            response = Response(
+                json.dumps(result),
+                status=200,
+                mimetype='application/json'
+            )
+            return response
+
+        except Exception as e:
+            print("=" * 70)
+            print(f"❌ ERREUR CRITIQUE dans /api/system-stats")
+            print(f"❌ Exception: {e}")
+            print(f"❌ Type: {type(e).__name__}")
+            print("=" * 70)
+
+            error_result = {
+                'success': False,
+                'error': str(e),
+                'error_type': type(e).__name__
+            }
+
+            response = Response(
+                json.dumps(error_result),
+                status=500,
+                mimetype='application/json'
+            )
+            return response
 
 
     @app.route('/test-archive-query')
@@ -1366,6 +1582,146 @@ def create_app():
         print(f"⚠️ Erreur initialisation Geopol-Data: {e}")
 
     # ============================================================
+    # MODULE OPEN-METEO (COUCHES MÉTÉO)
+    # ============================================================
+
+    print("\n🌦️  Initialisation du module Open-Meteo...")
+
+    meteo_integration = None
+
+    try:
+        from .geopol_data import init_meteo_module
+        meteo_result = init_meteo_module(app)
+
+        if meteo_result:
+            meteo_integration = meteo_result.get('integration')
+            print("✅ Open-Meteo intégré")
+            print(f"   • Health: http://localhost:5000/api/weather/health")
+            print(f"   • Layers: http://localhost:5000/api/weather/layers")
+
+            # Stocker dans app.config
+            app.config['METEO_INTEGRATION'] = meteo_integration
+        else:
+            print("⚠️ Open-Meteo en mode dégradé")
+
+    except Exception as e:
+        print(f"⚠️ Erreur initialisation Open-Meteo: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # ============================================================
+    # MODULE USGS EARTHQUAKE (SÉISMES)
+    # ============================================================
+
+    print("\n🌍 Initialisation du module Earthquake...")
+
+    earthquake_integration = None
+
+    try:
+        from .geopol_data import init_earthquake_module
+        earthquake_result = init_earthquake_module(app)
+
+        if earthquake_result:
+            earthquake_integration = earthquake_result.get('integration')
+            print("✅ USGS Earthquake intégré")
+            print(f"   • Health: http://localhost:5000/api/earthquakes/health")
+            print(f"   • GeoJSON: http://localhost:5000/api/earthquakes/geojson")
+            print(f"   • Stats: http://localhost:5000/api/earthquakes/statistics")
+
+            # Stocker dans app.config
+            app.config['EARTHQUAKE_INTEGRATION'] = earthquake_integration
+        else:
+            print("⚠️ Earthquake en mode dégradé")
+
+    except Exception as e:
+        print(f"⚠️ Erreur initialisation Earthquake: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # ============================================================
+    # MODULE GESTION DES PROFILS DE CONFIGURATION
+    # ============================================================
+
+    print("\n⚙️ Initialisation du module Gestion des Profils...")
+
+    try:
+        from .geopol_data import init_config_module
+        config_result = init_config_module(app)
+
+        if config_result:
+            print("✅ Gestionnaire de Profils intégré")
+            print(f"   • Liste profils: http://localhost:5000/api/geopol/profiles")
+            print(f"   • Profil défaut: http://localhost:5000/api/geopol/profiles/default")
+            print(f"   • Profil analyst: http://localhost:5000/api/geopol/profiles/analyst")
+            print(f"   • Profil meteo: http://localhost:5000/api/geopol/profiles/meteo")
+        else:
+            print("⚠️ Gestionnaire de Profils en mode dégradé")
+
+    except Exception as e:
+        print(f"⚠️ Erreur initialisation Config Manager: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # ============================================================
+    # MODULE SDR COVERAGE CALCULATOR
+    # ============================================================
+
+    print("\n🗺️ Initialisation du module SDR Coverage Calculator...")
+
+    try:
+        from .geopol_data import init_sdr_coverage_module
+        coverage_result = init_sdr_coverage_module(app, db_manager)
+
+        if coverage_result:
+            print("✅ SDR Coverage Calculator intégré")
+            print(f"   • Heatmap: http://localhost:5000/api/sdr/coverage/heatmap")
+            print(f"   • Zones sous-couvertes: http://localhost:5000/api/sdr/coverage/undercovered")
+            print(f"   • Statistiques: http://localhost:5000/api/sdr/coverage/statistics")
+            print(f"   • GeoJSON Heatmap: http://localhost:5000/api/sdr/coverage/geojson/heatmap")
+        else:
+            print("⚠️ SDR Coverage Calculator en mode dégradé")
+
+    except Exception as e:
+        print(f"⚠️ Erreur initialisation SDR Coverage: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # ============================================================
+    # MODULE SDR DASHBOARD TEMPS RÉEL
+    # ============================================================
+
+    print("\n📊 Initialisation du module SDR Dashboard...")
+
+    try:
+        from .geopol_data import init_sdr_dashboard_module
+
+        # Récupérer le SDRAnalyzer si disponible
+        sdr_analyzer = None
+        try:
+            from .geopol_data import SDRAnalyzer
+            if SDRAnalyzer:
+                sdr_analyzer = SDRAnalyzer(db_manager)
+        except:
+            pass
+
+        dashboard_result = init_sdr_dashboard_module(app, db_manager, sdr_analyzer)
+
+        if dashboard_result:
+            print("✅ SDR Dashboard intégré")
+            print(f"   • Page Dashboard: http://localhost:5000/sdr/dashboard")
+            print(f"   • API Summary: http://localhost:5000/api/sdr/dashboard/summary")
+            print(f"   • API Timeline: http://localhost:5000/api/sdr/dashboard/timeline")
+            print(f"   • API Zones: http://localhost:5000/api/sdr/dashboard/zones")
+            print(f"   • API Alertes: http://localhost:5000/api/sdr/dashboard/alerts")
+        else:
+            print("⚠️ SDR Dashboard en mode dégradé")
+
+    except Exception as e:
+        print(f"⚠️ Erreur initialisation SDR Dashboard: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # ============================================================
     # MODULE ALERTES GÉOPOLITIQUES (SIMPLIFIÉ)
     # ============================================================
 
@@ -1451,6 +1807,7 @@ def create_app():
     print(f"   • SDR Spectrum: {'✅' if sdr_spectrum_service else '❌'}")
     print(f"   • Geopol-Data: {'✅' if geopol_data_service else '❌'}")
     print(f"   • Alertes Géopolitiques: {'✅' if 'alerts_service' in locals() else '❌'}")
+    print(f"   • Fichiers statiques: ✅ Configurés")
     print("="*70)
     print("🌐 URLS GÉOPOLITIQUES:")
     print("   • /api/geo/diagnostic - Diagnostic complet")
@@ -1468,6 +1825,11 @@ def create_app():
     print("   • /api/sdr/dashboard - Dashboard SDR")
     print("   • /api/sdr/test-spectrum - Test spectre")
     print("   • /api/sdr/debug-servers - Debug serveurs")
+    print("="*70)
+    print("📁 URLS FICHIERS STATIQUES:")
+    print("   • /static/data/countries.geojson - Fichier GeoJSON")
+    print("   • /static/data/countries_simplified.geojson - Fichier GeoJSON simplifié")
+    print("   • /debug/static-files - Diagnostic fichiers")
     print("="*70)
     print("📝 VOS MODULES EXISTANTS:")
     print("   • Toutes vos ~70 routes sont conservées")
@@ -1525,8 +1887,5 @@ def create_app():
     print("   • /demo-dashboard - Dashboard simplifié")
     print("   • /demo-stats - Statistiques")
     print("   • /demo-country/<code> - Données pays")
-
-
- 
 
     return app

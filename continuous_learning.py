@@ -154,7 +154,7 @@ class ContinuousLearningEngine:
             conn.commit()
             logger.info(f"✅ Feedback collecté pour article {article_id}")
             
-            # Vérifier si on doit déclencher l'apprentissage
+            # Vérifier si on doit déclencher l'apprentissage - CORRECTION CRITIQUE
             self._check_and_trigger_learning()
             
         except Exception as e:
@@ -386,14 +386,15 @@ class PassiveLearningScheduler:
         logger.info("🛑 Planificateur d'apprentissage passif arrêté")
     
     def _scheduler_loop(self):
-        """Boucle principale du planificateur"""
+        """Boucle principale du planificateur - CORRIGÉE"""
         while self.running:
             try:
-                # Vérifier les feedbacks toutes les 30 minutes
+                # Vérifier les feedbacks
                 self.learning_engine._check_and_trigger_learning()
                 
-                # Attendre 30 minutes
-                for _ in range(30 * 60):  # 30 minutes * 60 secondes
+                # Attendre 30 minutes avec interruption possible
+                wait_time = 30 * 60  # 30 minutes
+                for _ in range(wait_time):
                     if not self.running:
                         return
                     time.sleep(1)

@@ -1,9 +1,25 @@
 import os
+import secrets
 
 # Chemins de base
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, 'rss_analyzer.db')
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
+# SÉCURITÉ: SECRET_KEY pour sessions et CSRF
+# En production, définir FLASK_SECRET_KEY dans les variables d'environnement
+# Génération automatique si non définie (à éviter en production)
+SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
+if not SECRET_KEY:
+    # ATTENTION: Générer une nouvelle clé à chaque démarrage n'est pas recommandé en production
+    # Les sessions seront invalidées à chaque redémarrage
+    SECRET_KEY = secrets.token_hex(32)
+    import warnings
+    warnings.warn(
+        "SECRET_KEY non définie dans les variables d'environnement. "
+        "Définissez FLASK_SECRET_KEY pour la production.",
+        RuntimeWarning
+    )
 
 # Configuration RSS
 UPDATE_INTERVAL = 3600  # 1 heure en secondes
