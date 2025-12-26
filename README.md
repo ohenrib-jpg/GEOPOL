@@ -213,8 +213,10 @@ API REST ?
 
 - Certaines fonctions sont encore simulées (mock)
 - Archiviste en cours d’amélioration
-- Pas encore de base de données résiliente pour les réseaux sociaux
-- Pas de captures d’écran dans le README (limitation GitHub actuelle)
+- Bataille epique contre le Commandant Zorg
+- L'API Eurostat n'est pas compatissante
+- OSoME en cours d'integration 
+- Pas de README visuel 
 
 ##10. Licence##
 Projet open‑source sous licence MIT.
