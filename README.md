@@ -29,15 +29,14 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 - Fournir un outil pédagogique pour les lycées, universités et écoles spécialisées.
 - Offrir une plateforme de recherche pour les analystes, journalistes et laboratoires.
 - Proposer un cadre open‑source pour l’étude des tendances géopolitiques.
-- Permettre une veille OSINT structurée, transparente et reproductible.
-
+  
 ## 3. Fonctionnalités principales
 
 *3.1 Analyse sémantique*
 
 - Modèle RoBERTa pour la classification des sentiments
 - Modèle interne “Mini‑moi” (LLM local) pour l’affinage automatique
-- Modèle IA GGUF (via llama.cpp) pour l'analyse des datas, générations de rapports, suivi des alertes configurées (Futur MAJ=>RaG), et assistance en temps réel. (j'utilise    Mistral 3.2 Q4 pour le développement => souveraineté numérique oblige)
+- Modèle IA GGUF (via llama.cpp) pour l'analyse des datas, générations de rapports, suivi des alertes configurées (Futur MAJ=>RaG), et assistance en temps réel. (j'utilise    Qwen pour le développement => Mon premier choix etait....fort peu judicieux.)
 - Extraction d’entités géopolitiques (SpaCy NER)
 - Analyse thématique (mots‑clés, pondérations, synonymes)
   
