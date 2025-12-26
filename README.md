@@ -82,25 +82,43 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 ## 4. Architecture du projet
 GEOPOL/
 │
+
 ├── Flask/
+
 │   ├── app_factory.py
+
 │   ├── geopol_data/
+
 │   │   ├── connectors/ (World Bank, Open-Meteo, etc.)
+
 │   │   ├── sdr_monitoring/ (détection d’anomalies)
+
 │   │   ├── models.py
+
 │   │   ├── service.py
+
 │   │   └── templates/
+
 │   ├── static/
+
 │   │   ├── js/
+
 │   │   └── css/
+
 │   └── routes/
+
 │
 ├── data/
+
 │   └── natural_earth/, etc,...
+
 │
 ├── scripts/
+
 │   └── fetch_natural_earth.py, etc,...
+
 │
+
 └── GEOPOLCMD.bat        <- batch windows provisoire avec fenetres cmd apparentes 
 
 
