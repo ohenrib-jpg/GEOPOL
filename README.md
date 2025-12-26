@@ -1,7 +1,7 @@
                                                             GEOPOL Analytics
                                                     
                                                  
-## Environnement open‑source pour la recherche géopolitique et la veille stratégique avec fonctions OSINT: analyse multisource, IA locales, détection d’anomalies et visualisation dynamique des indicateurs faibles
+##  GEOPOL est un cadre d’analyse géopolitique modulaire conçu pour explorer, enseigner et tester des corrélations de signaux faibles hétérogènes (OSINT, données géophysiques, économiques, électromagnétiques, narratives), sans prétention prédictive ou décisionnelle.  
 
 Open‑Source Platform for Geopolitical Analysis and Strategic Monitoring, with OSINT Capabilities and Local AI Models
 
