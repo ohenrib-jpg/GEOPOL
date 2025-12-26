@@ -388,3 +388,69 @@ http://localhost:5000
 
 
 By the people, for the people
+
+
+
+
+Et pour ceux qui aiment bien trainer jusqu'au "THE END" du generique de fin :
+
+## 🔬 LE FACTEUR_Z : THÉORIE & MOTIVATION
+ **Hypothèse centrale:**
+> La tension sociale ne résulte PAS directement de l'intensité du discours médiatique,
+> mais de la **DISSONANCE** entre la doxa médiatique et l'inconscient populaire exprimé sur les réseaux sociaux.
+
+Il faut donc prendre en compte :
+1. ✅ **La segmentation événementielle** - Analyser par contexte
+2. ✅ **L'asymétrie temporelle** - Lag de 6h média → social
+3. ✅ **Le poids émotionnel** - Colère/peur amplifient, ironie/humour atténuent
+4. ✅ **La fonction de saturation** - Robustesse contre outliers
+
+## 📐 FORMULE ACADÉMIQUE
+
+**Divergence instantanée D(t,i):**
+D(t,i) = tanh(RSS_sentiment(t) - Social_sentiment(t+Δlag))
+où:
+  - t = timestamp de l'article média
+  - Δlag = 6h (asymétrie temporelle)
+  - tanh normalise ∈ [-1, +1]
+
+
+**Dissonance cumulée par segment Δ(Sₖ):**
+Δ(Sₖ) = Σ[i∈Sₖ] D(t,i) × w(i)
+
+où w(i) = poids combiné:
+  - Poids émotionnel (anger×1.5, fear×1.4, irony×0.7, joy×0.8)
+  - Viralité sociale (nombre de posts dans fenêtre 6h)
+
+
+**Facteur_Z final avec saturation:**
+Si |Δ̄| > θ_saturation (= 5.0):
+    Δ_saturé = sign(Δ̄) × (θ + (|Δ̄| - θ) × γ)
+    où γ = 0.85 (décroissance)
+Sinon:
+    Δ_saturé = Δ̄
+
+Facteur_Z = Δ_saturé × modulation_événements
+
+où modulation_événements:
+  - Si événements négatifs > positifs: ×1.3 (amplification)
+  - Si événements positifs > négatifs: ×0.8 (atténuation)
+
+
+## **Exemple concret:**
+
+**Scénario:** Média annonce une réforme controversée avec ton neutre (RSS = 0.1)
+**Réaction sociale:** Colère massive sur Twitter (Social = -0.8)
+
+D(t) = tanh(0.1 - (-0.8)) = tanh(0.9) = 0.72
+Poids émotionnel (colère) = 1.5
+Δ(segment) = 0.72 × 1.5 = 1.08
+Modulation événement négatif = ×1.3
+Facteur_Z = 1.08 × 1.3 = 1.40
+
+Interprétation: "Dissonance modérée - Divergence notable"
+Direction: "amplification" (médias minimisent vs social rejette)
+
+**Différence clé:** V2 détecte que les médias **minimisent** (ton neutre) alors que le public **rejette massivement** (colère) → signal d'alerte pour les décideurs.
+
+
