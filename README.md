@@ -525,3 +525,123 @@ Direction: "amplification" (médias minimisent vs social rejette)
 **Différence clé:** V2 détecte que les médias **minimisent** (ton neutre) alors que le public **rejette massivement** (colère) → signal d'alerte pour les décideurs.
 
 
+
+🔬 The Z‑Factor: A Divergence‑Based Indicator for Media–Social Asymmetry Analysis
+
+1. Theoretical Motivation
+   
+Contemporary research in computational social science suggests that social tension emerges less from the absolute polarity of media discourse than from the dissonance between institutional narratives and the emotional dynamics expressed within social networks.
+To formalize this phenomenon, we introduce the Z‑Factor, a divergence‑based indicator designed to quantify the misalignment between:
+- media sentiment trajectories, and
+- social‑network emotional responses,
+while incorporating temporal asymmetry, emotional weighting, event‑level modulation, and adaptive segmentation.
+A key assumption is that clivage‑inducing events (e.g., political crises, scandals, sudden policy announcements) produce abrupt narrative shifts. These shifts alter the temporal structure of reactions, requiring dynamic segmentation rather than fixed time windows.
+Furthermore, empirical observations show that neutral emotional categories (neutral+, neutral–) are the most sensitive to narrative disruptions. Their evolution curves often reveal early inflection points preceding polarized reactions.
+Thus, monitoring their trajectories is essential for detecting emerging tensions.
+
+2. Model Components
+   
+2.1 Adaptive Temporal Segmentation
+   
+Unlike fixed‑window approaches, the Z‑Factor uses event‑dependent temporal segmentation.
+
+Segments S_k are defined by:
+
+- abrupt changes in media narrative structure
+  
+- spikes in social‑network activity
+  
+- shifts in neutral emotion distributions
+  
+- clustering of clivage‑inducing events
+  
+This ensures that divergence is computed within coherent narrative intervals, rather than arbitrary time slices.
+
+2.2 Temporal Asymmetry
+
+A systematic delay is observed between media publication and social reaction.
+
+We operationalize this through:
+
+\Delta _{lag}=6\mathrm{\  hours}
+
+This lag may be adjusted in future versions based on event‑specific dynamics.
+
+2.3 Instantaneous Divergence
+
+For each media item i at time t:
+
+The hyperbolic tangent ensures boundedness and robustness to extreme values.
+
+2.4 Emotional Weighting
+
+Each divergence value is modulated by an emotion‑specific weight w(i):
+
+- anger × 1.5
+  
+- fear × 1.4
+  
+- irony × 0.7
+  
+- joy × 0.8
+  
+- neutral+ × 1.6
+  
+- neutral– × 1.6
+  
+The increased weight for neutral categories reflects their high sensitivity to narrative transitions, making them early indicators of structural dissonance.
+A social‑virality coefficient (post volume in the 6‑hour window) is also included.
+
+2.5 Segment‑Level Aggregation
+
+For each adaptive segment S_k:
+
+\Delta (S_k)=\sum _{i\in S_k}D(t,i)\times w(i)
+
+This captures the cumulative divergence associated with a coherent narrative phase.
+
+2.6 Saturation Mechanism
+
+To prevent extreme values from dominating:
+
+If
+
+|\bar {\Delta }|>\theta _{sat}\quad (\theta _{sat}=5.0)
+
+Then:
+
+Where \gamma =0.85 ensures diminishing returns.
+
+Else:
+
+\Delta _{sat}=\bar {\Delta }
+
+2.7 Event‑Level Modulation
+
+Z=\Delta _{sat}\times modulation_{events}
+Where:
+
+- negative events > positive → × 1.3
+  
+- positive events > negative → × 0.8
+  
+This reflects the asymmetric impact of event polarity on collective dynamics.
+
+3. Analytical Significance
+   
+The Z‑Factor provides a compact, interpretable measure of media–social divergence, enabling:
+
+- early detection of narrative fractures
+  
+- identification of clivage‑inducing events
+  
+- monitoring of neutral emotion inflection points
+  
+- enhanced media‑literacy analysis
+  
+- integration into OSINT and strategic‑monitoring workflows
+  
+Its adaptive segmentation and emphasis on neutral‑emotion sensitivity make it particularly suited for real‑time socio‑political monitoring.
+
+
+
