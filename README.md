@@ -3,7 +3,7 @@
                                                  
 ##  GEOPOL est un cadre d’analyse géopolitique modulaire conçu pour explorer, enseigner et tester des corrélations de signaux faibles hétérogènes (OSINT, données géophysiques, économiques, électromagnétiques, narratives), sans prétention prédictive ou décisionnelle.  
 
-Open‑Source Platform for Geopolitical Analysis and Strategic Monitoring, with OSINT Capabilities and Local AI Models
+## Open‑source geopolitical analysis platform for education, research, and media monitoring
 
 具备 OSINT 功能、使用本地人工智能模型的地缘政治分析与战略监测开源平台
 
@@ -235,59 +235,130 @@ Les contributions sont les bienvenues :
 
 #### GEOPOL Analytics
 
-Open‑Source Platform for Geopolitical, Media and Environmental Analysis
-(Open‑source license strictly limited to Education and Research use)
-Overview
-GEOPOL Analytics is a professional‑grade analytical platform designed for education, academic research, and strategic studies.
-It integrates semantic analysis, multi‑source monitoring, economic and environmental indicators, and interactive geospatial visualisation.
-The system runs locally without external dependencies and can operate continuously on a server for long‑term monitoring.
+Open‑source geopolitical analysis platform for education, research, and media monitoring
+Geopol Analytics is an open‑source platform designed to provide structured, transparent, and accessible geopolitical analysis.
+Initially developed from the perspective of a History & Geography teacher, the project aims to support:
 
-Key Features
-Semantic & Media Analysis
-- RoBERTa‑based sentiment classification
-- Local refinement model (“Mini‑moi”)
-- Named Entity Recognition (SpaCy)
-- Thematic classification with weighted keywords
-Multi‑Source Geopolitical Monitoring
-- RSS feeds
-- Social media (X/Twitter via Nitter, Reddit)
-- Historical archives (Archive.org, Gallica, WebTimeMachine)
-- Economic indicators (World Bank, Eurostat, INSEE)
-- Environmental indicators (Open‑Meteo: air quality, climate, weather)
-GEO‑DATA Mapping
-- Leaflet‑based interactive world map
-- Natural Earth datasets
-- Country‑level economic and environmental dashboards
-- Geopolitical blocs, NER overlays, weather layers
-- SDR network activity visualisation
-SDR Monitoring (New)
-- Low‑latency anomaly detection (moving average + standard deviation)
-- Classification from INFO to CRITICAL
-- Monitoring of global SDR network coverage
-- Real‑time integration into the map
-Historical “Archivist”
-- Retrieval of comparable historical situations
-- Semantic vector search (in progress)
-- Cross‑analysis with current indicators
-Analytical Dashboard
-- Sentiment evolution over 30 days
-- Theme‑based statistics
-- RSS vs Social Media divergence
-- Narrative dissonance index (Factor_Z)
+- educators
+  
+- students
+  
+- researchers
+  
+- journalists
+  
+- analysts
+  
+…by offering a modular environment for understanding media flows, socio‑economic signals, and narrative dynamics.
 
-**Use Cases**
-Education (High School & University)
-- Geopolitical blocs and global indicators
-- Media literacy and narrative analysis
-- OSINT introduction and practical exercises
-Academic Research
-- Long‑term trend analysis
-- Narrative divergence studies
-- Correlation between economic, environmental and media indicators
-OSINT & Strategic Monitoring
-- Multi‑source early‑warning signals
-- SDR‑based anomaly detection
-- Cross‑validation with historical precedents
+🚀 Key Features
+
+🧠 Local AI Engine (GGUF)
+
+Geopol Analytics uses a fully local AI model in GGUF format for:
+- inference
+- data processing
+- automated report generation
+This ensures:
+- data sovereignty
+- offline capability
+- reproducibility
+- transparency
+No external API is required.
+
+🔍 Retrieval‑Augmented Generation (RAG)
+
+An integrated RAG system allows the platform to:
+- cross‑reference heterogeneous datasets
+- consolidate weak signals
+- contextualize media and social flows
+- improve the reliability of analytical outputs
+
+🎭 Emotional Trend Comparison (BERT‑based)
+
+A dedicated module compares:
+- emotional trends in media streams
+- emotional trends in social networks
+It identifies:
+- divergences
+- dissonances
+- narrative shifts
+- sentiment asymmetries
+This helps users understand how public discourse evolves across ecosystems.
+
+🛰️ Lightweight OSINT Framework
+
+Geopol Analytics includes a minimal OSINT layer based on:
+- weak‑signal detection
+- distributed micro‑sensors
+- open‑source data streams
+The goal is not intrusive intelligence gathering, but transparent, ethical, and educational monitoring.
+
+🧩 Modular Architecture
+
+The platform is structured into independent modules:
+- media analysis
+- socio‑economic indicators
+- strategic monitoring
+- AI inference
+- RAG engine
+- visualization tools
+- data ingestion pipelines
+Each module can evolve independently and be replaced or extended.
+
+🎓 Educational & Research Orientation
+
+Geopol Analytics is designed to remain:
+- open‑source
+- transparent
+- reproducible
+- accessible
+It is intended for:
+- classrooms
+- universities
+- research labs
+- journalism schools
+- civic education initiatives
+
+📰 Professional Testing (Upcoming)
+
+Once the core modules reach stable production‑ready status, the platform will be offered for free testing to a regional newspaper editorial team.
+Goals:
+- gather professional feedback
+- validate real‑world usefulness
+- improve ergonomics and workflows
+- strengthen the credibility of the project
+This step supports the long‑term mission:
+an open‑source tool with academic rigor and operational relevance.
+
+🛠️ Current Status (2026)
+
+- Core architecture: stable
+- Local AI inference: stable
+- RAG engine: functional, improving
+- Emotional comparison module: operational
+- OSINT weak‑signal module: beta
+- UI/UX: in progress
+- Documentation: being updated
+
+🗺️ Roadmap
+
+Short term
+- Stabilize all modules
+- Improve UI/UX
+- Add multilingual support
+- Expand documentation
+- 
+Medium term
+- Deploy a public demo
+- Conduct testing in a newsroom
+- Publish academic‑style documentation
+- 
+Long term
+- Build a community of contributors
+- Integrate additional data sources
+- Develop advanced visualization dashboards
+
 
 
 
