@@ -68,7 +68,7 @@ Le logiciel fonctionne localement, sans installation système, et peut être dé
 
 *3.5 Surveillance satellite grace aux sources publiques Copernicus et autres ##(65%)*
 
-Integration d'un YOLO peu evolue permettant tout de meme une surveillance environnementale (flux routiers, incendies, urbanisation,...), voir economique (calcul des volumes remplies sur un parking, flux d'actiites des zones indistrielles,...)
+Integration d'un YOLO peu evolue permettant tout de meme une surveillance environnementale (flux routiers, incendies, urbanisation,...), voir economique (calcul des volumes remplis d'un parking, flux d'activites des zones indistrielles,...)
 
 *3.6 Tableau de bord analytique* ## (100%)
   
