@@ -161,7 +161,7 @@ def create_satellite_blueprint() -> Blueprint:
         try:
             manager = get_satellite_manager()
     
-            # Récupérer les paramètres selon la méthode
+        # Récupérer les paramètres selon la méthode
             bbox = None
             width = 512
             height = 512

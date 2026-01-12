@@ -42,9 +42,9 @@ class SatelliteManager:
         try:
             from .satellite_sources import SatelliteSources
             self.sources = SatelliteSources()
-            logger.info("✅ Sources satellite chargées")
+            logger.info("[OK] Sources satellite chargées")
         except Exception as e:
-            logger.error(f"❌ Erreur chargement sources: {e}")
+            logger.error(f"[ERROR] Erreur chargement sources: {e}")
             self.sources = None
 
     # ========================================
@@ -72,7 +72,7 @@ class SatelliteManager:
 
         # Récupérer les couches
         if not self.sources:
-            logger.warning("⚠️ Module sources non disponible")
+            logger.warning("[WARN] Module sources non disponible")
             return {}
 
         layers = {}
@@ -81,26 +81,35 @@ class SatelliteManager:
         try:
             public_layers = self.sources.get_public_layers()
             layers.update(public_layers)
-            logger.debug(f"✅ {len(public_layers)} couches publiques chargées")
+            logger.debug(f"[OK] {len(public_layers)} couches publiques chargées")
         except Exception as e:
-            logger.error(f"❌ Erreur couches publiques: {e}")
+            logger.error(f"[ERROR] Erreur couches publiques: {e}")
 
         # 2. Sources WMS publiques
         try:
             wms_layers = self.sources.get_wms_sources()
             layers.update(wms_layers)
-            logger.debug(f"✅ {len(wms_layers)} sources WMS chargées")
+            logger.debug(f"[OK] {len(wms_layers)} sources WMS chargées")
         except Exception as e:
-            logger.error(f"❌ Erreur sources WMS: {e}")
+            logger.error(f"[ERROR] Erreur sources WMS: {e}")
 
         # 3. Mode avancé si activé
         if self._is_advanced_mode_enabled():
             try:
                 advanced_layers = self._get_advanced_layers()
                 layers.update(advanced_layers)
-                logger.debug(f"✅ {len(advanced_layers)} couches avancées chargées")
+                logger.debug(f"[OK] {len(advanced_layers)} couches avancées chargées")
             except Exception as e:
-                logger.warning(f"⚠️ Erreur couches avancées: {e}")
+                logger.warning(f"[WARN] Erreur couches avancées: {e}")
+
+        # 4. Couches Planet si configuré
+        try:
+            planet_layers = self._get_planet_layers()
+            if planet_layers:
+                layers.update(planet_layers)
+                logger.debug(f"[OK] {len(planet_layers)} couches Planet chargées")
+        except Exception as e:
+            logger.debug(f"[DEBUG] Planet non disponible: {e}")
 
         # Mettre en cache
         if use_cache:
@@ -122,41 +131,45 @@ class SatelliteManager:
     ) -> Optional[str]:
         """
         Génère l'URL pour une couche satellite.
-
-        Args:
-            layer_id: Identifiant de la couche
-            bbox: Bounding box (min_lon, min_lat, max_lon, max_lat)
-            width: Largeur de l'image en pixels
-            height: Hauteur de l'image en pixels
-            date: Date au format YYYY-MM-DD (optionnel)
-
-        Returns:
-            URL de la couche ou None si erreur
         """
         if not self.sources:
-            logger.error("❌ Module sources non disponible")
+            logger.error("[ERROR] Module sources non disponible")
             return None
-
+    
+        logger.info(f"[DEBUG] get_layer_url appelé avec layer_id={layer_id}")
+        
         try:
             # Essayer mode avancé si disponible
-            if layer_id.startswith('sentinel_') and self._is_advanced_mode_enabled():
+            is_advanced = self._is_advanced_mode_enabled()
+            logger.info(f"[DEBUG] Mode avancé activé: {is_advanced}")
+            
+            if layer_id.startswith(('sentinel', 'SENTINEL')) and is_advanced:
+                logger.info(f"[DEBUG] Tentative mode avancé pour {layer_id}")
+                if bbox is None:
+                    logger.warning("[WARN] Bbox requis pour couches avancées")
+                    return None
+                    
                 url = self._get_advanced_layer_url(layer_id, bbox, width, height, date)
                 if url:
+                    logger.info(f"[OK] URL avancée générée pour {layer_id}")
                     return url
-                logger.warning(f"⚠️ Mode avancé échoué pour {layer_id}, fallback sur sources publiques")
-
+                logger.warning(f"[WARN] Mode avancé échoué pour {layer_id}")
+    
             # Fallback sur sources publiques
+            logger.info(f"[DEBUG] Tentative sources publiques pour {layer_id}")
             url = self.sources.get_layer_url(layer_id, bbox, width, height)
-
+    
             if url:
-                logger.debug(f"✅ URL générée pour {layer_id}")
+                logger.debug(f"[OK] URL générée pour {layer_id}")
                 return url
             else:
-                logger.warning(f"⚠️ Aucune URL disponible pour {layer_id}")
+                logger.warning(f"[WARN] Aucune URL disponible pour {layer_id}")
                 return None
-
+    
         except Exception as e:
-            logger.error(f"❌ Erreur génération URL pour {layer_id}: {e}")
+            logger.error(f"[ERROR] Erreur génération URL pour {layer_id}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return None
 
     def get_layer_metadata(self, layer_id: str) -> Optional[Dict[str, Any]]:
@@ -287,14 +300,14 @@ class SatelliteManager:
                 # Invalider le cache
                 self.cache.clear()
 
-                logger.info("✅ Mode avancé activé")
+                logger.info("[OK] Mode avancé activé")
                 return True
             else:
-                logger.warning("⚠️ Échec validation identifiants")
+                logger.warning("[WARN] Échec validation identifiants")
                 return False
 
         except Exception as e:
-            logger.error(f"❌ Erreur activation mode avancé: {e}")
+            logger.error(f"[ERROR] Erreur activation mode avancé: {e}")
             return False
 
     def disable_advanced_mode(self):
@@ -306,7 +319,7 @@ class SatelliteManager:
         # Invalider le cache
         self.cache.clear()
 
-        logger.info("ℹ️ Mode avancé désactivé")
+        logger.info("ℹ Mode avancé désactivé")
 
     def _get_advanced_layers(self) -> Dict[str, Any]:
         """Récupère les couches du mode avancé."""
@@ -323,7 +336,21 @@ class SatelliteManager:
             return advanced.get_available_layers()
 
         except Exception as e:
-            logger.error(f"❌ Erreur récupération couches avancées: {e}")
+            logger.error(f"[ERROR] Erreur récupération couches avancées: {e}")
+            return {}
+
+    def _get_planet_layers(self) -> Dict[str, Any]:
+        """Récupère les couches Planet si configuré."""
+        try:
+            from .planet_connector import get_planet_connector
+
+            connector = get_planet_connector()
+            if connector.is_configured():
+                return connector.get_available_layers()
+            return {}
+
+        except Exception as e:
+            logger.debug(f"[DEBUG] Planet non disponible: {e}")
             return {}
 
     def _get_advanced_layer_url(
@@ -337,19 +364,36 @@ class SatelliteManager:
         """Génère l'URL pour une couche avancée."""
         try:
             from .satellite_advanced import SatelliteAdvanced
-
+    
             client_id = session.get('satellite_client_id')
             client_secret = session.get('satellite_client_secret')
-
+    
             if not client_id or not client_secret:
+                logger.warning("[WARN] Identifiants Sentinel Hub non disponibles")
                 return None
-
+    
             advanced = SatelliteAdvanced(client_id, client_secret)
-            return advanced.get_layer_url(layer_id, bbox, width, height, date)
-
+            
+            # Utiliser la bonne méthode
+            url = advanced.get_layer_url(
+                layer_id=layer_id,
+                bbox=bbox,
+                width=width,
+                height=height,
+                date=date
+            )
+            
+            if url:
+                logger.debug(f"[OK] URL générée pour couche avancée {layer_id}")
+            else:
+                logger.warning(f"[WARN] Aucune URL générée pour {layer_id}")
+                
+            return url
+    
         except Exception as e:
-            logger.error(f"❌ Erreur URL couche avancée: {e}")
+            logger.error(f"[ERROR] Erreur URL couche avancée {layer_id}: {e}")
             return None
+
 
     # ========================================
     # GESTION CACHE
@@ -358,7 +402,7 @@ class SatelliteManager:
     def clear_cache(self):
         """Vide le cache."""
         self.cache.clear()
-        logger.info("🗑️ Cache vidé")
+        logger.info("🗑 Cache vidé")
 
     def set_cache_ttl(self, ttl_seconds: int):
         """
@@ -368,7 +412,7 @@ class SatelliteManager:
             ttl_seconds: Durée de vie en secondes
         """
         self.cache_ttl = ttl_seconds
-        logger.info(f"⏱️ Cache TTL défini à {ttl_seconds}s")
+        logger.info(f"⏱ Cache TTL défini à {ttl_seconds}s")
 
 
 # ========================================

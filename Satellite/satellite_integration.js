@@ -1,6 +1,6 @@
 class SatelliteIntegration {
     constructor() {
-        this.apiBaseUrl = '/api/satellite';
+        this.apiBaseUrl = '/satellite/api';
         this.map = null;
         this.currentLayers = new Map();
         this.credentialsStatus = null;

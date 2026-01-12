@@ -1,0 +1,79 @@
+<!-- Nouvelle structure avec recommandations -->
+<div id="satellite-panel" class="panel">
+    <div class="panel-header">
+        <h3>🛰️ Imagerie Satellite Intelligente</h3>
+        <div class="panel-subtitle">
+            <span id="satellite-status">● Mode Basique</span>
+            <button id="quick-recommend" class="btn-small">🤖 Recommander</button>
+        </div>
+    </div>
+    
+    <div class="panel-tabs">
+        <!-- TODO: Ajouter onglet "Recommandations" -->
+        <button class="tab-btn active" data-tab="recommend">Recommandé</button>
+        <button class="tab-btn" data-tab="layers">Toutes les couches</button>
+        <button class="tab-btn" data-tab="dates">Par date</button>
+        <button class="tab-btn" data-tab="advanced">Avancé</button>
+    </div>
+    
+    <div class="tab-content active" id="tab-recommend">
+        <!-- TODO: Afficher les recommandations contextuelles -->
+        <div class="recommendation-card">
+            <h4>🌿 Pour l'analyse végétale</h4>
+            <p>Sentinel-2 Cloudless 2023</p>
+            <button class="btn-add" data-layer="s2cloudless_2023">Ajouter</button>
+        </div>
+        
+        <div class="recommendation-card">
+            <h4>🏙️ Pour zones urbaines</h4>
+            <p>Landsat 8 + OSM Overlay</p>
+            <button class="btn-add" data-layer-combo="landsat_8,osm_standard">
+                Ajouter combo
+            </button>
+        </div>
+    </div>
+    
+    <div class="tab-content" id="tab-layers">
+        <!-- TODO: Grille de couches avec filtres -->
+        <div class="filter-bar">
+            <input type="text" id="layer-search" placeholder="Rechercher une couche...">
+            <select id="layer-category">
+                <option value="all">Toutes catégories</option>
+                <option value="satellite">Satellite</option>
+                <option value="reference">Référence</option>
+                <option value="hazard">Risques</option>
+            </select>
+        </div>
+        
+        <div id="layers-grid" class="layers-grid">
+            <!-- Rempli dynamiquement par JS -->
+        </div>
+    </div>
+    
+    <!-- TODO: Ajouter section de préchargement -->
+    <div class="preload-section">
+        <h4>⚡ Préchargement intelligent</h4>
+        <button id="preload-current-view" class="btn-small">
+            Précharger la vue actuelle
+        </button>
+        <div class="preload-stats">
+            <span>Cache: <span id="cache-size">0</span> couches</span>
+            <span>Préchargées: <span id="preloaded-count">0</span></span>
+        </div>
+    </div>
+</div>
+
+<!-- TODO: Ajouter styles pour nouveaux éléments -->
+<style>
+.recommendation-card {
+    /* Styles pour les cartes de recommandation */
+}
+
+.filter-bar {
+    /* Styles pour la barre de filtres */
+}
+
+.preload-stats {
+    /* Styles pour les statistiques */
+}
+</style>

@@ -382,13 +382,13 @@ class SatelliteSources:
         # Chercher dans les sources WMS
         if layer_id in self.wms_sources:
             if bbox is None:
-                logger.warning(f"⚠️ Bbox requis pour couche WMS {layer_id}")
+                logger.warning(f"[WARN] Bbox requis pour couche WMS {layer_id}")
                 return None
 
             layer = self.wms_sources[layer_id]
             return self._generate_wms_url(layer, bbox, width, height)
 
-        logger.warning(f"⚠️ Couche {layer_id} non trouvée")
+        logger.warning(f"[WARN] Couche {layer_id} non trouvée")
         return None
 
     def _generate_wms_url(
