@@ -1,0 +1,1 @@
+"""Routes du module economique"""

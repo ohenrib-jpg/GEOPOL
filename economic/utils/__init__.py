@@ -1,0 +1,1 @@
+"""Utilitaires du module economique"""
