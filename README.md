@@ -1,7 +1,7 @@
                                                             GEOPOL Analytics
                                                     
                                                  
-##  GEOPOL est un cadre d’analyse géopolitique modulaire conçu pour explorer, enseigner et tester des corrélations de signaux faibles hétérogènes (OSINT, données géophysiques, économiques, électromagnétiques, narratives), sans prétention prédictive ou décisionnelle. Il s'agit d'un outil Open Souce pour l'Education NAtionale, l'Enseignement et la Recherche
+##  GEOPOL est un cadre d’analyse géopolitique modulaire conçu pour explorer, enseigner et tester des corrélations de signaux faibles hétérogènes (OSINT, données géophysiques, économiques, électromagnétiques, narratives), sans prétention prédictive ou décisionnelle. Il s'agit d'un outil Open Souce pour l'Education Nationale, l'Enseignement et la Recherche
 
 
 ## Open‑source geopolitical analysis platform for education, research, and media monitoring
