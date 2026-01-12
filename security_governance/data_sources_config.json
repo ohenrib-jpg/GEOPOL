@@ -1,0 +1,216 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-08",
+    "description": "Configuration centralisée des sources de données sécurité & gouvernance"
+  },
+  "sources": {
+    "ucdp": {
+      "name": "Uppsala Conflict Data Program",
+      "description": "Données de conflits armés avec victimes géolocalisées",
+      "provider": "Uppsala University",
+      "base_url": "https://ucdpapi.pcr.uu.se",
+      "api_version": "23.1",
+      "endpoints": {
+        "conflicts": "/api/ucdpprioconflict/23.1",
+        "events": "/api/gedevents/23.1",
+        "dyadic": "/api/dyadic/23.1",
+        "nonstate": "/api/nonstate/23.1",
+        "onesided": "/api/onesided/23.1",
+        "battledeaths": "/api/battledeaths/23.1"
+      },
+      "fallback_urls": {
+        "csv_ged": "https://ucdp.uu.se/downloads/ged/ged231.csv",
+        "downloads_page": "https://ucdp.uu.se/downloads/"
+      },
+      "documentation": "https://ucdp.uu.se/apidocs/",
+      "update_frequency": "daily",
+      "requires_auth": false,
+      "timeout": 30,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3
+    },
+    "transparency_cpi": {
+      "name": "Transparency International - Corruption Perceptions Index",
+      "description": "Indice de perception de la corruption (score 0-100)",
+      "provider": "Transparency International",
+      "base_url": "https://www.transparency.org",
+      "api_available": false,
+      "data_urls": {
+        "2024": {
+          "main_page": "https://www.transparency.org/en/cpi/2024",
+          "media_kit": "https://www.transparency.org/en/cpi/2024/media-kit",
+          "published": "2025-02"
+        },
+        "2023": {
+          "main_page": "https://www.transparency.org/en/cpi/2023",
+          "published": "2024-01"
+        }
+      },
+      "alternative_sources": {
+        "datahub_csv": "https://pkgstore.datahub.io/core/corruption-perceptions-index/cpi_1/data/cpi.csv",
+        "github_csv": "https://raw.githubusercontent.com/datasets/corruption-perceptions-index/master/data/cpi.csv",
+        "datahub_page": "https://datahub.io/core/corruption-perceptions-index"
+      },
+      "documentation": "https://www.transparency.org/en/news/how-cpi-scores-are-calculated",
+      "update_frequency": "annual",
+      "requires_auth": false,
+      "timeout": 60,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3,
+      "license": "CC BY-ND 4.0"
+    },
+    "worldbank_corruption": {
+      "name": "World Bank - Control of Corruption Indicator",
+      "description": "Indicateur de contrôle de la corruption (World Governance Indicators)",
+      "provider": "World Bank",
+      "base_url": "https://api.worldbank.org/v2",
+      "endpoints": {
+        "indicator": "/country/all/indicator/CC.EST",
+        "metadata": "/indicator/CC.EST"
+      },
+      "documentation": "https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation",
+      "update_frequency": "annual",
+      "requires_auth": false,
+      "timeout": 30,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3,
+      "format": "json"
+    },
+    "acled": {
+      "name": "Armed Conflict Location & Event Data Project",
+      "description": "Données détaillées sur les conflits et manifestations",
+      "provider": "ACLED",
+      "base_url": "https://api.acleddata.com",
+      "endpoints": {
+        "data": "/acled/read"
+      },
+      "documentation": "https://apidocs.acleddata.com/",
+      "update_frequency": "weekly",
+      "requires_auth": true,
+      "auth_type": "api_key",
+      "env_vars": {
+        "email": "ACLED_EMAIL",
+        "key": "ACLED_API_KEY"
+      },
+      "timeout": 60,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3,
+      "rate_limit": "2500 requests/day (free tier)"
+    },
+    "ocha_hdx": {
+      "name": "UN OCHA Humanitarian Data Exchange",
+      "description": "Données humanitaires et crises",
+      "provider": "UN OCHA",
+      "base_url": "https://data.humdata.org/api/3",
+      "endpoints": {
+        "datasets": "/action/package_search",
+        "dataset_show": "/action/package_show"
+      },
+      "documentation": "https://data.humdata.org/api/",
+      "update_frequency": "varies",
+      "requires_auth": false,
+      "timeout": 45,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3
+    },
+    "ofac_sdn": {
+      "name": "OFAC Specially Designated Nationals List",
+      "description": "Liste des sanctions américaines",
+      "provider": "US Treasury OFAC",
+      "base_url": "https://www.treasury.gov",
+      "data_urls": {
+        "xml": "https://www.treasury.gov/ofac/downloads/sdn.xml",
+        "csv": "https://www.treasury.gov/ofac/downloads/sdn.csv",
+        "advanced_xml": "https://www.treasury.gov/ofac/downloads/sanctions/1.0/sdn_advanced.xml"
+      },
+      "documentation": "https://home.treasury.gov/policy-issues/financial-sanctions/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists",
+      "update_frequency": "daily",
+      "requires_auth": false,
+      "timeout": 60,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3
+    },
+    "vdem": {
+      "name": "V-Dem (Varieties of Democracy)",
+      "description": "Indicateurs de démocratie et gouvernance",
+      "provider": "V-Dem Institute",
+      "base_url": "https://v-dem.net",
+      "data_urls": {
+        "csv": "https://v-dem.net/data/the-v-dem-dataset/",
+        "api": "https://v-dem.net/data_analysis/VariableGraph/"
+      },
+      "documentation": "https://v-dem.net/data/reference-documents/",
+      "update_frequency": "annual",
+      "requires_auth": false,
+      "timeout": 60,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3,
+      "status": "planned"
+    },
+    "global_terrorism_db": {
+      "name": "Global Terrorism Database",
+      "description": "Base de données des incidents terroristes",
+      "provider": "START Consortium - University of Maryland",
+      "base_url": "https://www.start.umd.edu/gtd",
+      "data_urls": {
+        "download": "https://www.start.umd.edu/gtd/access/"
+      },
+      "documentation": "https://www.start.umd.edu/gtd/about/",
+      "update_frequency": "annual",
+      "requires_auth": true,
+      "auth_type": "registration",
+      "timeout": 60,
+      "max_retries": 3,
+      "circuit_breaker_threshold": 3,
+      "status": "planned",
+      "notes": "Nécessite inscription et téléchargement manuel"
+    }
+  },
+  "cache_strategies": {
+    "ucdp": {
+      "ttl_hours": 1,
+      "stale_ttl_hours": 24,
+      "compress": true,
+      "priority": "high"
+    },
+    "transparency_cpi": {
+      "ttl_hours": 24,
+      "stale_ttl_hours": 168,
+      "compress": true,
+      "priority": "medium"
+    },
+    "worldbank_corruption": {
+      "ttl_hours": 12,
+      "stale_ttl_hours": 72,
+      "compress": true,
+      "priority": "medium"
+    },
+    "acled": {
+      "ttl_hours": 1,
+      "stale_ttl_hours": 24,
+      "compress": true,
+      "priority": "high"
+    },
+    "ocha_hdx": {
+      "ttl_hours": 2,
+      "stale_ttl_hours": 48,
+      "compress": true,
+      "priority": "high"
+    },
+    "ofac_sdn": {
+      "ttl_hours": 6,
+      "stale_ttl_hours": 72,
+      "compress": true,
+      "priority": "medium"
+    }
+  },
+  "global_settings": {
+    "default_timeout": 30,
+    "default_max_retries": 3,
+    "default_retry_delay": 2,
+    "circuit_breaker_timeout": 60,
+    "user_agent": "GEOPOL-Analytics/1.0 (+https://github.com/geopol)",
+    "enable_ssl_verify": true
+  }
+}
