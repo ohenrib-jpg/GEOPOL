@@ -1,0 +1,16 @@
+{
+    "name": "Cultural Dynamics",
+    "version": "1.0.0",
+    "description": "Analyse soft power et influence culturelle - diffusion culturelle, échanges, indice soft power",
+    "author": "GEOPOLIS",
+    "category": "culture",
+    "tags": ["soft_power", "culture", "influence", "medias", "education"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "dimension": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "soft_power", "exchanges", "media"]
+        }
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "name": "Water Security",
+    "version": "1.0.0",
+    "description": "Analyse sécurité hydrique mondiale - stress hydrique, conflits eau, gestion ressources, impact géopolitique",
+    "author": "GEOPOLIS",
+    "category": "environment",
+    "tags": ["eau", "securite_hydrique", "conflits", "stress_hydrique", "bassins"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "region": {
+            "type": "string",
+            "default": "global",
+            "options": ["global", "middle-east", "asia", "africa", "europe"]
+        },
+        "risk_type": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "stress", "conflicts", "transboundary"]
+        }
+    }
+}

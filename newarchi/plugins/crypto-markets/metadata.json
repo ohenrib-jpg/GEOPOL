@@ -1,0 +1,28 @@
+{
+    "name": "Crypto Markets",
+    "version": "3.0.0",
+    "description": "Analyse cryptomonnaies temps réel avec données CoinGecko + graphiques historiques",
+    "author": "GEOPOLIS",
+    "category": "finance",
+    "tags": ["crypto", "bitcoin", "ethereum", "marche", "coingecko"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "coingecko": {
+            "nom": "CoinGecko API",
+            "url": "https://www.coingecko.com/api/documentation",
+            "gratuit": "Oui",
+            "limites": "50 appels/minute sans clé"
+        }
+    },
+    "configuration": {
+        "periode_par_defaut": 7,
+        "devise_par_defaut": "usd",
+        "cryptos_par_defaut": ["bitcoin", "ethereum", "ripple", "cardano", "solana"]
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 300
+}

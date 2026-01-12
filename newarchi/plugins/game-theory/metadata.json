@@ -1,0 +1,147 @@
+{
+  "name": "game-theory",
+  "version": "2.0.0",
+  "description": "Plugin d'analyse géopolitique par la théorie des jeux - Équilibres de Nash, dilemmes du prisonnier, jeux stratégiques",
+  "author": "Votre Organisation",
+  "license": "MIT",
+  "main": "plugin.py",
+  "className": "Plugin",
+  
+  "capabilities": [
+    "strategic_analysis",
+    "game_theory_calculations", 
+    "nash_equilibrium_detection",
+    "geopolitical_modeling",
+    "risk_assessment",
+    "cooperation_analysis"
+  ],
+  
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "game_type": {
+        "type": "string",
+        "enum": ["prisoners_dilemma", "chicken_game", "cooperative", "nash_equilibrium", "auto_detect"],
+        "default": "auto_detect",
+        "description": "Type de jeu à analyser"
+      },
+      "actors": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": ["USA", "China", "Russia", "EU"],
+        "description": "Acteurs géopolitiques à inclure dans l'analyse"
+      },
+      "depth_analysis": {
+        "type": "boolean",
+        "default": true,
+        "description": "Effectuer une analyse approfondie avec calculs algorithmiques"
+      },
+      "include_recommendations": {
+        "type": "boolean", 
+        "default": true,
+        "description": "Générer des recommandations stratégiques"
+      }
+    }
+  },
+  
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["success", "error"]
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "scenario": {"type": "string"},
+            "type_jeu": {"type": "string"},
+            "acteurs": {"type": "string"},
+            "matrice_gains": {"type": ["array", "string"]},
+            "equilibre_nash": {"type": "string"},
+            "strategie_dominante": {"type": "string"},
+            "resultat_parfait": {"type": "string"},
+            "analyse_strategique": {"type": "string"},
+            "probabilite_cooperation": {"type": "number"},
+            "niveau_risque": {"type": "string"}
+          }
+        }
+      },
+      "metrics": {
+        "type": "object",
+        "properties": {
+          "scenarios_analyses": {"type": "integer"},
+          "equilibres_nash_identifies": {"type": "integer"},
+          "dilemmes_cooperation": {"type": "integer"},
+          "jeux_conflit_analyses": {"type": "integer"},
+          "complexite_strategique_moyenne": {"type": "number"},
+          "taux_cooperation_moyen": {"type": "number"},
+          "niveau_risque_moyen": {"type": "number"}
+        }
+      },
+      "recommendations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {"type": "string"},
+            "titre": {"type": "string"},
+            "description": {"type": "string"},
+            "actions": {"type": "array"}
+          }
+        }
+      }
+    },
+    "required": ["status", "data", "metrics"]
+  },
+  
+  "dependencies": {
+    "python": ">=3.8",
+    "packages": {
+      "numpy": ">=1.21.0"
+    },
+    "plugins": ["economic-data", "conflict-monitor", "diplomacy-tracker"]
+  },
+  
+  "tags": [
+    "geopolitics", 
+    "game-theory", 
+    "strategic-analysis",
+    "nash-equilibrium",
+    "risk-assessment",
+    "international-relations"
+  ],
+  
+  "examples": [
+    {
+      "name": "Analyse crise USA-Chine",
+      "input": {
+        "game_type": "prisoners_dilemma",
+        "actors": ["USA", "China"],
+        "depth_analysis": true
+      },
+      "description": "Analyse du dilemme du prisonnier appliqué aux relations commerciales USA-Chine"
+    },
+    {
+      "name": "Évaluation risques Ukraine",
+      "input": {
+        "game_type": "chicken_game", 
+        "actors": ["USA", "Russia", "EU"],
+        "include_recommendations": true
+      },
+      "description": "Analyse du jeu de la poule mouillée dans le contexte de la crise ukrainienne"
+    }
+  ],
+  
+  "settings": {
+    "timeout": 30,
+    "max_actors": 6,
+    "default_risk_threshold": 0.7,
+    "enable_mixed_equilibria": true,
+    "log_level": "INFO"
+  }
+}

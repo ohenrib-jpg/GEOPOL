@@ -1,0 +1,9 @@
+{
+    "name": "Alliance Dynamics",
+    "version": "1.1.0",
+    "description": "Analyse des alliances et partenariats stratégiques avec visualisation par mappemonde",
+    "author": "GEOPOLIS",
+    "category": "geopolitics",
+    "tags": ["alliances", "organisations", "carte_monde", "blocs_geopolitiques"],
+    "dependencies": ["requests", "pandas", "plotly", "pycountry"]
+}

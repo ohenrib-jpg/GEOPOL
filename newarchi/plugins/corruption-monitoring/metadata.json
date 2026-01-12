@@ -1,0 +1,21 @@
+{
+    "name": "Corruption Monitoring",
+    "version": "1.0.0",
+    "description": "Surveillance corruption mondiale - indices corruption, affaires, blanchiment, impact gouvernance et développement",
+    "author": "GEOPOLIS",
+    "category": "governance",
+    "tags": ["corruption", "gouvernance", "blanchiment", "transparence", "development"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "region": {
+            "type": "string",
+            "default": "global",
+            "options": ["global", "europe", "asia", "africa", "americas"]
+        },
+        "corruption_type": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "public", "private", "money_laundering"]
+        }
+    }
+}

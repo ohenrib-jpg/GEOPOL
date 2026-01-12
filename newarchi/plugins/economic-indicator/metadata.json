@@ -1,0 +1,9 @@
+{
+    "name": "Indicateurs Économiques",
+    "version": "1.0.0",
+    "description": "Surveillance des indicateurs économiques via World Bank, Yahoo Finance et FRED",
+    "author": "GEOPOLIS",
+    "category": "economics",
+    "tags": ["economie", "indicateurs", "marches", "alertes"],
+    "dependencies": ["yfinance", "requests"]
+}

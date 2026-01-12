@@ -1,0 +1,21 @@
+{
+    "name": "Cultural Tension Monitor",
+    "version": "1.0.0",
+    "description": "Surveillance des tensions culturelles - identité, valeurs, intégration, conflits mémoriels",
+    "author": "GEOPOLIS",
+    "category": "societal",
+    "tags": ["tensions_culturelles", "identite", "valeurs", "integration", "mémoire"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "country": {
+            "type": "string",
+            "default": "France",
+            "options": ["France", "USA", "Allemagne", "UK", "Canada"]
+        },
+        "dimension": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "identity", "values", "integration", "memory"]
+        }
+    }
+}

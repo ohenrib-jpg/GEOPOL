@@ -1,0 +1,27 @@
+{
+    "name": "Media Sentiment Analysis",
+    "version": "2.0.0",
+    "description": "Analyse sentiments médiatiques via RSS réels + analyse émotionnelle 5 dimensions",
+    "author": "GEOPOLIS",
+    "category": "media",
+    "tags": ["sentiment", "medias", "rss", "emotions", "analyse"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["feedparser>=6.0.8", "textblob>=0.17.1", "requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "rss_feeds": {
+            "nom": "Flux RSS médias",
+            "url": "Divers sources médiatiques",
+            "gratuit": "Oui",
+            "limites": "Respect rate limiting"
+        }
+    },
+    "configuration": {
+        "sources_rss": "Configurable via code",
+        "limite_articles": 10
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 1800
+}

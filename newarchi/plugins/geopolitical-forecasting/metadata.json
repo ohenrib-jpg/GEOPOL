@@ -1,0 +1,21 @@
+{
+    "name": "Analyse Médias et Sentiments",
+    "version": "1.0.0",
+    "description": "Analyse des sentiments médiatiques via scraping RSS et analyse émotionnelle sur 5 dimensions",
+    "author": "GEOPOLIS",
+    "category": "media",
+    "tags": ["medias", "sentiments", "analyse", "rss", "emotions"],
+    "dependencies": ["feedparser", "beautifulsoup4", "requests"],
+    "parameters": {
+        "keywords": {
+            "type": "array",
+            "default": ["conflict", "economy", "politics", "security"],
+            "description": "Mots-clés pour filtrer les articles"
+        },
+        "sources": {
+            "type": "array",
+            "default": ["bbc", "reuters", "npr"],
+            "options": ["bbc", "reuters", "npr", "cnn", "ap", "afp"]
+        }
+    }
+}

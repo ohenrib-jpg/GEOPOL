@@ -1,0 +1,21 @@
+{
+    "name": "Narrative Tracking",
+    "version": "1.0.0",
+    "description": "Suivi des récits sociétaux dominants - analyse discours médiatique, réseaux sociaux, évolution narratives",
+    "author": "GEOPOLIS",
+    "category": "societal",
+    "tags": ["recits", "narratives", "medias", "reseaux_sociaux", "discours"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "country": {
+            "type": "string",
+            "default": "France",
+            "options": ["France", "USA", "Allemagne", "UK", "Canada"]
+        },
+        "timeframe": {
+            "type": "string",
+            "default": "7d",
+            "options": ["24h", "7d", "30d", "90d"]
+        }
+    }
+}

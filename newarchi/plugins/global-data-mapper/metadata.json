@@ -1,0 +1,21 @@
+{
+    "name": "Global Data Mapper",
+    "version": "1.0.0",
+    "description": "Cartographie mondiale des données des autres plugins - conflits, alliances, ressources, activités spatiales",
+    "author": "GEOPOLIS",
+    "category": "visualization",
+    "tags": ["cartographie", "integration", "hotspots", "analyse_spatiale"],
+    "dependencies": [],
+    "parameters": {
+        "map_type": {
+            "type": "string",
+            "default": "comprehensive",
+            "options": ["comprehensive", "conflicts", "resources", "alliances", "space"]
+        },
+        "data_sources": {
+            "type": "array",
+            "default": ["conflicts", "resources", "alliances", "space"],
+            "options": ["conflicts", "resources", "alliances", "space", "energy", "health"]
+        }
+    }
+}

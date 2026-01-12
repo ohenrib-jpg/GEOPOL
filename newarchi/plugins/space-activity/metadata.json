@@ -1,0 +1,38 @@
+{
+    "name": "Space Activity",
+    "version": "2.0.0",
+    "description": "Surveillance activité spatiale : satellites, débris orbitaux, ISS, alertes phénomènes spatiaux",
+    "author": "GEOPOLIS",
+    "category": "science",
+    "tags": ["espace", "satellites", "debris", "iss", "nasa", "orbite"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "celestrak": {
+            "nom": "CelesTrak NORAD Elements",
+            "url": "https://celestrak.org",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        },
+        "nasa": {
+            "nom": "NASA APIs",
+            "url": "https://api.nasa.gov",
+            "gratuit": "Oui",
+            "limites": "1000 appels/heure avec clé gratuite"
+        },
+        "opennotify": {
+            "nom": "OpenNotify ISS",
+            "url": "http://open-notify.org",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        }
+    },
+    "configuration": {
+        "nasa_api_key": "DEMO_KEY (gratuit - obtenir sur api.nasa.gov)"
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 1800
+}

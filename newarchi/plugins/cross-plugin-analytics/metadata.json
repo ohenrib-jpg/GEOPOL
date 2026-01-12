@@ -1,0 +1,9 @@
+{
+    "name": "Cross-Plugin Analytics",
+    "version": "1.0.0",
+    "description": "Analyse croisée des données entre tous les plugins GEOPOLIS pour insights intégrés",
+    "author": "GEOPOLIS",
+    "category": "analytics",
+    "tags": ["analyse_croisee", "correlations", "risque_integre", "alertes"],
+    "dependencies": []
+}

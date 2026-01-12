@@ -1,0 +1,27 @@
+{
+    "name": "Network Analysis",
+    "version": "2.0.0",
+    "description": "Analyse réseaux sociaux et médias - tendances, influence, viralité en temps réel",
+    "author": "GEOPOLIS",
+    "category": "analysis",
+    "tags": ["reseau", "tendances", "influence", "viralite", "analyse"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["feedparser>=6.0.8", "networkx>=3.0", "requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "rss_feeds": {
+            "nom": "Flux RSS médias internationaux",
+            "url": "Divers sources",
+            "gratuit": "Oui",
+            "limites": "Respect rate limiting"
+        }
+    },
+    "configuration": {
+        "sources_multiple": "Médias français et internationaux",
+        "themes_surveillance": "5 catégories principales"
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 3600
+}

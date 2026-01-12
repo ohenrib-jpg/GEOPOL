@@ -1,0 +1,16 @@
+{
+    "name": "Social Cohesion Index",
+    "version": "1.0.0",
+    "description": "Indice de cohésion sociale - confiance institutionnelle, capital social, résilience communautaire",
+    "author": "GEOPOLIS",
+    "category": "societal",
+    "tags": ["cohesion_sociale", "confiance", "capital_social", "resilience"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "countries": {
+            "type": "array",
+            "default": ["France", "USA", "Allemagne", "Japon", "Brésil"],
+            "description": "Pays à analyser"
+        }
+    }
+}

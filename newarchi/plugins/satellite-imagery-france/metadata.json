@@ -1,0 +1,31 @@
+{
+    "name": "satellite-imagery-france",
+    "version": "5.0.0",
+    "description": "Surveillance risques France avec APIs réelles - Météo Open-Meteo, Géorisques, Satellites Copernicus",
+    "author": "GEOPOLIS",
+    "category": "environment",
+    "tags": ["satellite", "meteo", "georisques", "risques", "france", "production", "donnees-reelles", "copernicus"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["requests>=2.31.0"]
+    },
+    "parameters": {
+        "region": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "paca", "occitanie", "idf", "normandie", "bretagne", "auvergne-rhone-alpes"],
+            "description": "Région à analyser"
+        },
+        "risk_type": {
+            "type": "string", 
+            "default": "all",
+            "options": ["all", "meteo", "geological", "coastal", "forest_fire"],
+            "description": "Type de risque à surveiller"
+        }
+    },
+    "apis_utilisees": {
+        "meteo": "Open-Meteo (gratuit)",
+        "georisques": "API officielle Géorisques",
+        "satellites": "Copernicus Data Space Ecosystem"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Climate Security",
+    "version": "1.0.0",
+    "description": "Sécurité climatique et impacts géopolitiques - stress hydrique, sécurité alimentaire, migrations",
+    "author": "GEOPOLIS",
+    "category": "environment",
+    "tags": ["climat", "securite", "eau", "alimentation", "migrations"],
+    "dependencies": ["requests"]
+}

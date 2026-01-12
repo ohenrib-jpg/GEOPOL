@@ -1,0 +1,21 @@
+{
+    "name": "Demographic Trends",
+    "version": "1.0.0",
+    "description": "Analyse tendances démographiques mondiales - projections, vieillissement, migrations, impact géopolitique",
+    "author": "GEOPOLIS",
+    "category": "demography",
+    "tags": ["demographie", "population", "vieillissement", "migrations", "projections"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "timeframe": {
+            "type": "string",
+            "default": "2050",
+            "options": ["2030", "2050", "2100"]
+        },
+        "trend_type": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "population", "aging", "migration"]
+        }
+    }
+}

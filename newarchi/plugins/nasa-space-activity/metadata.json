@@ -1,0 +1,16 @@
+{
+    "name": "NASA Space Activity",
+    "version": "1.0.0",
+    "description": "Suivi de l'activite spatiale NASA - ISS, images astronomiques, lancements",
+    "author": "GEOPOLIS Team",
+    "category": "espace",
+    "tags": ["nasa", "espace", "iss", "satellite", "lancement"],
+    "endpoints": {
+        "iss": "Position International Space Station",
+        "apod": "Astronomy Picture of the Day",
+        "launches": "Prochains lancements spatiaux"
+    },
+    "settings": {
+        "nasa_api_key": "Optionnel pour APOD"
+    }
+}

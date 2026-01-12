@@ -1,0 +1,21 @@
+{
+    "name": "Health Security",
+    "version": "1.0.0",
+    "description": "Sécurité sanitaire mondiale - pandémies, systèmes santé, maladies émergentes, préparation crises",
+    "author": "GEOPOLIS",
+    "category": "health",
+    "tags": ["sante", "pandemie", "securite_sanitaire", "maladies", "crise"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "region": {
+            "type": "string",
+            "default": "global",
+            "options": ["global", "europe", "asia", "africa", "americas"]
+        },
+        "threat_type": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "pandemic", "health_systems", "emerging_diseases"]
+        }
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "name": "Migration Flows",
+    "version": "1.0.0",
+    "description": "Analyse flux migratoires mondiaux - réfugiés, migrations économiques, climatiques, tendances et impacts",
+    "author": "GEOPOLIS",
+    "category": "demography",
+    "tags": ["migrations", "refugies", "climat", "flux", "geopolitique"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "flow_type": {
+            "type": "string",
+            "default": "all",
+            "options": ["all", "refugees", "economic", "climate"]
+        },
+        "region": {
+            "type": "string",
+            "default": "global",
+            "options": ["global", "europe", "asia", "africa", "americas"]
+        }
+    }
+}

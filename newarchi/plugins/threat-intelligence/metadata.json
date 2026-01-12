@@ -1,0 +1,9 @@
+{
+    "name": "Threat Intelligence",
+    "version": "1.0.0",
+    "description": "Veille cyber et menaces hybrides via AlienVault OTX et bases de données CVE",
+    "author": "GEOPOLIS",
+    "category": "security",
+    "tags": ["cyber", "menaces", "ioc", "apt"],
+    "dependencies": ["requests"]
+}

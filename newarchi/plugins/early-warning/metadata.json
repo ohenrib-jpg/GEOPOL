@@ -1,0 +1,9 @@
+{
+    "name": "Early Warning System",
+    "version": "1.0.0",
+    "description": "Système d'alerte précoce - indicateurs avancés, signaux faibles et modèles prédictifs",
+    "author": "GEOPOLIS",
+    "category": "analytics",
+    "tags": ["alertes", "prediction", "signaux_faibles", "prevision"],
+    "dependencies": []
+}

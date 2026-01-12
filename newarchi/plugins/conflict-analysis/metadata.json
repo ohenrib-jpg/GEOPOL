@@ -1,0 +1,41 @@
+{
+    "name": "Analyse des Conflits",
+    "version": "3.0.0",
+    "description": "Analyse conflits armés avec données RÉELLES ACLED + GDELT + REST Countries",
+    "author": "GEOPOLIS",
+    "category": "security",
+    "tags": ["conflits", "acled", "gdelt", "donnees-reelles", "geopolitique"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "acled": {
+            "nom": "Armed Conflict Location & Event Data",
+            "url": "https://acleddata.com/",
+            "gratuit": "Oui (avec inscription)",
+            "inscription": "https://developer.acleddata.com/",
+            "limites": "Illimité avec clé gratuite"
+        },
+        "gdelt": {
+            "nom": "Global Database of Events, Language and Tone",
+            "url": "https://www.gdeltproject.org/",
+            "gratuit": "Oui (100% gratuit)",
+            "limites": "Aucune"
+        },
+        "restcountries": {
+            "nom": "REST Countries API",
+            "url": "https://restcountries.com/",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        }
+    },
+    "configuration": {
+        "acled_email": "Votre email (optionnel mais recommandé)",
+        "acled_key": "Votre clé API ACLED (optionnel)",
+        "note": "Le plugin fonctionne sans clés mais avec données limitées"
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 1800
+}

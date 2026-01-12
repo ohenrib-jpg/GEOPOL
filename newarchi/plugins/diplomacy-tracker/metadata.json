@@ -1,0 +1,9 @@
+{
+    "name": "Diplomacy Tracker",
+    "version": "1.0.0",
+    "description": "Suivi diplomatique en temps réel - sommets, visites officielles, résolutions ONU, langage diplomatique",
+    "author": "GEOPOLIS",
+    "category": "diplomacy",
+    "tags": ["diplomatie", "sommets", "visites", "resolutions_onu"],
+    "dependencies": ["requests", "feedparser", "beautifulsoup4"]
+}

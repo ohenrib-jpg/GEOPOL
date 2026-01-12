@@ -1,0 +1,21 @@
+{
+    "name": "ISO Country Data",
+    "version": "1.0.0",
+    "description": "Informations pays via API ISO - données standardisées, codes, indicateurs nationaux",
+    "author": "GEOPOLIS",
+    "category": "reference",
+    "tags": ["pays", "iso", "donnees_standard", "geographie"],
+    "dependencies": ["requests"],
+    "parameters": {
+        "countries": {
+            "type": "array",
+            "default": ["FR", "DE", "US", "CN", "RU"],
+            "description": "Codes ISO des pays à analyser"
+        },
+        "data_type": {
+            "type": "string",
+            "default": "basic",
+            "options": ["basic", "detailed", "economic"]
+        }
+    }
+}

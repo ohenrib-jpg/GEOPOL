@@ -1,0 +1,9 @@
+{
+    "name": "Tech Sovereignty",
+    "version": "1.0.0",
+    "description": "Souveraineté technologique - semi-conducteurs, IA, quantique, spatial, dépendances stratégiques",
+    "author": "GEOPOLIS",
+    "category": "technology",
+    "tags": ["technologie", "souverainete", "semi-conducteurs", "ia", "quantique", "spatial"],
+    "dependencies": ["requests"]
+}

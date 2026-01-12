@@ -1,0 +1,38 @@
+{
+    "name": "Sanctions Monitor",
+    "version": "2.0.0",
+    "description": "Surveillance sanctions internationales avec carte Douanes Françaises + OFAC + UE",
+    "author": "GEOPOLIS",
+    "category": "security",
+    "tags": ["sanctions", "douanes", "ofac", "ue", "carte-interactive"],
+    "dependencies": {
+        "python": ">=3.8",
+        "packages": ["requests>=2.31.0"]
+    },
+    "apis_utilisees": {
+        "douanes_francaises": {
+            "nom": "Carte sanctions Douanes Françaises",
+            "url": "https://www.douane.gouv.fr/sanctions-internationales",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        },
+        "ofac": {
+            "nom": "OFAC SDN List",
+            "url": "https://www.treasury.gov/ofac/downloads/sdn.xml",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        },
+        "eu_sanctions": {
+            "nom": "Sanctions Union Européenne",
+            "url": "https://data.europa.eu/euodp/",
+            "gratuit": "Oui",
+            "limites": "Aucune"
+        }
+    },
+    "configuration": {
+        "note": "Aucune clé API requise - données publiques"
+    },
+    "donnees_reelles": true,
+    "mode_fallback": true,
+    "cache_duration": 3600
+}
