@@ -7,7 +7,7 @@ from datetime import datetime
 def create_complete_database():
     """Crée la base de données complète avec toutes les tables"""
     db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'geopolitics.db')
-    print(f"🗃️  Création de la base: {db_path}")
+    print(f"🗃  Création de la base: {db_path}")
     
     # Supprimer l'ancienne base si elle existe
     if os.path.exists(db_path):
@@ -18,7 +18,7 @@ def create_complete_database():
     cursor = conn.cursor()
     
     try:
-        print("🔨 Création des tables...")
+        print("[HAMMER] Création des tables...")
         
         # 1. Table des thèmes
         cursor.execute("""
@@ -31,7 +31,7 @@ def create_complete_database():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        print("✅ Table 'themes' créée")
+        print("[OK] Table 'themes' créée")
         
         # 2. Table des articles (COMPLÈTE avec RoBERTa)
         cursor.execute("""
@@ -57,7 +57,7 @@ def create_complete_database():
                 analyzed_at DATETIME
             )
         """)
-        print("✅ Table 'articles' créée avec colonnes RoBERTa")
+        print("[OK] Table 'articles' créée avec colonnes RoBERTa")
         
         # 3. Table d'association articles-thèmes
         cursor.execute("""
@@ -71,7 +71,7 @@ def create_complete_database():
                 FOREIGN KEY (theme_id) REFERENCES themes(id) ON DELETE CASCADE
             )
         """)
-        print("✅ Table 'theme_analyses' créée")
+        print("[OK] Table 'theme_analyses' créée")
         
         # 4. Table des migrations
         cursor.execute("""
@@ -80,7 +80,7 @@ def create_complete_database():
                 applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        print("✅ Table 'migrations' créée")
+        print("[OK] Table 'migrations' créée")
         
         # 5. Table des corroborations
         cursor.execute("""
@@ -95,7 +95,7 @@ def create_complete_database():
                 UNIQUE(article_id, similar_article_id)
             )
         """)
-        print("✅ Table 'article_corroborations' créée")
+        print("[OK] Table 'article_corroborations' créée")
         
         # 6. Index pour performances
         indexes = [
@@ -111,7 +111,7 @@ def create_complete_database():
         
         for index_sql in indexes:
             cursor.execute(index_sql)
-        print("✅ Index créés")
+        print("[OK] Index créés")
         
         # 7. Peupler avec les thèmes par défaut
         default_themes = {
@@ -147,7 +147,7 @@ def create_complete_database():
                     theme_data['color'].replace('#', '')
                 )
             )
-        print("✅ Thèmes par défaut ajoutés")
+        print("[OK] Thèmes par défaut ajoutés")
         
         # 8. Ajouter des articles d'exemple avec RoBERTa
         sample_articles = [
@@ -193,7 +193,7 @@ def create_complete_database():
                 article['analysis_model'], article['sentiment_confidence'], article['roberta_score'],
                 article['roberta_label'], article['detailed_sentiment']
             ))
-        print("✅ Articles d'exemple ajoutés")
+        print("[OK] Articles d'exemple ajoutés")
         
         conn.commit()
         
@@ -202,7 +202,7 @@ def create_complete_database():
         _show_database_summary(cursor)
         
     except Exception as e:
-        print(f"❌ Erreur: {e}")
+        print(f"[ERROR] Erreur: {e}")
         conn.rollback()
         raise
     finally:
@@ -220,15 +220,15 @@ def _show_database_summary(cursor):
         cursor.execute("SELECT analysis_model, COUNT(*) FROM articles GROUP BY analysis_model")
         models = cursor.fetchall()
         
-        print(f"📊 RÉSUMÉ:")
+        print(f"[DATA] RÉSUMÉ:")
         print(f"   📰 Articles: {articles_count}")
-        print(f"   🏷️  Thèmes: {themes_count}")
-        print(f"   🤖 Modèles d'analyse:")
+        print(f"   🏷  Thèmes: {themes_count}")
+        print(f"   [AI] Modèles d'analyse:")
         for model, count in models:
             print(f"      {model}: {count} articles")
             
     except Exception as e:
-        print(f"📊 Erreur résumé: {e}")
+        print(f"[DATA] Erreur résumé: {e}")
 
 if __name__ == "__main__":
     create_complete_database()

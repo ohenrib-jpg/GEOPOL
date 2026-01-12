@@ -71,19 +71,19 @@ def check_themes_structure(db_path='instance/geopol.db'):
         all_numeric = all(isinstance(theme_id[0], (int, float)) for theme_id in ids)
         
         if all_numeric:
-            print("  ✅ Tous les IDs sont numériques - Configuration OK")
+            print("  [OK] Tous les IDs sont numériques - Configuration OK")
         else:
-            print("  ⚠️  PROBLÈME DÉTECTÉ: Certains IDs ne sont pas numériques")
+            print("  [WARN]  PROBLÈME DÉTECTÉ: Certains IDs ne sont pas numériques")
             print("  Solution 1: Recréer la table themes avec une colonne id INTEGER PRIMARY KEY")
             print("  Solution 2: Ajouter une colonne numeric_id INTEGER et l'utiliser pour l'API")
             
         return themes, col_names
         
     except sqlite3.Error as e:
-        logger.error(f"❌ Erreur SQLite: {e}")
+        logger.error(f"[ERROR] Erreur SQLite: {e}")
         return None, None
     except Exception as e:
-        logger.error(f"❌ Erreur générale: {e}")
+        logger.error(f"[ERROR] Erreur générale: {e}")
         return None, None
 
 def suggest_fix(themes, col_names):
@@ -95,7 +95,7 @@ def suggest_fix(themes, col_names):
     try:
         id_index = col_names.index('id')
     except ValueError:
-        print("\n⚠️  La colonne 'id' n'existe pas dans la table!")
+        print("\n[WARN]  La colonne 'id' n'existe pas dans la table!")
         return
     
     # Vérifier si on a des IDs non-numériques
@@ -124,7 +124,7 @@ CREATE INDEX IF NOT EXISTS idx_themes_numeric_id ON themes(numeric_id);
 """)
 
 if __name__ == '__main__':
-    print("\n🔍 DIAGNOSTIC DE LA TABLE THEMES")
+    print("\n[SEARCH] DIAGNOSTIC DE LA TABLE THEMES")
     print("="*60)
     
     themes, col_names = check_themes_structure()
@@ -150,4 +150,4 @@ if __name__ == '__main__':
             ]
         }, indent=2))
     
-    print("\n✅ Diagnostic terminé!\n")
+    print("\n[OK] Diagnostic terminé!\n")

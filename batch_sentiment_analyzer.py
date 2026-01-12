@@ -35,7 +35,7 @@ class BatchSentimentAnalyzer:
         4. Application de l'analyse bayésienne
         5. Sauvegarde avec métriques de cohérence
         """
-        logger.info(f"🔄 Démarrage analyse batch de {len(articles)} articles")
+        logger.info(f"[MIGRATION] Démarrage analyse batch de {len(articles)} articles")
         
         results = {
             'total_articles': len(articles),
@@ -48,17 +48,17 @@ class BatchSentimentAnalyzer:
         }
         
         # ÉTAPE 1 : Analyse initiale de tous les articles
-        logger.info("📊 Étape 1/5 : Analyse initiale...")
+        logger.info("[DATA] Étape 1/5 : Analyse initiale...")
         analyzed_articles = self._initial_analysis(articles)
         results['analyzed'] = len(analyzed_articles)
         
         # ÉTAPE 2 : Identification des clusters
-        logger.info("🔍 Étape 2/5 : Identification des clusters...")
+        logger.info("[SEARCH] Étape 2/5 : Identification des clusters...")
         clusters = self._identify_clusters(analyzed_articles)
         results['clusters_found'] = len(clusters)
         
         # ÉTAPE 3 : Harmonisation par cluster
-        logger.info("⚖️ Étape 3/5 : Harmonisation des clusters...")
+        logger.info("⚖ Étape 3/5 : Harmonisation des clusters...")
         harmonization_stats = self._harmonize_clusters(clusters, analyzed_articles)
         results['harmonized'] = harmonization_stats['harmonized']
         results['sentiment_changes'] = harmonization_stats['changes']
@@ -72,7 +72,7 @@ class BatchSentimentAnalyzer:
         logger.info("💾 Étape 5/5 : Sauvegarde...")
         save_stats = self._save_batch_results(analyzed_articles, db_manager)
         
-        logger.info(f"✅ Analyse batch terminée : {results['analyzed']} articles, "
+        logger.info(f"[OK] Analyse batch terminée : {results['analyzed']} articles, "
                    f"{results['clusters_found']} clusters, "
                    f"{results['harmonized']} harmonisés")
         
@@ -108,7 +108,7 @@ class BatchSentimentAnalyzer:
                 logger.error(f"Erreur analyse article {article.get('id')}: {e}")
                 continue
         
-        logger.info(f"✅ {len(analyzed)}/{len(articles)} articles analysés avec succès")
+        logger.info(f"[OK] {len(analyzed)}/{len(articles)} articles analysés avec succès")
         return analyzed
     
     def _identify_clusters(self, articles: List[Dict]) -> List[List[int]]:
@@ -142,7 +142,7 @@ class BatchSentimentAnalyzer:
                 logger.debug(f"📦 Cluster trouvé : {len(cluster_ids)} articles similaires "
                            f"(article principal: {article_id})")
         
-        logger.info(f"🔍 {len(clusters)} clusters identifiés sur {len(articles)} articles")
+        logger.info(f"[SEARCH] {len(clusters)} clusters identifiés sur {len(articles)} articles")
         return clusters
     
     def _harmonize_clusters(self, clusters: List[List[int]], 
@@ -172,7 +172,7 @@ class BatchSentimentAnalyzer:
             
             # Si la déviation est trop grande, harmoniser
             if current_deviation > self.max_deviation:
-                logger.debug(f"⚠️ Cluster incohérent détecté (σ={current_deviation:.3f}), harmonisation...")
+                logger.debug(f"[WARN] Cluster incohérent détecté (σ={current_deviation:.3f}), harmonisation...")
                 
                 for article in cluster_articles:
                     old_score = article['sentiment_analysis']['score']
@@ -200,7 +200,7 @@ class BatchSentimentAnalyzer:
                     
                     if new_type != old_type:
                         stats['changes'] += 1
-                        logger.debug(f"  📝 Article {article.get('id')}: {old_type} → {new_type} "
+                        logger.debug(f"  [NOTE] Article {article.get('id')}: {old_type} → {new_type} "
                                    f"(score: {old_score:.3f} → {harmonized_score:.3f})")
         
         return stats

@@ -297,4 +297,4 @@ def register_entity_routes(app, db_manager, entity_extractor, entity_db_manager)
             logger.error(f"Erreur catégories: {e}")
             return jsonify({'error': str(e)}), 500
     
-    logger.info("✅ Routes entités géopolitiques enregistrées")
+    logger.info("[OK] Routes entités géopolitiques enregistrées")

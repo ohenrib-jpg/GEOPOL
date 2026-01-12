@@ -297,7 +297,7 @@ class BayesianSentimentAnalyzer:
             ))
             
             conn.commit()
-            logger.info(f"✅ Analyse bayésienne sauvegardée pour article {article_id}")
+            logger.info(f"[OK] Analyse bayésienne sauvegardée pour article {article_id}")
         except Exception as e:
             logger.error(f"Erreur sauvegarde: {e}")
             conn.rollback()

@@ -6,6 +6,7 @@ from collections import defaultdict, Counter
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Set, Tuple
 import unicodedata
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -42,20 +43,67 @@ class GeoNarrativeAnalyzer:
             r'\(.*?\)',       # parenthèses
         ]
         
-        logger.info("✅ GeoNarrativeAnalyzer initialisé pour la production")
+        logger.info("[OK] GeoNarrativeAnalyzer initialisé pour la production")
+
+    def _clean_html(self, text: str) -> str:
+        """
+        Nettoie le HTML et les balises XML des flux RSS mal formatés
+        Identique au nettoyage dans ArticleContextBuilder pour cohérence
+
+        Args:
+            text: Texte potentiellement avec HTML/XML
+
+        Returns:
+            Texte nettoyé sans balises
+        """
+        if not text:
+            return ""
+
+        # Détecter si le texte contient du HTML
+        if '<' not in text and '>' not in text:
+            return text
+
+        try:
+            # Parser avec BeautifulSoup
+            soup = BeautifulSoup(text, 'html.parser')
+
+            # Supprimer les scripts et styles
+            for script in soup(["script", "style"]):
+                script.decompose()
+
+            # Extraire le texte
+            clean_text = soup.get_text(separator=' ', strip=True)
+
+            # Nettoyer les espaces multiples
+            clean_text = re.sub(r'\s+', ' ', clean_text)
+
+            # Décoder les entités HTML restantes
+            clean_text = clean_text.replace('&nbsp;', ' ')
+            clean_text = clean_text.replace('&amp;', '&')
+            clean_text = clean_text.replace('&lt;', '<')
+            clean_text = clean_text.replace('&gt;', '>')
+            clean_text = clean_text.replace('&quot;', '"')
+            clean_text = clean_text.replace('&#39;', "'")
+
+            return clean_text.strip()
+
+        except Exception as e:
+            logger.warning(f"[WARN] Erreur nettoyage HTML: {e}")
+            # Fallback: suppression brutale des balises
+            return re.sub(r'<[^>]+>', ' ', text).strip()
 
     def detect_transnational_patterns(self, days=7, min_countries=2):
         try:
-            logger.info(f"🔍 Analyse patterns sur {days} jours (min {min_countries} pays)")
+            logger.info(f"[SEARCH] Analyse patterns sur {days} jours (min {min_countries} pays)")
             
             # 1. Récupérer les articles récents
             articles_by_country = self._get_recent_articles_by_country(days)
             
             if not articles_by_country:
-                logger.warning("⚠️ Aucun article trouvé")
+                logger.warning("[WARN] Aucun article trouvé")
                 return self._get_fallback_patterns()
 
-            logger.info(f"📊 Articles récupérés: {sum(len(v) for v in articles_by_country.values())} dans {len(articles_by_country)} pays")
+            logger.info(f"[DATA] Articles récupérés: {sum(len(v) for v in articles_by_country.values())} dans {len(articles_by_country)} pays")
 
             # 2. Préparer les corpus par pays
             country_patterns = self._extract_country_patterns(articles_by_country)
@@ -68,11 +116,11 @@ class GeoNarrativeAnalyzer:
             # 4. Enrichir avec les entités SpaCy
             enriched_patterns = self._enrich_patterns_with_entities(transnational_patterns)
             
-            logger.info(f"✅ {len(enriched_patterns)} patterns transnationaux détectés")
+            logger.info(f"[OK] {len(enriched_patterns)} patterns transnationaux détectés")
             return enriched_patterns
 
         except Exception as e:
-            logger.error(f"❌ Erreur détection patterns: {e}", exc_info=True)
+            logger.error(f"[ERROR] Erreur détection patterns: {e}", exc_info=True)
             return self._get_fallback_patterns()
 
     def _extract_country_patterns(self, articles_by_country: Dict[str, List[Dict]]) -> Dict[str, Dict[str, int]]:
@@ -91,10 +139,10 @@ class GeoNarrativeAnalyzer:
                 
                 if ngrams:
                     country_patterns[country] = ngrams
-                    logger.debug(f"  📝 {country}: {len(ngrams)} patterns")
+                    logger.debug(f"  [NOTE] {country}: {len(ngrams)} patterns")
                     
             except Exception as e:
-                logger.warning(f"⚠️ Erreur traitement {country}: {e}")
+                logger.warning(f"[WARN] Erreur traitement {country}: {e}")
                 continue
         
         return country_patterns
@@ -102,17 +150,21 @@ class GeoNarrativeAnalyzer:
     def _build_clean_corpus(self, articles: List[Dict]) -> str:
         """Construit un corpus nettoyé à partir des articles"""
         text_chunks = []
-        
+
         for article in articles:
             title = article.get('title', '')
             content = article.get('content', '')
-            
-            # Nettoyage approfondi
-            cleaned_text = self._deep_clean_text(f"{title}. {content}")
-            
+
+            # ÉTAPE 1: Nettoyer le HTML/XML (BeautifulSoup)
+            title_clean = self._clean_html(title)
+            content_clean = self._clean_html(content)
+
+            # ÉTAPE 2: Nettoyage linguistique approfondi
+            cleaned_text = self._deep_clean_text(f"{title_clean}. {content_clean}")
+
             if cleaned_text and len(cleaned_text) > 50:
                 text_chunks.append(cleaned_text)
-        
+
         return " ".join(text_chunks)
 
     def _deep_clean_text(self, text: str) -> str:
@@ -256,7 +308,7 @@ class GeoNarrativeAnalyzer:
                 }
                 
             except Exception as e:
-                logger.warning(f"⚠️ Erreur enrichissement pattern: {e}")
+                logger.warning(f"[WARN] Erreur enrichissement pattern: {e}")
                 pattern["entities"] = {}
             
             enriched_patterns.append(pattern)
@@ -271,34 +323,84 @@ class GeoNarrativeAnalyzer:
             
             cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
             
-            # Requête optimisée pour la production
+            # Requête enrichie pour France, Canada, USA, Afrique francophone
             cursor.execute("""
-                SELECT 
+                SELECT
                     a.id,
                     a.title,
                     a.content,
                     a.feed_url,
                     a.pub_date,
-                    COALESCE(a.country, 
-                        CASE 
-                            WHEN a.feed_url LIKE '%france%' OR a.title LIKE '%france%' OR a.content LIKE '%france%' THEN 'FR'
-                            WHEN a.feed_url LIKE '%germany%' OR a.title LIKE '%allemagne%' OR a.content LIKE '%germany%' THEN 'DE'
-                            WHEN a.feed_url LIKE '%uk%' OR a.title LIKE '%britain%' OR a.content LIKE '%uk%' THEN 'UK'
-                            WHEN a.feed_url LIKE '%us%' OR a.title LIKE '%usa%' OR a.content LIKE '%united states%' THEN 'US'
-                            WHEN a.feed_url LIKE '%spain%' OR a.title LIKE '%espagne%' OR a.content LIKE '%spain%' THEN 'ES'
-                            WHEN a.feed_url LIKE '%italy%' OR a.title LIKE '%italie%' OR a.content LIKE '%italy%' THEN 'IT'
-                            WHEN a.feed_url LIKE '%china%' OR a.title LIKE '%chine%' OR a.content LIKE '%china%' THEN 'CN'
-                            WHEN a.feed_url LIKE '%japan%' OR a.title LIKE '%japon%' OR a.content LIKE '%japan%' THEN 'JP'
-                            WHEN a.feed_url LIKE '%russia%' OR a.title LIKE '%russie%' OR a.content LIKE '%russia%' THEN 'RU'
-                            ELSE 'OTHER'
-                        END
-                    ) as country
+                    CASE
+                        -- France
+                        WHEN a.feed_url LIKE '%france%' OR a.title LIKE '%france%' OR a.content LIKE '%france%' THEN 'FR'
+
+                        -- Canada
+                        WHEN a.feed_url LIKE '%canada%' OR a.feed_url LIKE '%quebec%'
+                             OR a.title LIKE '%canada%' OR a.title LIKE '%québec%'
+                             OR a.content LIKE '%canada%' THEN 'CA'
+
+                        -- USA
+                        WHEN a.feed_url LIKE '%usa%' OR a.feed_url LIKE '%us%' OR a.feed_url LIKE '%america%'
+                             OR a.title LIKE '%états-unis%' OR a.title LIKE '%usa%' OR a.title LIKE '%etats-unis%'
+                             OR a.content LIKE '%united states%' OR a.content LIKE '%états-unis%' THEN 'US'
+
+                        -- Afrique francophone
+                        WHEN a.feed_url LIKE '%senegal%' OR a.title LIKE '%sénégal%' OR a.content LIKE '%sénégal%' THEN 'SN'
+                        WHEN a.feed_url LIKE '%cote%ivoire%' OR a.feed_url LIKE '%cotedivoire%'
+                             OR a.title LIKE '%côte%ivoire%' OR a.content LIKE '%côte%ivoire%' THEN 'CI'
+                        WHEN a.feed_url LIKE '%mali%' OR a.title LIKE '%mali%' OR a.content LIKE '%mali%' THEN 'ML'
+                        WHEN a.feed_url LIKE '%burkina%' OR a.title LIKE '%burkina%' OR a.content LIKE '%burkina%' THEN 'BF'
+                        WHEN a.feed_url LIKE '%niger%' OR a.title LIKE '%niger%' OR a.content LIKE '%niger%' THEN 'NE'
+                        WHEN a.feed_url LIKE '%benin%' OR a.feed_url LIKE '%bénin%'
+                             OR a.title LIKE '%bénin%' OR a.content LIKE '%bénin%' THEN 'BJ'
+                        WHEN a.feed_url LIKE '%togo%' OR a.title LIKE '%togo%' OR a.content LIKE '%togo%' THEN 'TG'
+                        WHEN a.feed_url LIKE '%cameroun%' OR a.title LIKE '%cameroun%' OR a.content LIKE '%cameroun%' THEN 'CM'
+                        WHEN a.feed_url LIKE '%tchad%' OR a.title LIKE '%tchad%' OR a.content LIKE '%tchad%' THEN 'TD'
+                        WHEN a.feed_url LIKE '%gabon%' OR a.title LIKE '%gabon%' OR a.content LIKE '%gabon%' THEN 'GA'
+                        WHEN a.feed_url LIKE '%congo%' OR a.title LIKE '%congo%' OR a.content LIKE '%congo%' THEN 'CG'
+                        WHEN a.feed_url LIKE '%rdc%' OR a.feed_url LIKE '%rd%congo%'
+                             OR a.title LIKE '%rdc%' OR a.title LIKE '%république démocratique%' THEN 'CD'
+                        WHEN a.feed_url LIKE '%guinee%' OR a.feed_url LIKE '%guinée%'
+                             OR a.title LIKE '%guinée%' OR a.content LIKE '%guinée%' THEN 'GN'
+                        WHEN a.feed_url LIKE '%madagascar%' OR a.title LIKE '%madagascar%' OR a.content LIKE '%madagascar%' THEN 'MG'
+
+                        -- BRICS originaux
+                        WHEN a.feed_url LIKE '%brazil%' OR a.feed_url LIKE '%brasil%'
+                             OR a.title LIKE '%brésil%' OR a.content LIKE '%brésil%' THEN 'BR'
+                        WHEN a.feed_url LIKE '%russia%' OR a.title LIKE '%russie%' OR a.content LIKE '%russie%' THEN 'RU'
+                        WHEN a.feed_url LIKE '%india%' OR a.feed_url LIKE '%inde%'
+                             OR a.title LIKE '%inde%' OR a.content LIKE '%inde%' THEN 'IN'
+                        WHEN a.feed_url LIKE '%china%' OR a.title LIKE '%chine%' OR a.content LIKE '%chine%' THEN 'CN'
+                        WHEN a.feed_url LIKE '%south%africa%' OR a.feed_url LIKE '%afrique%sud%'
+                             OR a.title LIKE '%afrique%sud%' OR a.content LIKE '%afrique%sud%' THEN 'ZA'
+
+                        -- BRICS+ (nouveaux membres 2024)
+                        WHEN a.feed_url LIKE '%iran%' OR a.title LIKE '%iran%' OR a.content LIKE '%iran%' THEN 'IR'
+                        WHEN a.feed_url LIKE '%saudi%' OR a.feed_url LIKE '%arabie%'
+                             OR a.title LIKE '%arabie%saoudite%' OR a.content LIKE '%arabie%saoudite%' THEN 'SA'
+                        WHEN a.feed_url LIKE '%egypt%' OR a.feed_url LIKE '%egypte%'
+                             OR a.title LIKE '%égypte%' OR a.content LIKE '%égypte%' THEN 'EG'
+                        WHEN a.feed_url LIKE '%uae%' OR a.feed_url LIKE '%emirates%' OR a.feed_url LIKE '%emirats%'
+                             OR a.title LIKE '%émirats%' OR a.content LIKE '%émirats%arabes%' THEN 'AE'
+                        WHEN a.feed_url LIKE '%ethiopia%' OR a.feed_url LIKE '%ethiopie%'
+                             OR a.title LIKE '%éthiopie%' OR a.content LIKE '%éthiopie%' THEN 'ET'
+
+                        -- Union Européenne (pays majeurs)
+                        WHEN a.feed_url LIKE '%germany%' OR a.title LIKE '%allemagne%' OR a.content LIKE '%allemagne%' THEN 'DE'
+                        WHEN a.feed_url LIKE '%uk%' OR a.title LIKE '%britain%' OR a.content LIKE '%royaume-uni%' THEN 'UK'
+                        WHEN a.feed_url LIKE '%spain%' OR a.title LIKE '%espagne%' OR a.content LIKE '%espagne%' THEN 'ES'
+                        WHEN a.feed_url LIKE '%italy%' OR a.feed_url LIKE '%italie%'
+                             OR a.title LIKE '%italie%' OR a.content LIKE '%italie%' THEN 'IT'
+
+                        ELSE 'OTHER'
+                    END as country
                 FROM articles a
-                WHERE a.pub_date >= ? 
-                  AND a.content IS NOT NULL 
+                WHERE a.pub_date >= ?
+                  AND a.content IS NOT NULL
                   AND LENGTH(a.content) > 200
                 ORDER BY a.pub_date DESC
-                LIMIT 1000
+                LIMIT 2000
             """, (cutoff,))
             
             articles_by_country = defaultdict(list)
@@ -318,7 +420,7 @@ class GeoNarrativeAnalyzer:
             return dict(articles_by_country)
             
         except Exception as e:
-            logger.error(f"❌ Erreur récupération articles: {e}")
+            logger.error(f"[ERROR] Erreur récupération articles: {e}")
             return {}
 
     def _get_fallback_patterns(self) -> List[Dict]:

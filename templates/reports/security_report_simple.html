@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Security Report - {{ report_date }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2c3e50; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .metric { margin: 10px 0; }
+        .risk { padding: 10px; margin: 5px 0; border-left: 3px solid #e74c3c; }
+    </style>
+</head>
+<body>
+    <h1>Security & Governance Report</h1>
+    <p>Generated: {{ report_date }}</p>
+
+    {% if overview %}
+    <div class="section">
+        <h2>Overview</h2>
+        {% for key, value in overview.items() %}
+        <div class="metric"><strong>{{ key|replace('_', ' ')|title }}:</strong> {{ value }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if risks %}
+    <div class="section">
+        <h2>Top Risks</h2>
+        {% for risk in risks %}
+        <div class="risk">
+            <strong>{{ risk.type|replace('_', ' ')|title }}</strong>: {{ risk.indicator }}
+            {% if risk.country %}({{ risk.country }}){% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>

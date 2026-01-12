@@ -25,33 +25,33 @@ def test_archiviste_v3():
         from archiviste_v3.archiviste_service import ArchivisteServiceImproved
         from archiviste_v3.archive_client import ArchiveOrgClient
         from archiviste_v3.archiviste_database import ArchivisteDatabase
-        print("✅ Tous les modules importés avec succès")
+        print("[OK] Tous les modules importés avec succès")
     except ImportError as e:
-        print(f"❌ Erreur d'import: {e}")
+        print(f"[ERROR] Erreur d'import: {e}")
         return False
     
     # Test 2: Initialisation du service
-    print("\n🔧 Test 2: Initialisation du service...")
+    print("\n[TOOL] Test 2: Initialisation du service...")
     try:
         db_manager = DatabaseManager()
         service = ArchivisteServiceImproved(db_manager)
-        print("✅ Service initialisé")
+        print("[OK] Service initialisé")
     except Exception as e:
-        print(f"❌ Erreur initialisation: {e}")
+        print(f"[ERROR] Erreur initialisation: {e}")
         return False
     
     # Test 3: Vérification des périodes
-    print("\n📅 Test 3: Récupération des périodes...")
+    print("\n[CALENDAR] Test 3: Récupération des périodes...")
     try:
         periods = service.get_available_periods()
-        print(f"✅ {len(periods)} périodes disponibles")
+        print(f"[OK] {len(periods)} périodes disponibles")
         print(f"   Exemples: {list(periods.keys())[:3]}")
     except Exception as e:
-        print(f"❌ Erreur périodes: {e}")
+        print(f"[ERROR] Erreur périodes: {e}")
         return False
     
     # Test 4: Vérification des thèmes
-    print("\n🏷️  Test 4: Récupération des thèmes...")
+    print("\n🏷  Test 4: Récupération des thèmes...")
     try:
         conn = db_manager.get_connection()
         cursor = conn.cursor()
@@ -60,11 +60,11 @@ def test_archiviste_v3():
         conn.close()
         
         if themes_count == 0:
-            print("⚠️  Aucun thème trouvé - Créez un thème dans l'interface")
+            print("[WARN]  Aucun thème trouvé - Créez un thème dans l'interface")
             print("   Instructions: Dashboard > Gérer les thèmes > Créer")
             return False
         
-        print(f"✅ {themes_count} thème(s) trouvé(s)")
+        print(f"[OK] {themes_count} thème(s) trouvé(s)")
         
         # Récupérer le premier thème
         conn = db_manager.get_connection()
@@ -78,11 +78,11 @@ def test_archiviste_v3():
             test_theme_name = theme_row[1]
             print(f"   Thème de test: {test_theme_name} (ID: {test_theme_id})")
         else:
-            print("❌ Impossible de récupérer un thème de test")
+            print("[ERROR] Impossible de récupérer un thème de test")
             return False
             
     except Exception as e:
-        print(f"❌ Erreur thèmes: {e}")
+        print(f"[ERROR] Erreur thèmes: {e}")
         return False
     
     # Test 5: Récupération des mots-clés
@@ -90,32 +90,32 @@ def test_archiviste_v3():
     try:
         keywords = service.get_theme_keywords(test_theme_id)
         if not keywords:
-            print("⚠️  Aucun mot-clé pour ce thème")
+            print("[WARN]  Aucun mot-clé pour ce thème")
             print("   Ajoutez des mots-clés dans l'interface de gestion")
             return False
         
-        print(f"✅ {len(keywords)} mots-clés récupérés")
+        print(f"[OK] {len(keywords)} mots-clés récupérés")
         print(f"   Mots-clés: {', '.join(keywords[:5])}")
         if len(keywords) > 5:
             print(f"   + {len(keywords) - 5} autres...")
     except Exception as e:
-        print(f"❌ Erreur mots-clés: {e}")
+        print(f"[ERROR] Erreur mots-clés: {e}")
         import traceback
         traceback.print_exc()
         return False
     
     # Test 6: Construction de requête
-    print("\n📝 Test 6: Construction de la requête Archive.org...")
+    print("\n[NOTE] Test 6: Construction de la requête Archive.org...")
     try:
         query = service.build_theme_based_query(test_theme_id)
-        print(f"✅ Requête construite ({len(query)} caractères)")
+        print(f"[OK] Requête construite ({len(query)} caractères)")
         print(f"   Aperçu: {query[:100]}...")
     except Exception as e:
-        print(f"❌ Erreur construction requête: {e}")
+        print(f"[ERROR] Erreur construction requête: {e}")
         return False
     
     # Test 7: Test Archive.org (optionnel - peut être lent)
-    print("\n🌐 Test 7: Connexion à Archive.org...")
+    print("\n[WEB] Test 7: Connexion à Archive.org...")
     print("   (Ce test peut prendre 10-30 secondes...)")
     try:
         archive_client = ArchiveOrgClient()
@@ -129,17 +129,17 @@ def test_archiviste_v3():
         )
         
         if results:
-            print(f"✅ Archive.org accessible - {len(results)} résultats test")
+            print(f"[OK] Archive.org accessible - {len(results)} résultats test")
             print(f"   Premier résultat: {results[0].get('title', 'Sans titre')[:50]}...")
         else:
-            print("⚠️  Archive.org accessible mais aucun résultat pour le test")
+            print("[WARN]  Archive.org accessible mais aucun résultat pour le test")
             print("   (Ceci est normal si les serveurs sont temporairement vides)")
     except Exception as e:
-        print(f"⚠️  Erreur connexion Archive.org: {e}")
+        print(f"[WARN]  Erreur connexion Archive.org: {e}")
         print("   (Le service fonctionne quand même, mais Archive.org est inaccessible)")
     
     # Test 8: Analyse complète (optionnel)
-    print("\n🎯 Test 8: Test d'analyse complète...")
+    print("\n[TARGET] Test 8: Test d'analyse complète...")
     print("   Voulez-vous tester une analyse complète ? (peut prendre 30s-1min)")
     print("   Ceci effectuera une vraie requête à Archive.org")
     
@@ -155,13 +155,13 @@ def test_archiviste_v3():
             )
             
             if result.get('success'):
-                print(f"✅ Analyse réussie !")
-                print(f"   📊 Documents analysés: {result.get('items_analyzed', 0)}")
+                print(f"[OK] Analyse réussie !")
+                print(f"   [DATA] Documents analysés: {result.get('items_analyzed', 0)}")
                 print(f"   ⭐ Documents clés: {len(result.get('key_items', []))}")
                 
                 # Afficher les insights
                 if result.get('insights'):
-                    print(f"   💡 Insights:")
+                    print(f"   [IDEA] Insights:")
                     for insight in result['insights'][:3]:
                         print(f"      - {insight}")
                 
@@ -170,15 +170,15 @@ def test_archiviste_v3():
                 if metadata.get('theme_keywords'):
                     print(f"   🔑 Mots-clés utilisés: {', '.join(metadata['theme_keywords'][:5])}")
             else:
-                print(f"⚠️  Analyse terminée mais sans résultats")
+                print(f"[WARN]  Analyse terminée mais sans résultats")
                 print(f"   Erreur: {result.get('error', 'Inconnue')}")
                 print(f"   Suggestions: {result.get('suggestions', [])}")
         except Exception as e:
-            print(f"❌ Erreur analyse: {e}")
+            print(f"[ERROR] Erreur analyse: {e}")
             import traceback
             traceback.print_exc()
     else:
-        print("   ⏭️  Test d'analyse sauté")
+        print("   [SKIP]  Test d'analyse sauté")
     
     # Test 9: Vérification base de données
     print("\n💾 Test 9: Vérification des tables de la base...")
@@ -196,24 +196,24 @@ def test_archiviste_v3():
         for table in tables_to_check:
             cursor.execute(f"SELECT COUNT(*) FROM {table}")
             count = cursor.fetchone()[0]
-            print(f"   ✅ {table}: {count} entrée(s)")
+            print(f"   [OK] {table}: {count} entrée(s)")
         
         conn.close()
     except Exception as e:
-        print(f"❌ Erreur vérification BDD: {e}")
+        print(f"[ERROR] Erreur vérification BDD: {e}")
         return False
     
     # Résumé final
     print("\n" + "=" * 70)
-    print("📊 RÉSUMÉ DES TESTS")
+    print("[DATA] RÉSUMÉ DES TESTS")
     print("=" * 70)
-    print("✅ Modules: OK")
-    print("✅ Service: OK")
-    print("✅ Périodes: OK")
-    print("✅ Thèmes: OK")
-    print("✅ Mots-clés: OK")
-    print("✅ Requêtes: OK")
-    print("✅ Base de données: OK")
+    print("[OK] Modules: OK")
+    print("[OK] Service: OK")
+    print("[OK] Périodes: OK")
+    print("[OK] Thèmes: OK")
+    print("[OK] Mots-clés: OK")
+    print("[OK] Requêtes: OK")
+    print("[OK] Base de données: OK")
     print("=" * 70)
     print("\n🎉 TOUS LES TESTS SONT PASSÉS !")
     print("\n📋 Prochaines étapes:")
@@ -227,7 +227,7 @@ def test_archiviste_v3():
 
 def create_test_theme(db_manager):
     """Crée un thème de test si aucun n'existe"""
-    print("\n🛠️  Création d'un thème de test...")
+    print("\n🛠  Création d'un thème de test...")
     
     try:
         conn = db_manager.get_connection()
@@ -236,7 +236,7 @@ def create_test_theme(db_manager):
         # Vérifier si un thème existe déjà
         cursor.execute("SELECT COUNT(*) FROM themes")
         if cursor.fetchone()[0] > 0:
-            print("   ℹ️  Des thèmes existent déjà, pas besoin de créer un thème de test")
+            print("   ℹ  Des thèmes existent déjà, pas besoin de créer un thème de test")
             conn.close()
             return
         
@@ -260,15 +260,15 @@ def create_test_theme(db_manager):
         conn.commit()
         conn.close()
         
-        print("   ✅ Thème de test créé: 'Test Archiviste v3'")
+        print("   [OK] Thème de test créé: 'Test Archiviste v3'")
         print("   🔑 Mots-clés: guerre, conflit, diplomatie, sanctions, ukraine...")
         
     except Exception as e:
-        print(f"   ❌ Erreur création thème de test: {e}")
+        print(f"   [ERROR] Erreur création thème de test: {e}")
 
 
 if __name__ == "__main__":
-    print("\n🚀 Démarrage des tests Archiviste v3.0...\n")
+    print("\n[LAUNCH] Démarrage des tests Archiviste v3.0...\n")
     
     # Option: créer un thème de test si nécessaire
     try:
@@ -282,18 +282,18 @@ if __name__ == "__main__":
         conn.close()
         
         if themes_count == 0:
-            print("⚠️  Aucun thème trouvé dans la base de données")
+            print("[WARN]  Aucun thème trouvé dans la base de données")
             user_input = input("   Voulez-vous créer un thème de test ? (O/n): ").strip().lower()
             if user_input != 'n':
                 create_test_theme(db_manager)
     except Exception as e:
-        print(f"⚠️  Impossible de vérifier les thèmes: {e}")
+        print(f"[WARN]  Impossible de vérifier les thèmes: {e}")
     
     # Lancer les tests
     success = test_archiviste_v3()
     
     if not success:
-        print("\n❌ Certains tests ont échoué")
+        print("\n[ERROR] Certains tests ont échoué")
         print("   Vérifiez les messages d'erreur ci-dessus")
         sys.exit(1)
     else:

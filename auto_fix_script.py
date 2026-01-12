@@ -12,7 +12,7 @@ def backup_file(filepath):
     if os.path.exists(filepath):
         backup_path = f"{filepath}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         shutil.copy2(filepath, backup_path)
-        print(f"✅ Sauvegarde créée: {backup_path}")
+        print(f"[OK] Sauvegarde créée: {backup_path}")
         return backup_path
     return None
 
@@ -22,13 +22,13 @@ def fix_routes_indentation():
     routes_path = 'Flask/routes.py'
     
     if not os.path.exists(routes_path):
-        print(f"❌ Fichier introuvable: {routes_path}")
+        print(f"[ERROR] Fichier introuvable: {routes_path}")
         return False
     
     # Créer une sauvegarde
     backup_file(routes_path)
     
-    print("🔧 Lecture de routes.py...")
+    print("[TOOL] Lecture de routes.py...")
     with open(routes_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     
@@ -57,7 +57,7 @@ def fix_routes_indentation():
             if stripped.startswith(('except ', 'finally:')) and current_indent <= get_stats_indent:
                 # Ajouter 4 espaces d'indentation
                 line = '    ' + line
-                print(f"🔧 Correction ligne {i+1}: ajout d'indentation pour {stripped[:20]}...")
+                print(f"[TOOL] Correction ligne {i+1}: ajout d'indentation pour {stripped[:20]}...")
         
         fixed_lines.append(line)
     
@@ -66,21 +66,21 @@ def fix_routes_indentation():
     with open(routes_path, 'w', encoding='utf-8') as f:
         f.writelines(fixed_lines)
     
-    print("✅ Fichier routes.py corrigé !")
+    print("[OK] Fichier routes.py corrigé !")
     return True
 
 def main():
     print("=" * 60)
-    print("🛠️  CORRECTION AUTOMATIQUE DE ROUTES.PY")
+    print("🛠  CORRECTION AUTOMATIQUE DE ROUTES.PY")
     print("=" * 60)
     print()
     
     if fix_routes_indentation():
-        print("\n✅ Correction terminée avec succès !")
-        print("💡 Relancez l'application: python run.py")
+        print("\n[OK] Correction terminée avec succès !")
+        print("[IDEA] Relancez l'application: python run.py")
     else:
-        print("\n❌ Correction échouée")
-        print("💡 Utilisez le fichier artifact 'routes_complete_fixed'")
+        print("\n[ERROR] Correction échouée")
+        print("[IDEA] Utilisez le fichier artifact 'routes_complete_fixed'")
 
 if __name__ == "__main__":
     main()

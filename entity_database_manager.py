@@ -93,7 +93,7 @@ class EntityDatabaseManager:
         
         conn.commit()
         conn.close()
-        logger.info("✅ Tables d'entités géopolitiques créées")
+        logger.info("[OK] Tables d'entités géopolitiques créées")
     
     def store_article_entities(self, article_id: int, entities: Dict[str, Any]) -> bool:
         """
@@ -173,11 +173,11 @@ class EntityDatabaseManager:
             conn.commit()
             conn.close()
             
-            logger.info(f"✅ {len(entity_ids)} entités stockées pour article {article_id}")
+            logger.info(f"[OK] {len(entity_ids)} entités stockées pour article {article_id}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur stockage entités article {article_id}: {e}")
+            logger.error(f"[ERROR] Erreur stockage entités article {article_id}: {e}")
             return False
     
     def _create_relations(self, cursor, entity_ids: List[int], article_id: int):

@@ -46,7 +46,7 @@ class CorroborationEngine:
                     ngram_range=(1, 2),
                     min_df=1
                 )
-                logger.info("✅ TF-IDF initialisé")
+                logger.info("[OK] TF-IDF initialisé")
             except Exception as e:
                 logger.warning(f"Erreur init TF-IDF: {e}")
     
@@ -251,7 +251,7 @@ class CorroborationEngine:
         article_id = article.get('id')
         results = []
         
-        logger.info(f"🔍 Recherche de corroboration pour article {article_id} parmi {len(candidates)} candidats")
+        logger.info(f"[SEARCH] Recherche de corroboration pour article {article_id} parmi {len(candidates)} candidats")
         
         for candidate in candidates:
             # Éviter de comparer avec soi-même
@@ -278,7 +278,7 @@ class CorroborationEngine:
         # Limiter le nombre de résultats
         results = results[:top_n]
         
-        logger.info(f"✅ {len(results)} articles corroborants trouvés (seuil: {threshold})")
+        logger.info(f"[OK] {len(results)} articles corroborants trouvés (seuil: {threshold})")
         
         return results
     

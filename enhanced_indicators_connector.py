@@ -58,7 +58,7 @@ class EnhancedIndicatorsConnector:
         self.yfinance = YFinanceConnector()
         self.gini = GINIScraper()
         
-        logger.info("✅ EnhancedIndicatorsConnector initialisé (avec GINI)")
+        logger.info("[OK] EnhancedIndicatorsConnector initialisé (avec GINI)")
     
     def get_dashboard_data(self) -> Dict[str, Any]:
         """
@@ -74,7 +74,7 @@ class EnhancedIndicatorsConnector:
             'summary': {}
         }
         
-        # ✅ CORRECTION : Tracker les IDs pour éviter doublons
+        # [OK] CORRECTION : Tracker les IDs pour éviter doublons
         added_ids = set()
         
         # 1. Indicateurs Eurostat (données officielles UE pour France)
@@ -89,7 +89,7 @@ class EnhancedIndicatorsConnector:
                     added_ids.add(key)
                     
         except Exception as e:
-            logger.error(f"❌ Erreur Eurostat: {e}")
+            logger.error(f"[ERROR] Erreur Eurostat: {e}")
             result['sources_status']['eurostat'] = 'error'
         
         # 2. Indicateurs INSEE (scraping page d'accueil)
@@ -104,7 +104,7 @@ class EnhancedIndicatorsConnector:
                     added_ids.add(key)
                     
         except Exception as e:
-            logger.error(f"❌ Erreur INSEE: {e}")
+            logger.error(f"[ERROR] Erreur INSEE: {e}")
             result['sources_status']['insee'] = 'error'
         
         # 3. Marchés financiers (yFinance)
@@ -113,13 +113,13 @@ class EnhancedIndicatorsConnector:
             result['sources_status']['yfinance'] = 'operational'
             result['financial_markets'] = markets_data
         except Exception as e:
-            logger.error(f"❌ Erreur yFinance: {e}")
+            logger.error(f"[ERROR] Erreur yFinance: {e}")
             result['sources_status']['yfinance'] = 'error'
         
         # 4. Générer le résumé
         result['summary'] = self._generate_summary(result)
         
-        logger.info(f"📊 Dashboard: {len(result['indicators'])} indicateurs chargés")
+        logger.info(f"[DATA] Dashboard: {len(result['indicators'])} indicateurs chargés")
         logger.info(f"   IDs: {list(result['indicators'].keys())}")
         
         return result
@@ -131,7 +131,7 @@ class EnhancedIndicatorsConnector:
         """
         indicators = {}
         
-        # ✅ Indicateurs par défaut (avec GINI)
+        # [OK] Indicateurs par défaut (avec GINI)
         default_ids = ['gdp', 'hicp', 'trade_balance', 'gini']
         
         try:
@@ -157,7 +157,7 @@ class EnhancedIndicatorsConnector:
         except Exception as e:
             logger.error(f"Erreur récupération Eurostat: {e}")
         
-        # ✅ AJOUTER GINI spécifique si pas déjà inclus
+        # [OK] AJOUTER GINI spécifique si pas déjà inclus
         if 'eurostat_gini' not in indicators:
             try:
                 gini_data = self.gini.get_gini_data()
@@ -176,7 +176,7 @@ class EnhancedIndicatorsConnector:
                         reliability=gini_data['reliability'],
                         confidence='high' if gini_data['reliability'] == 'official' else 'medium'
                     )
-                    logger.info(f"✅ GINI ajouté: {gini_data['value']} ({gini_data['reliability']})")
+                    logger.info(f"[OK] GINI ajouté: {gini_data['value']} ({gini_data['reliability']})")
             
             except Exception as e:
                 logger.error(f"Erreur récupération GINI: {e}")
@@ -340,7 +340,7 @@ class EnhancedIndicatorsConnector:
     
     def force_refresh(self) -> Dict[str, Any]:
         """Force le rafraîchissement de toutes les sources"""
-        logger.info("🔄 Rafraîchissement forcé de toutes les sources")
+        logger.info("[MIGRATION] Rafraîchissement forcé de toutes les sources")
         
         # Forcer rafraîchissement INSEE
         try:
@@ -375,30 +375,30 @@ if __name__ == "__main__":
     data = connector.get_dashboard_data()
     
     print("=" * 70)
-    print("📊 DASHBOARD ÉCONOMIQUE COMPLET")
+    print("[DATA] DASHBOARD ÉCONOMIQUE COMPLET")
     print("=" * 70)
     
     print(f"\n📡 Statut des sources:")
     for source, status in data['sources_status'].items():
-        icon = '✅' if status == 'operational' else '❌'
+        icon = '[OK]' if status == 'operational' else '[ERROR]'
         print(f"  {icon} {source}: {status}")
     
-    print(f"\n📈 Indicateurs récupérés: {data['summary']['total_indicators']}")
-    print(f"🎯 Qualité des données: {data['summary']['data_quality']}")
+    print(f"\n[CHART] Indicateurs récupérés: {data['summary']['total_indicators']}")
+    print(f"[TARGET] Qualité des données: {data['summary']['data_quality']}")
     
-    print("\n📊 Indicateurs par source:")
+    print("\n[DATA] Indicateurs par source:")
     for source, count in data['summary']['by_source'].items():
         print(f"  • {source}: {count}")
     
-    print("\n🔍 Fiabilité:")
+    print("\n[SEARCH] Fiabilité:")
     for reliability, count in data['summary']['by_reliability'].items():
         print(f"  • {reliability}: {count}")
     
-    print("\n🏷️ Catégories:")
+    print("\n🏷 Catégories:")
     for category, count in data['summary']['by_category'].items():
         print(f"  • {category}: {count}")
     
-    print("\n📉 Détail des indicateurs:")
+    print("\n[CHART_DOWN] Détail des indicateurs:")
     for ind_id, indicator in data['indicators'].items():
         print(f"\n  {indicator['reliability_icon']} {indicator['name']}")
         print(f"     Valeur: {indicator['value']} {indicator['unit']}")

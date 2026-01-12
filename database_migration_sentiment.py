@@ -10,7 +10,7 @@ def migrate_sentiment_columns(db_path):
     cursor = conn.cursor()
     
     try:
-        print("🔧 Migration des colonnes de sentiment RoBERTa...")
+        print("[TOOL] Migration des colonnes de sentiment RoBERTa...")
         
         # Vérifier la structure actuelle
         cursor.execute("PRAGMA table_info(articles)")
@@ -30,12 +30,12 @@ def migrate_sentiment_columns(db_path):
                 print(f"➕ Ajout de la colonne {column_name}...")
                 try:
                     cursor.execute(f"ALTER TABLE articles ADD COLUMN {column_name} {column_type}")
-                    print(f"✅ Colonne {column_name} ajoutée")
+                    print(f"[OK] Colonne {column_name} ajoutée")
                 except Exception as e:
-                    print(f"⚠️ Erreur sur {column_name}: {e}")
+                    print(f"[WARN] Erreur sur {column_name}: {e}")
         
         # Mettre à jour les articles existants
-        print("🔄 Mise à jour des articles existants...")
+        print("[MIGRATION] Mise à jour des articles existants...")
         
         cursor.execute("""
             UPDATE articles 
@@ -45,13 +45,13 @@ def migrate_sentiment_columns(db_path):
         """)
         
         updated_count = cursor.rowcount
-        print(f"✅ {updated_count} articles mis à jour avec le modèle traditionnel")
+        print(f"[OK] {updated_count} articles mis à jour avec le modèle traditionnel")
         
         conn.commit()
         print("🎉 Migration RoBERTa terminée avec succès!")
         
     except Exception as e:
-        print(f"❌ Erreur migration RoBERTa: {e}")
+        print(f"[ERROR] Erreur migration RoBERTa: {e}")
         conn.rollback()
         raise
     finally:

@@ -18,7 +18,7 @@ def register_economic_routes(app, db_manager):
     eco_manager = EconomicIndicatorsManager(db_manager)
     app.config['ECO_MANAGER'] = eco_manager
     
-    logger.info("📊 Enregistrement des routes économiques...")
+    logger.info("[DATA] Enregistrement des routes économiques...")
     
     # ==========================================
     # PAGE PRINCIPALE
@@ -57,7 +57,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur fetch_financial: {e}")
+            logger.error(f"[ERROR] Erreur fetch_financial: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/financial/latest')
@@ -74,7 +74,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_latest_financial: {e}")
+            logger.error(f"[ERROR] Erreur get_latest_financial: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/indices')
@@ -90,7 +90,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_major_indices: {e}")
+            logger.error(f"[ERROR] Erreur get_major_indices: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/commodities')
@@ -105,7 +105,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_commodities: {e}")
+            logger.error(f"[ERROR] Erreur get_commodities: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/currencies')
@@ -120,7 +120,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_currencies: {e}")
+            logger.error(f"[ERROR] Erreur get_currencies: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     # ==========================================
@@ -148,7 +148,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur fetch_worldbank: {e}")
+            logger.error(f"[ERROR] Erreur fetch_worldbank: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/worldbank/country/<country_code>')
@@ -166,7 +166,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_wb_by_country: {e}")
+            logger.error(f"[ERROR] Erreur get_wb_by_country: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/brics')
@@ -181,7 +181,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_brics: {e}")
+            logger.error(f"[ERROR] Erreur get_brics: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     # ==========================================
@@ -203,7 +203,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur fetch_sanctions: {e}")
+            logger.error(f"[ERROR] Erreur fetch_sanctions: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/sanctions/summary')
@@ -218,7 +218,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_sanctions_summary: {e}")
+            logger.error(f"[ERROR] Erreur get_sanctions_summary: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     # ==========================================
@@ -243,7 +243,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_timeseries: {e}")
+            logger.error(f"[ERROR] Erreur get_timeseries: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/economic/timeseries/save', methods=['POST'])
@@ -266,7 +266,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur save_timeseries: {e}")
+            logger.error(f"[ERROR] Erreur save_timeseries: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     # ==========================================
@@ -294,7 +294,7 @@ def register_economic_routes(app, db_manager):
             })
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_economic_dashboard: {e}")
+            logger.error(f"[ERROR] Erreur get_economic_dashboard: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
-    logger.info("✅ Routes économiques enregistrées")
+    logger.info("[OK] Routes économiques enregistrées")

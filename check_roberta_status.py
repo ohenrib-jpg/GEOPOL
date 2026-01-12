@@ -9,45 +9,45 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 def check_roberta_status(db_path):
     """Vérifie le statut de RoBERTa et de la base de données"""
-    print("🔍 Vérification complète du système...")
+    print("[SEARCH] Vérification complète du système...")
     
     # 1. Vérifier la base de données
-    print("\n📊 VÉRIFICATION BASE DE DONNÉES:")
+    print("\n[DATA] VÉRIFICATION BASE DE DONNÉES:")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     # Colonnes existantes
     cursor.execute("PRAGMA table_info(articles)")
     columns = [col[1] for col in cursor.fetchall()]
-    print(f"✅ Colonnes articles: {len(columns)} colonnes")
+    print(f"[OK] Colonnes articles: {len(columns)} colonnes")
     
     # Vérifier les colonnes critiques
     critical_columns = ['analysis_model', 'detailed_sentiment', 'sentiment_confidence']
     for col in critical_columns:
         if col in columns:
-            print(f"   ✅ {col}: PRÉSENTE")
+            print(f"   [OK] {col}: PRÉSENTE")
         else:
-            print(f"   ❌ {col}: MANQUANTE")
+            print(f"   [ERROR] {col}: MANQUANTE")
     
     # Compter les articles
     cursor.execute("SELECT COUNT(*) FROM articles")
     total_articles = cursor.fetchone()[0]
-    print(f"✅ Total articles: {total_articles}")
+    print(f"[OK] Total articles: {total_articles}")
     
     # Vérifier si analysis_model existe avant de l'utiliser
     if 'analysis_model' in columns:
         cursor.execute("SELECT analysis_model, COUNT(*) FROM articles GROUP BY analysis_model")
         stats = cursor.fetchall()
-        print("📊 Articles par modèle:")
+        print("[DATA] Articles par modèle:")
         for model, count in stats:
             print(f"   {model}: {count} articles")
     else:
-        print("❌ analysis_model: colonne non disponible")
+        print("[ERROR] analysis_model: colonne non disponible")
     
     conn.close()
     
     # 2. Vérifier RoBERTa
-    print("\n🤖 VÉRIFICATION ROERTA:")
+    print("\n[AI] VÉRIFICATION ROERTA:")
     try:
         from sentiment_analyzer import SentimentAnalyzer
         analyzer = SentimentAnalyzer()
@@ -66,18 +66,18 @@ def check_roberta_status(db_path):
         for i, text in enumerate(test_cases, 1):
             print(f"\n🧪 Test {i}: '{text}'")
             result = analyzer.analyze_sentiment_with_score(text)
-            print(f"   📊 Modèle: {result['model']}")
-            print(f"   🎯 Type: {result['type']}")
+            print(f"   [DATA] Modèle: {result['model']}")
+            print(f"   [TARGET] Type: {result['type']}")
             print(f"   🔢 Score: {result['score']:.3f}")
-            print(f"   💪 Confiance: {result['confidence']:.3f}")
+            print(f"   [MUSCLE] Confiance: {result['confidence']:.3f}")
             
             if 'roberta' in result.get('model', ''):
-                print("   ✅ RoBERTa actif!")
+                print("   [OK] RoBERTa actif!")
             else:
-                print("   ⚠️ Mode traditionnel")
+                print("   [WARN] Mode traditionnel")
     
     except Exception as e:
-        print(f"❌ Erreur RoBERTa: {e}")
+        print(f"[ERROR] Erreur RoBERTa: {e}")
         import traceback
         traceback.print_exc()
     

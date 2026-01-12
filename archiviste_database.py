@@ -12,9 +12,9 @@ class ArchivisteDatabase:
     
     def __init__(self, db_manager):  # ← db_manager est l'objet DatabaseManager
         self.db_manager = db_manager  # ← Stocker l'objet directement
-        self._init_tables()  # ✅ Cette méthode doit exister
+        self._init_tables()  # [OK] Cette méthode doit exister
     
-    def _init_tables(self):  # ✅ Méthode ajoutée
+    def _init_tables(self):  # [OK] Méthode ajoutée
         """Initialise les tables avancées pour l'Archiviste"""
         conn = self.db_manager.get_connection()
         cursor = conn.cursor()
@@ -91,10 +91,10 @@ class ArchivisteDatabase:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_archiviste_mappings_theme ON archiviste_theme_mappings(theme_id)")
             
             conn.commit()
-            logger.info("✅ Tables Archiviste avancées initialisées")
+            logger.info("[OK] Tables Archiviste avancées initialisées")
             
         except Exception as e:
-            logger.error(f"❌ Erreur init tables Archiviste: {e}")
+            logger.error(f"[ERROR] Erreur init tables Archiviste: {e}")
             conn.rollback()
         finally:
             conn.close()
@@ -141,11 +141,11 @@ class ArchivisteDatabase:
                 
                 formatted_themes.append(formatted_theme)
             
-            logger.info(f"✅ {len(formatted_themes)} thèmes chargés via ThemeManager")
+            logger.info(f"[OK] {len(formatted_themes)} thèmes chargés via ThemeManager")
             return formatted_themes
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_user_themes via ThemeManager: {e}")
+            logger.error(f"[ERROR] Erreur get_user_themes via ThemeManager: {e}")
             # Fallback: essayer la méthode directe
             return self._get_themes_directly()
     
@@ -162,7 +162,7 @@ class ArchivisteDatabase:
             """)
             
             if not cursor.fetchone():
-                logger.warning("⚠️ Table 'themes' n'existe pas")
+                logger.warning("[WARN] Table 'themes' n'existe pas")
                 return []
             
             # Vérifier si la colonne 'active' existe
@@ -202,11 +202,11 @@ class ArchivisteDatabase:
                     'category': 'general'
                 })
             
-            logger.info(f"✅ {len(themes)} thèmes chargés directement depuis la base")
+            logger.info(f"[OK] {len(themes)} thèmes chargés directement depuis la base")
             return themes
             
         except Exception as e:
-            logger.error(f"❌ Erreur _get_themes_directly: {e}")
+            logger.error(f"[ERROR] Erreur _get_themes_directly: {e}")
             return []
         finally:
             conn.close()
@@ -246,7 +246,7 @@ class ArchivisteDatabase:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde item Archiviste: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde item Archiviste: {e}")
             conn.rollback()
             return False
         finally:
@@ -325,7 +325,7 @@ class ArchivisteDatabase:
             conn.commit()
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde mappings: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde mappings: {e}")
             conn.rollback()
         finally:
             conn.close()
@@ -366,7 +366,7 @@ class ArchivisteDatabase:
             return items
             
         except Exception as e:
-            logger.error(f"❌ Erreur get_items_by_theme: {e}")
+            logger.error(f"[ERROR] Erreur get_items_by_theme: {e}")
             return []
         finally:
             conn.close()

@@ -1,7 +1,7 @@
 # Flask/archiviste_enhanced.py
 import logging
 from typing import List, Dict, Any
-from .archiviste_database import ArchivisteDatabase  # ✅ Import relatif corrigé
+from .archiviste_database import ArchivisteDatabase  # [OK] Import relatif corrigé
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +27,16 @@ class EnhancedArchiviste:
         """Récupère tous les thèmes disponibles avec statistiques"""
         try:
             themes = self.archiviste_db.get_user_themes_with_keywords()
-            logger.info(f"📊 {len(themes)} thèmes disponibles")
+            logger.info(f"[DATA] {len(themes)} thèmes disponibles")
             return themes
         except Exception as e:
-            logger.error(f"❌ Erreur get_available_themes: {e}")
+            logger.error(f"[ERROR] Erreur get_available_themes: {e}")
             return []
 
     def analyze_period_with_theme(self, period_key: str, theme_id: int, max_items: int = 100) -> Dict[str, Any]:
         """Analyse une période historique avec un thème spécifique"""
         try:
-            logger.info(f"🎯 Début analyse période {period_key} avec thème ID {theme_id}")
+            logger.info(f"[TARGET] Début analyse période {period_key} avec thème ID {theme_id}")
             
             if period_key not in self.historical_periods:
                 return {
@@ -60,7 +60,7 @@ class EnhancedArchiviste:
                     'available_themes': [{'id': t['id'], 'name': t['name']} for t in themes]
                 }
             
-            logger.info(f"🎯 Analyse période {period['name']} avec thème: {theme['name']} (ID: {theme_id})")
+            logger.info(f"[TARGET] Analyse période {period['name']} avec thème: {theme['name']} (ID: {theme_id})")
             
             # Recherche avec les mots-clés du thème
             if not theme.get('keywords'):
@@ -119,11 +119,11 @@ class EnhancedArchiviste:
                 'query_used': query
             }
             
-            logger.info(f"✅ Analyse terminée: {len(analyzed_items)} items analysés")
+            logger.info(f"[OK] Analyse terminée: {len(analyzed_items)} items analysés")
             return result
             
         except Exception as e:
-            logger.error(f"❌ Erreur analyze_period_with_theme: {e}")
+            logger.error(f"[ERROR] Erreur analyze_period_with_theme: {e}")
             return {
                 'success': False,
                 'error': f'Erreur lors de l\'analyse: {str(e)}'
@@ -131,7 +131,7 @@ class EnhancedArchiviste:
 
     def search_archive_simulation(self, query: str, start_year: int, end_year: int, max_items: int = 50) -> List[Dict[str, Any]]:
         """Simulation de recherche Archive.org pour les tests"""
-        logger.info(f"🔍 Simulation recherche: {query} ({start_year}-{end_year})")
+        logger.info(f"[SEARCH] Simulation recherche: {query} ({start_year}-{end_year})")
         
         # Données simulées réalistes
         simulated_items = []

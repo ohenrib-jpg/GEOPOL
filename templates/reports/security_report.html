@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Sécurité & Gouvernance - {{ report_date }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; color: #333; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 2.5em; }
+        .header .subtitle { font-size: 1.2em; opacity: 0.9; margin-top: 10px; }
+        .section { margin-bottom: 30px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.5em; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .metric-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; }
+        .metric-value { font-size: 2em; font-weight: bold; color: #2c3e50; }
+        .metric-label { color: #7f8c8d; font-size: 0.9em; }
+        .risk-item { padding: 10px; margin: 5px 0; background: #fff; border-radius: 5px; border-left: 4px solid #e74c3c; }
+        .risk-item.medium { border-left-color: #f39c12; }
+        .risk-item.low { border-left-color: #27ae60; }
+        .risk-type { font-weight: bold; color: #2c3e50; }
+        .risk-details { color: #7f8c8d; font-size: 0.9em; margin-top: 5px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #7f8c8d; font-size: 0.9em; text-align: center; }
+        .data-source { display: inline-block; background: #ecf0f1; padding: 5px 10px; border-radius: 15px; margin-right: 5px; font-size: 0.8em; }
+        .status-healthy { color: #27ae60; }
+        .status-warning { color: #f39c12; }
+        .status-critical { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport Sécurité & Gouvernance</h1>
+        <div class="subtitle">Analyse globale des risques sécuritaires et indicateurs de gouvernance</div>
+        <div>Généré le {{ report_date }} • Sources: {% for source in data_sources %}<span class="data-source">{{ source }}</span>{% endfor %}</div>
+    </div>
+
+    {% if overview %}
+    <div class="section">
+        <h2 class="section-title">📊 Vue d'ensemble</h2>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.total_events or 0 }}</div>
+                <div class="metric-label">Événements de conflit (30j)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.corruption_score|default('N/A') }}</div>
+                <div class="metric-label">Score corruption moyen</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.total_sanctions or 0 }}</div>
+                <div class="metric-label">Sanctions actives</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.humanitarian_crises or 0 }}</div>
+                <div class="metric-label">Crises humanitaires</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if risks %}
+    <div class="section">
+        <h2 class="section-title">🚨 Principaux risques identifiés</h2>
+        {% for risk in risks %}
+        <div class="risk-item {{ risk.severity }}">
+            <div class="risk-type">{{ risk.type|replace('_', ' ')|title }}</div>
+            <div class="risk-details">{{ risk.indicator }} • {{ risk.country or risk.program or risk.crisis_type }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cache_stats %}
+    <div class="section">
+        <h2 class="section-title">💾 Statistiques du cache</h2>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">{{ cache_stats.total_files or 0 }}</div>
+                <div class="metric-label">Fichiers cache</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ cache_stats.total_size_mb|default(0)|round(2) }} MB</div>
+                <div class="metric-label">Taille totale</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ cache_stats.source_count or 0 }}</div>
+                <div class="metric-label">Sources actives</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value status-{{ cache_health.status|default('healthy') }}">{{ cache_health.status|default('healthy')|title }}</div>
+                <div class="metric-label">Santé du cache</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h2 class="section-title">📈 Tendances et recommandations</h2>
+        <p><strong>Direction:</strong> {{ trends.direction|default('stable')|title }}</p>
+        <p><strong>Période analysée:</strong> {{ trends.period_months|default(6) }} mois</p>
+        {% if trends.hotspots %}
+        <p><strong>Zones sensibles:</strong> {{ trends.hotspots|join(', ') }}</p>
+        {% endif %}
+        {% if recommendations %}
+        <h3>Recommandations</h3>
+        <ul>
+            {% for rec in recommendations %}
+            <li>{{ rec }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>Rapport généré automatiquement par GEOPOL Security Analytics Dashboard</p>
+        <p>© {{ current_year }} - Données sources: UCDP, Transparency International, World Bank, OFAC, UN OCHA HDX</p>
+    </div>
+</body>
+</html>

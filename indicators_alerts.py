@@ -17,7 +17,7 @@ class IndicatorAlerts:
     def __init__(self, db_manager=None):
         self.db_manager = db_manager
         self.thresholds = self._load_default_thresholds()
-        logger.info("✅ IndicatorAlerts initialisé")
+        logger.info("[OK] IndicatorAlerts initialisé")
     
     def _load_default_thresholds(self) -> Dict[str, Dict[str, float]]:
         """Seuils par défaut pour les alertes"""

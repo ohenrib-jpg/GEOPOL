@@ -56,7 +56,7 @@ def fix_archiviste_database(db_path: str = "rss_analyzer.db"):
     cursor = conn.cursor()
     
     try:
-        print("🔧 Début de la correction de la structure Archiviste...")
+        print("[TOOL] Début de la correction de la structure Archiviste...")
         
         # === ÉTAPE 1: Vérifier la structure actuelle ===
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -64,19 +64,19 @@ def fix_archiviste_database(db_path: str = "rss_analyzer.db"):
         print(f"📋 Tables existantes: {existing_tables}")
         
         # === ÉTAPE 2: Créer les tables de base si nécessaire ===
-        print("🔄 Création des tables de base...")
+        print("[MIGRATION] Création des tables de base...")
         _create_basic_tables(cursor, existing_tables)
         
         # === ÉTAPE 3: Corriger la table 'themes' ===
         if 'themes' in existing_tables:
-            print("🔄 Correction de la table 'themes'...")
+            print("[MIGRATION] Correction de la table 'themes'...")
             _fix_themes_table(cursor)
         else:
-            print("📝 Création de la table 'themes'...")
+            print("[NOTE] Création de la table 'themes'...")
             _create_themes_table(cursor)
         
         # === ÉTAPE 4: Créer les tables Archiviste spécifiques ===
-        print("🔄 Création des tables Archiviste...")
+        print("[MIGRATION] Création des tables Archiviste...")
         _create_archiviste_tables(cursor)
         
         # === ÉTAPE 5: Peupler les thèmes par défaut si nécessaire ===
@@ -84,7 +84,7 @@ def fix_archiviste_database(db_path: str = "rss_analyzer.db"):
         theme_count = cursor.fetchone()[0]
         
         if theme_count == 0:
-            print("🔄 Ajout des thèmes par défaut...")
+            print("[MIGRATION] Ajout des thèmes par défaut...")
             _populate_default_themes(cursor)
         
         conn.commit()
@@ -92,10 +92,10 @@ def fix_archiviste_database(db_path: str = "rss_analyzer.db"):
         # === ÉTAPE 6: Vérification finale ===
         _verify_fix(cursor)
         
-        print("✅ Correction Archiviste terminée avec succès!")
+        print("[OK] Correction Archiviste terminée avec succès!")
         
     except Exception as e:
-        print(f"❌ Erreur lors de la correction: {e}")
+        print(f"[ERROR] Erreur lors de la correction: {e}")
         conn.rollback()
         raise
     finally:
@@ -158,7 +158,7 @@ def _create_themes_table(cursor):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    print("   ✅ Table 'themes' créée")
+    print("   [OK] Table 'themes' créée")
 
 def _fix_themes_table(cursor):
     """Corrige la structure de la table themes"""
@@ -186,7 +186,7 @@ def _fix_themes_table(cursor):
         id_value = sample_id[0]
         # Si l'ID n'est pas numérique, normaliser
         if isinstance(id_value, str) and not id_value.isdigit():
-            print("   🔄 Conversion des IDs texte vers numérique...")
+            print("   [MIGRATION] Conversion des IDs texte vers numérique...")
             _normalize_theme_ids(cursor)
 
 def _normalize_theme_ids(cursor):
@@ -229,10 +229,10 @@ def _normalize_theme_ids(cursor):
         cursor.execute("DROP TABLE themes")
         cursor.execute("ALTER TABLE themes_temp RENAME TO themes")
         
-        print(f"   ✅ {len(themes_data)} thèmes normalisés avec IDs numériques")
+        print(f"   [OK] {len(themes_data)} thèmes normalisés avec IDs numériques")
         
     except Exception as e:
-        print(f"   ⚠️ Erreur normalisation IDs: {e}")
+        print(f"   [WARN] Erreur normalisation IDs: {e}")
         # Annuler les changements de cette étape
         cursor.execute("DROP TABLE IF EXISTS themes_temp")
         raise
@@ -307,9 +307,9 @@ def _create_archiviste_tables(cursor):
     for table_name, create_sql in archiviste_tables.items():
         try:
             cursor.execute(create_sql)
-            print(f"   ✅ Table '{table_name}' créée/vérifiée")
+            print(f"   [OK] Table '{table_name}' créée/vérifiée")
         except Exception as e:
-            print(f"   ⚠️ Erreur création table {table_name}: {e}")
+            print(f"   [WARN] Erreur création table {table_name}: {e}")
     
     # Créer les index
     archiviste_indexes = [
@@ -324,7 +324,7 @@ def _create_archiviste_tables(cursor):
         try:
             cursor.execute(index_sql)
         except Exception as e:
-            print(f"   ⚠️ Erreur création index: {e}")
+            print(f"   [WARN] Erreur création index: {e}")
 
 def _populate_default_themes(cursor):
     """Ajoute les thèmes par défaut pour Archiviste"""
@@ -343,11 +343,11 @@ def _populate_default_themes(cursor):
             1  # active
         ))
     
-    print(f"   ✅ {len(DEFAULT_THEMES)} thèmes par défaut ajoutés")
+    print(f"   [OK] {len(DEFAULT_THEMES)} thèmes par défaut ajoutés")
 
 def _verify_fix(cursor):
     """Vérifie que la correction a fonctionné"""
-    print("\n🔍 Vérification de la correction...")
+    print("\n[SEARCH] Vérification de la correction...")
     
     # Vérifier les tables
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -356,14 +356,14 @@ def _verify_fix(cursor):
     required_tables = ['themes', 'archiviste_items', 'archiviste_theme_mappings']
     for table in required_tables:
         if table in tables:
-            print(f"   ✅ Table '{table}' présente")
+            print(f"   [OK] Table '{table}' présente")
         else:
-            print(f"   ❌ Table '{table}' MANQUANTE")
+            print(f"   [ERROR] Table '{table}' MANQUANTE")
     
     # Vérifier les thèmes
     cursor.execute("SELECT COUNT(*) FROM themes")
     theme_count = cursor.fetchone()[0]
-    print(f"   📊 Thèmes dans la base: {theme_count}")
+    print(f"   [DATA] Thèmes dans la base: {theme_count}")
     
     # Vérifier la structure des thèmes
     cursor.execute("PRAGMA table_info(themes)")
@@ -372,9 +372,9 @@ def _verify_fix(cursor):
     
     for col in required_columns:
         if col in theme_columns:
-            print(f"   ✅ Colonne '{col}' présente dans themes")
+            print(f"   [OK] Colonne '{col}' présente dans themes")
         else:
-            print(f"   ❌ Colonne '{col}' MANQUANTE dans themes")
+            print(f"   [ERROR] Colonne '{col}' MANQUANTE dans themes")
     
     # Vérifier les IDs numériques
     cursor.execute("SELECT id FROM themes LIMIT 5")
@@ -382,9 +382,9 @@ def _verify_fix(cursor):
     all_numeric = all(isinstance(id_val, int) or (isinstance(id_val, str) and str(id_val).isdigit()) for id_val in sample_ids)
     
     if all_numeric:
-        print("   ✅ IDs de thèmes numériques")
+        print("   [OK] IDs de thèmes numériques")
     else:
-        print("   ⚠️ IDs de thèmes non-numériques détectés")
+        print("   [WARN] IDs de thèmes non-numériques détectés")
 
 def get_database_status(db_path: str = "rss_analyzer.db") -> Dict[str, Any]:
     """Retourne le statut de la base de données Archiviste"""
@@ -441,18 +441,18 @@ def get_database_status(db_path: str = "rss_analyzer.db") -> Dict[str, Any]:
 
 # Utilisation simple
 if __name__ == "__main__":
-    print("🔧 Correcteur de base de données Archiviste")
+    print("[TOOL] Correcteur de base de données Archiviste")
     print("=" * 50)
     
     try:
         # Afficher le statut avant
-        print("📊 Statut avant correction:")
+        print("[DATA] Statut avant correction:")
         status_before = get_database_status()
-        print(f"   - Table themes: {'✅' if status_before['themes_table'] else '❌'}")
+        print(f"   - Table themes: {'[OK]' if status_before['themes_table'] else '[ERROR]'}")
         print(f"   - Nombre de thèmes: {status_before['theme_count']}")
         
         for table, exists in status_before['archiviste_tables'].items():
-            print(f"   - Table {table}: {'✅' if exists else '❌'}")
+            print(f"   - Table {table}: {'[OK]' if exists else '[ERROR]'}")
         
         if status_before['issues']:
             print("   - Problèmes détectés:")
@@ -460,24 +460,24 @@ if __name__ == "__main__":
                 print(f"     • {issue}")
         
         # Exécuter la correction
-        print("\n🔄 Exécution de la correction...")
+        print("\n[MIGRATION] Exécution de la correction...")
         fix_archiviste_database()
         
         # Afficher le statut après
-        print("\n📊 Statut après correction:")
+        print("\n[DATA] Statut après correction:")
         status_after = get_database_status()
-        print(f"   - Table themes: {'✅' if status_after['themes_table'] else '❌'}")
+        print(f"   - Table themes: {'[OK]' if status_after['themes_table'] else '[ERROR]'}")
         print(f"   - Nombre de thèmes: {status_after['theme_count']}")
         
         for table, exists in status_after['archiviste_tables'].items():
-            print(f"   - Table {table}: {'✅' if exists else '❌'}")
+            print(f"   - Table {table}: {'[OK]' if exists else '[ERROR]'}")
         
         if not status_after['issues']:
-            print("   ✅ Aucun problème détecté")
+            print("   [OK] Aucun problème détecté")
         else:
             print("   - Problèmes restants:")
             for issue in status_after['issues']:
                 print(f"     • {issue}")
                 
     except Exception as e:
-        print(f"❌ Erreur: {e}")
+        print(f"[ERROR] Erreur: {e}")

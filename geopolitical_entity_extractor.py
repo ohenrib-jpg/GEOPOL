@@ -56,10 +56,10 @@ class GeopoliticalEntityExtractor:
         """Charge le modèle SpaCy"""
         try:
             self.nlp = spacy.load(self.model_name)
-            logger.info(f"✅ Modèle SpaCy '{self.model_name}' chargé avec succès")
+            logger.info(f"[OK] Modèle SpaCy '{self.model_name}' chargé avec succès")
         except OSError:
-            logger.error(f"❌ Modèle '{self.model_name}' non trouvé")
-            logger.info("📥 Installation du modèle...")
+            logger.error(f"[ERROR] Modèle '{self.model_name}' non trouvé")
+            logger.info("[DOWNLOAD] Installation du modèle...")
             try:
                 import subprocess
                 subprocess.run(
@@ -67,9 +67,9 @@ class GeopoliticalEntityExtractor:
                     check=True
                 )
                 self.nlp = spacy.load(self.model_name)
-                logger.info(f"✅ Modèle '{self.model_name}' installé et chargé")
+                logger.info(f"[OK] Modèle '{self.model_name}' installé et chargé")
             except Exception as e:
-                logger.error(f"❌ Impossible d'installer le modèle: {e}")
+                logger.error(f"[ERROR] Impossible d'installer le modèle: {e}")
                 raise
     
     def extract_entities(self, text: str) -> Dict[str, Any]:
@@ -137,7 +137,7 @@ class GeopoliticalEntityExtractor:
             return entities
             
         except Exception as e:
-            logger.error(f"❌ Erreur extraction entités: {e}")
+            logger.error(f"[ERROR] Erreur extraction entités: {e}")
             return self._empty_result()
     
     def _enrich_with_known_entities(self, text: str, entities: Dict[str, Any]):
@@ -321,12 +321,12 @@ class GeopoliticalEntityExtractor:
         output = []
         
         if entities['locations']:
-            output.append("🌍 LIEUX:")
+            output.append("[GLOBAL] LIEUX:")
             for e in entities['locations'][:10]:
                 output.append(f"  • {e['text']}")
         
         if entities['organizations']:
-            output.append("\n🏛️ ORGANISATIONS:")
+            output.append("\n🏛 ORGANISATIONS:")
             for e in entities['organizations'][:10]:
                 output.append(f"  • {e['text']}")
         
@@ -353,6 +353,6 @@ class GeopoliticalEntityExtractor:
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(entities, f, ensure_ascii=False, indent=2)
-            logger.info(f"✅ Entités exportées vers {filepath}")
+            logger.info(f"[OK] Entités exportées vers {filepath}")
         except Exception as e:
-            logger.error(f"❌ Erreur export JSON: {e}")
+            logger.error(f"[ERROR] Erreur export JSON: {e}")

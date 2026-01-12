@@ -35,7 +35,7 @@ def safe_migration(db_path):
     cursor = conn.cursor()
     
     try:
-        print("🔍 Vérification de la structure de la base de données...")
+        print("[SEARCH] Vérification de la structure de la base de données...")
         
         # ÉTAPE 1: Vérifier quelles tables existent
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -64,7 +64,7 @@ def safe_migration(db_path):
         _show_database_summary(cursor)
         
     except Exception as e:
-        print(f"❌ Erreur lors de la migration: {e}")
+        print(f"[ERROR] Erreur lors de la migration: {e}")
         conn.rollback()
         raise
     finally:
@@ -111,7 +111,7 @@ def _create_essential_tables(cursor, existing_tables):
     
     for table_name, create_sql in essential_tables.items():
         if table_name not in existing_tables:
-            print(f"🔄 Création de la table {table_name}...")
+            print(f"[MIGRATION] Création de la table {table_name}...")
             cursor.execute(create_sql)
 
 def _add_advanced_columns(cursor, existing_tables):
@@ -130,12 +130,12 @@ def _add_advanced_columns(cursor, existing_tables):
         
         for column_name, column_type in advanced_columns:
             if column_name not in existing_columns:
-                print(f"🔄 Ajout de la colonne {column_name}...")
+                print(f"[MIGRATION] Ajout de la colonne {column_name}...")
                 try:
                     sql = f"ALTER TABLE articles ADD COLUMN {column_name} {column_type}"
                     cursor.execute(sql)
                 except Exception as e:
-                    print(f"⚠️ Impossible d'ajouter {column_name}: {e}")
+                    print(f"[WARN] Impossible d'ajouter {column_name}: {e}")
 
 def _add_roberta_columns(cursor, existing_tables):
     """AJOUT CRITIQUE : Colonnes pour RoBERTa"""
@@ -151,16 +151,16 @@ def _add_roberta_columns(cursor, existing_tables):
             ('roberta_label', 'TEXT')
         ]
         
-        print("🔧 Ajout des colonnes RoBERTa...")
+        print("[TOOL] Ajout des colonnes RoBERTa...")
         for column_name, column_type in roberta_columns:
             if column_name not in existing_columns:
                 try:
                     cursor.execute(f"ALTER TABLE articles ADD COLUMN {column_name} {column_type}")
-                    print(f"✅ Colonne RoBERTa ajoutée: {column_name}")
+                    print(f"[OK] Colonne RoBERTa ajoutée: {column_name}")
                 except Exception as e:
-                    print(f"⚠️ Erreur sur {column_name}: {e}")
+                    print(f"[WARN] Erreur sur {column_name}: {e}")
             else:
-                print(f"✅ Colonne RoBERTa déjà présente: {column_name}")
+                print(f"[OK] Colonne RoBERTa déjà présente: {column_name}")
         
         # Mettre à jour les articles existants avec le modèle par défaut
         try:
@@ -169,13 +169,13 @@ def _add_roberta_columns(cursor, existing_tables):
                 SET analysis_model = 'traditional'
                 WHERE analysis_model IS NULL
             """)
-            print(f"✅ {cursor.rowcount} articles mis à jour avec le modèle par défaut")
+            print(f"[OK] {cursor.rowcount} articles mis à jour avec le modèle par défaut")
         except Exception as e:
-            print(f"⚠️ Erreur mise à jour articles: {e}")
+            print(f"[WARN] Erreur mise à jour articles: {e}")
 
 def _create_indexes(cursor):
     """Crée les index de manière sécurisée"""
-    print("🔄 Création des index...")
+    print("[MIGRATION] Création des index...")
     
     # Index basiques (toujours sûrs)
     basic_indexes = [
@@ -190,7 +190,7 @@ def _create_indexes(cursor):
         try:
             cursor.execute(index_sql)
         except Exception as e:
-            print(f"⚠️ Index basique ignoré: {e}")
+            print(f"[WARN] Index basique ignoré: {e}")
     
     # Index avancés (peut échouer si colonnes manquantes)
     advanced_indexes = [
@@ -204,7 +204,7 @@ def _create_indexes(cursor):
         try:
             cursor.execute(index_sql)
         except Exception as e:
-            print(f"ℹ️ Index avancé ignoré (normal si colonne manquante): {e}")
+            print(f"ℹ Index avancé ignoré (normal si colonne manquante): {e}")
 
 def _populate_default_themes(cursor):
     """Ajoute les thèmes par défaut de manière sécurisée"""
@@ -214,7 +214,7 @@ def _populate_default_themes(cursor):
         theme_count = cursor.fetchone()[0]
         
         if theme_count == 0:
-            print("🔄 Ajout des thèmes par défaut...")
+            print("[MIGRATION] Ajout des thèmes par défaut...")
             for theme_id, theme_data in DEFAULT_THEMES.items():
                 # Nettoyer la couleur (enlever le # si présent)
                 color = theme_data['color'].replace('#', '') if theme_data['color'] else '6366f1'
@@ -228,12 +228,12 @@ def _populate_default_themes(cursor):
                         color
                     )
                 )
-            print("✅ Thèmes par défaut ajoutés")
+            print("[OK] Thèmes par défaut ajoutés")
         else:
-            print(f"✅ Thèmes déjà présents: {theme_count}")
+            print(f"[OK] Thèmes déjà présents: {theme_count}")
             
     except Exception as e:
-        print(f"⚠️ Erreur lors de l'ajout des thèmes: {e}")
+        print(f"[WARN] Erreur lors de l'ajout des thèmes: {e}")
 
 def _show_database_summary(cursor):
     """Affiche un résumé de la base de données"""
@@ -251,20 +251,20 @@ def _show_database_summary(cursor):
         cursor.execute("PRAGMA table_info(articles)")
         columns = [col[1] for col in cursor.fetchall()]
         
-        print(f"\n📊 RÉSUMÉ DE LA BASE DE DONNÉES:")
+        print(f"\n[DATA] RÉSUMÉ DE LA BASE DE DONNÉES:")
         print(f"   📰 Articles: {article_count}")
-        print(f"   🏷️  Analyses de thèmes: {theme_analysis_count}")
+        print(f"   🏷  Analyses de thèmes: {theme_analysis_count}")
         print(f"   📋 Thèmes: {theme_count}")
-        print(f"   🔧 Colonnes articles: {len(columns)}")
+        print(f"   [TOOL] Colonnes articles: {len(columns)}")
         
         # Vérifier les colonnes critiques
         critical_columns = ['analysis_model', 'sentiment_confidence', 'roberta_score']
         for col in critical_columns:
-            status = "✅ PRÉSENTE" if col in columns else "❌ MANQUANTE"
+            status = "[OK] PRÉSENTE" if col in columns else "[ERROR] MANQUANTE"
             print(f"   {status}: {col}")
         
     except Exception as e:
-        print(f"📊 Impossible d'afficher le résumé: {e}")
+        print(f"[DATA] Impossible d'afficher le résumé: {e}")
 
         # Flask/AJOUT colonnes 4 fromages 
 def _add_sentiment_columns(cursor, existing_tables):
@@ -289,6 +289,6 @@ def _add_sentiment_columns(cursor, existing_tables):
                     logger.info(f"  ➕ Colonne ajoutée: {column_name}")
                 except Exception as e:
                     if "duplicate column" in str(e).lower():
-                        logger.debug(f"  ⏭️  Colonne {column_name} existe déjà")
+                        logger.debug(f"  [SKIP]  Colonne {column_name} existe déjà")
                     else:
                         raise

@@ -12,11 +12,11 @@ import os
 def check_file_syntax(filepath):
     """Vérifie la syntaxe d'un fichier Python"""
     print(f"\n{'='*60}")
-    print(f"🔍 Vérification de: {filepath}")
+    print(f"[SEARCH] Vérification de: {filepath}")
     print(f"{'='*60}")
     
     if not os.path.exists(filepath):
-        print(f"❌ Fichier non trouvé: {filepath}")
+        print(f"[ERROR] Fichier non trouvé: {filepath}")
         return False
     
     try:
@@ -25,18 +25,18 @@ def check_file_syntax(filepath):
         
         # Essayer de parser le fichier
         ast.parse(content)
-        print(f"✅ Syntaxe correcte!")
+        print(f"[OK] Syntaxe correcte!")
         return True
         
     except SyntaxError as e:
-        print(f"❌ ERREUR DE SYNTAXE:")
+        print(f"[ERROR] ERREUR DE SYNTAXE:")
         print(f"   Ligne {e.lineno}: {e.msg}")
         print(f"   Texte: {e.text}")
         print(f"   Position: {' ' * (e.offset - 1)}^")
         return False
         
     except Exception as e:
-        print(f"❌ ERREUR: {e}")
+        print(f"[ERROR] ERREUR: {e}")
         return False
 
 def check_indentation(filepath):
@@ -51,32 +51,32 @@ def check_indentation(filepath):
         for i, line in enumerate(lines, 1):
             # Vérifier les tabulations mélangées avec des espaces
             if '\t' in line and ' ' * 4 in line:
-                issues.append((i, "⚠️  Mélange tabulations/espaces"))
+                issues.append((i, "[WARN]  Mélange tabulations/espaces"))
             
             # Vérifier les lignes avec indentation impaire
             stripped = line.lstrip()
             if stripped and not line.startswith('#'):
                 indent = len(line) - len(stripped)
                 if indent % 4 != 0:
-                    issues.append((i, f"⚠️  Indentation {indent} espaces (pas multiple de 4)"))
+                    issues.append((i, f"[WARN]  Indentation {indent} espaces (pas multiple de 4)"))
         
         if issues:
             print(f"   Problèmes potentiels trouvés:")
             for line_num, issue in issues[:10]:  # Afficher max 10 problèmes
                 print(f"   Ligne {line_num}: {issue}")
         else:
-            print(f"   ✅ Aucun problème d'indentation détecté")
+            print(f"   [OK] Aucun problème d'indentation détecté")
             
         return len(issues) == 0
         
     except Exception as e:
-        print(f"   ❌ Erreur lors de la vérification: {e}")
+        print(f"   [ERROR] Erreur lors de la vérification: {e}")
         return False
 
 def main():
     """Point d'entrée principal"""
     print("="*60)
-    print("🔧 DIAGNOSTIC SYNTAXE GEOPOL")
+    print("[TOOL] DIAGNOSTIC SYNTAXE GEOPOL")
     print("="*60)
     
     files_to_check = [
@@ -95,13 +95,13 @@ def main():
     
     print("\n" + "="*60)
     if all_ok:
-        print("✅ TOUS LES FICHIERS SONT CORRECTS")
+        print("[OK] TOUS LES FICHIERS SONT CORRECTS")
         print("   Si Flask ne démarre toujours pas, vérifiez:")
         print("   1. Les imports (psutil, threading, signal)")
         print("   2. Les logs de Flask au démarrage")
         print("   3. Le port 5000 est libre")
     else:
-        print("❌ DES ERREURS ONT ÉTÉ DÉTECTÉES")
+        print("[ERROR] DES ERREURS ONT ÉTÉ DÉTECTÉES")
         print("   Corrigez les erreurs ci-dessus et relancez ce script")
     print("="*60)
     

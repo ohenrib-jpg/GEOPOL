@@ -41,7 +41,7 @@ class DataExporter:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
             
-            logger.info(f"✅ Export quotidien créé: {filename}")
+            logger.info(f"[OK] Export quotidien créé: {filename}")
             
             # Sauvegarde automatique vers le dossier partagé si configuré
             self._backup_to_shared_folder(filepath)
@@ -49,7 +49,7 @@ class DataExporter:
             return filepath
             
         except Exception as e:
-            logger.error(f"❌ Erreur export quotidien: {e}")
+            logger.error(f"[ERROR] Erreur export quotidien: {e}")
             return None
         finally:
             conn.close()
@@ -85,7 +85,7 @@ class DataExporter:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
             
-            logger.info(f"✅ Résumé hebdomadaire créé: {filename}")
+            logger.info(f"[OK] Résumé hebdomadaire créé: {filename}")
             
             # Sauvegarde automatique
             self._backup_to_shared_folder(filepath)
@@ -93,7 +93,7 @@ class DataExporter:
             return filepath
             
         except Exception as e:
-            logger.error(f"❌ Erreur résumé hebdomadaire: {e}")
+            logger.error(f"[ERROR] Erreur résumé hebdomadaire: {e}")
             return None
         finally:
             conn.close()
@@ -114,7 +114,7 @@ class DataExporter:
             # Export des métriques avec la sauvegarde
             self._export_backup_metadata(backup_path)
             
-            logger.info(f"✅ Sauvegarde créée: {backup_file}")
+            logger.info(f"[OK] Sauvegarde créée: {backup_file}")
             
             # Sauvegarde automatique
             self._backup_to_shared_folder(backup_path)
@@ -122,7 +122,7 @@ class DataExporter:
             return backup_path
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde: {e}")
             return None
     
     def _backup_to_shared_folder(self, filepath):
@@ -137,10 +137,10 @@ class DataExporter:
                 shutil.copy2(filepath, dest_path)
                 logger.info(f"📤 Sauvegarde automatique: {filename}")
             else:
-                logger.info("ℹ️ Dossier partagé non trouvé, sauvegarde locale uniquement")
+                logger.info("ℹ Dossier partagé non trouvé, sauvegarde locale uniquement")
                 
         except Exception as e:
-            logger.warning(f"⚠️ Erreur sauvegarde automatique: {e}")
+            logger.warning(f"[WARN] Erreur sauvegarde automatique: {e}")
     
     def _export_backup_metadata(self, backup_path):
         """Exporte les métadonnées de la sauvegarde"""
@@ -157,7 +157,7 @@ class DataExporter:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
                 
         except Exception as e:
-            logger.error(f"❌ Erreur métadonnées sauvegarde: {e}")
+            logger.error(f"[ERROR] Erreur métadonnées sauvegarde: {e}")
     
     def _get_export_stats(self):
         """Récupère les statistiques d'export"""
@@ -175,7 +175,7 @@ class DataExporter:
             
             return stats
         except Exception as e:
-            logger.error(f"❌ Erreur statistiques export: {e}")
+            logger.error(f"[ERROR] Erreur statistiques export: {e}")
             return {}
         finally:
             conn.close()

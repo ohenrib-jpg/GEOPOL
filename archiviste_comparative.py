@@ -70,7 +70,7 @@ class ArchiveOrgClient:
                 'sort': 'downloads desc'  # Prioriser les documents populaires
             }
             
-            logger.info(f"🔍 Recherche Archive.org: {keyword_query} ({start_year}-{end_year})")
+            logger.info(f"[SEARCH] Recherche Archive.org: {keyword_query} ({start_year}-{end_year})")
             
             response = self.session.get(self.SEARCH_URL, params=params, timeout=30)
             response.raise_for_status()
@@ -78,12 +78,12 @@ class ArchiveOrgClient:
             data = response.json()
             docs = data.get('response', {}).get('docs', [])
             
-            logger.info(f"✅ {len(docs)} documents trouvés sur Archive.org")
+            logger.info(f"[OK] {len(docs)} documents trouvés sur Archive.org")
             
             return docs
             
         except Exception as e:
-            logger.error(f"❌ Erreur recherche Archive.org: {e}")
+            logger.error(f"[ERROR] Erreur recherche Archive.org: {e}")
             return []
     
     def get_item_metadata(self, identifier: str) -> Optional[Dict[str, Any]]:
@@ -96,7 +96,7 @@ class ArchiveOrgClient:
             return response.json()
             
         except Exception as e:
-            logger.error(f"❌ Erreur métadonnées {identifier}: {e}")
+            logger.error(f"[ERROR] Erreur métadonnées {identifier}: {e}")
             return None
     
     def extract_text_content(self, item: Dict[str, Any]) -> str:
@@ -209,7 +209,7 @@ class ComparativeSentimentAnalyzer:
         for i, item in enumerate(items):
             # Log de progression tous les 10 items
             if i % 10 == 0:
-                logger.info(f"📊 Analyse {i}/{len(items)} items...")
+                logger.info(f"[DATA] Analyse {i}/{len(items)} items...")
             
             # Extraire le texte
             text = self._extract_text_from_item(item)
@@ -239,7 +239,7 @@ class ComparativeSentimentAnalyzer:
             
             analyzed_items.append(analyzed_item)
         
-        logger.info(f"✅ {len(analyzed_items)} items analysés et pertinents")
+        logger.info(f"[OK] {len(analyzed_items)} items analysés et pertinents")
         
         return analyzed_items
     
@@ -307,7 +307,7 @@ class ComparativeArchiviste:
         VRAIE recherche et analyse sur Archive.org
         """
         try:
-            logger.info(f"🎯 Analyse comparative: période {period_key}, thème {theme_id}")
+            logger.info(f"[TARGET] Analyse comparative: période {period_key}, thème {theme_id}")
             
             # Valider la période
             if period_key not in self.historical_periods:
@@ -392,12 +392,12 @@ class ComparativeArchiviste:
             # Sauvegarder l'analyse
             self._save_comparative_analysis(result)
             
-            logger.info(f"✅ Analyse comparative terminée: {len(analyzed_items)} items historiques vs {len(current_articles)} actuels")
+            logger.info(f"[OK] Analyse comparative terminée: {len(analyzed_items)} items historiques vs {len(current_articles)} actuels")
             
             return result
             
         except Exception as e:
-            logger.error(f"❌ Erreur analyse comparative: {e}", exc_info=True)
+            logger.error(f"[ERROR] Erreur analyse comparative: {e}", exc_info=True)
             return {
                 'success': False,
                 'error': f'Erreur: {str(e)}'
@@ -618,10 +618,10 @@ class ComparativeArchiviste:
             ))
             
             conn.commit()
-            logger.info("✅ Analyse comparative sauvegardée")
+            logger.info("[OK] Analyse comparative sauvegardée")
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde analyse: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde analyse: {e}")
             conn.rollback()
         finally:
             conn.close()

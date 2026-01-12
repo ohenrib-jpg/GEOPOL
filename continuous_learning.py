@@ -13,15 +13,26 @@ from typing import Dict, List, Any, Optional
 import threading
 import time
 
-import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-import numpy as np
+# Import optionnel de torch pour éviter les erreurs si non installé
+try:
+    import torch
+    import torch.nn as nn
+    from torch.utils.data import Dataset, DataLoader
+    import numpy as np
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    # Définir des classes factices pour éviter les erreurs
+    Dataset = object
+    nn = None
 
 from .database import DatabaseManager
 from .sentiment_analyzer import SentimentAnalyzer
 
 logger = logging.getLogger(__name__)
+
+if not TORCH_AVAILABLE:
+    logger.warning("[WARN] PyTorch non disponible - apprentissage continu désactivé")
 
 class FeedbackDataset(Dataset):
     """Dataset pour l'apprentissage continu avec feedback utilisateur"""
@@ -131,10 +142,10 @@ class ContinuousLearningEngine:
             """)
             
             conn.commit()
-            logger.info("✅ Table learning_feedback créée")
+            logger.info("[OK] Table learning_feedback créée")
             
         except Exception as e:
-            logger.error(f"❌ Erreur création table feedback: {e}")
+            logger.error(f"[ERROR] Erreur création table feedback: {e}")
         finally:
             conn.close()
     
@@ -152,13 +163,13 @@ class ContinuousLearningEngine:
             """, (article_id, predicted_sentiment, corrected_sentiment, text_content, confidence))
             
             conn.commit()
-            logger.info(f"✅ Feedback collecté pour article {article_id}")
+            logger.info(f"[OK] Feedback collecté pour article {article_id}")
             
             # Vérifier si on doit déclencher l'apprentissage - CORRECTION CRITIQUE
             self._check_and_trigger_learning()
             
         except Exception as e:
-            logger.error(f"❌ Erreur collecte feedback: {e}")
+            logger.error(f"[ERROR] Erreur collecte feedback: {e}")
         finally:
             conn.close()
     
@@ -167,7 +178,7 @@ class ContinuousLearningEngine:
         unprocessed_count = self._get_unprocessed_feedback_count()
         
         if unprocessed_count >= self.min_feedback_threshold:
-            logger.info(f"🎯 {unprocessed_count} feedbacks non traités - Déclenchement apprentissage")
+            logger.info(f"[TARGET] {unprocessed_count} feedbacks non traités - Déclenchement apprentissage")
             self._trigger_learning()
     
     def _get_unprocessed_feedback_count(self) -> int:
@@ -182,7 +193,7 @@ class ContinuousLearningEngine:
             """)
             return cursor.fetchone()[0]
         except Exception as e:
-            logger.error(f"❌ Erreur comptage feedbacks: {e}")
+            logger.error(f"[ERROR] Erreur comptage feedbacks: {e}")
             return 0
         finally:
             conn.close()
@@ -214,7 +225,7 @@ class ContinuousLearningEngine:
             
             return feedbacks
         except Exception as e:
-            logger.error(f"❌ Erreur récupération feedbacks: {e}")
+            logger.error(f"[ERROR] Erreur récupération feedbacks: {e}")
             return []
         finally:
             conn.close()
@@ -226,7 +237,7 @@ class ContinuousLearningEngine:
         if not feedback_data:
             return
         
-        logger.info(f"🚀 Début apprentissage avec {len(feedback_data)} feedbacks")
+        logger.info(f"[LAUNCH] Début apprentissage avec {len(feedback_data)} feedbacks")
         
         try:
             # Créer le dataset
@@ -253,7 +264,7 @@ class ContinuousLearningEngine:
                 batch_count += 1
             
             avg_loss = total_loss / batch_count if batch_count > 0 else 0
-            logger.info(f"✅ Apprentissage terminé - Loss moyen: {avg_loss:.4f}")
+            logger.info(f"[OK] Apprentissage terminé - Loss moyen: {avg_loss:.4f}")
             
             # Sauvegarder le modèle
             self._save_model()
@@ -262,7 +273,7 @@ class ContinuousLearningEngine:
             self._mark_feedbacks_as_processed([f['id'] for f in feedback_data])
             
         except Exception as e:
-            logger.error(f"❌ Erreur apprentissage: {e}")
+            logger.error(f"[ERROR] Erreur apprentissage: {e}")
     
     def _mark_feedbacks_as_processed(self, feedback_ids: List[int]):
         """Marquer les feedbacks comme traités"""
@@ -281,10 +292,10 @@ class ContinuousLearningEngine:
             """, feedback_ids)
             
             conn.commit()
-            logger.info(f"✅ {len(feedback_ids)} feedbacks marqués comme traités")
+            logger.info(f"[OK] {len(feedback_ids)} feedbacks marqués comme traités")
             
         except Exception as e:
-            logger.error(f"❌ Erreur mise à jour feedbacks: {e}")
+            logger.error(f"[ERROR] Erreur mise à jour feedbacks: {e}")
         finally:
             conn.close()
     
@@ -296,9 +307,9 @@ class ContinuousLearningEngine:
                 'optimizer_state_dict': self.optimizer.state_dict(),
                 'timestamp': datetime.now().isoformat()
             }, self.model_path)
-            logger.info("✅ Modèle sauvegardé")
+            logger.info("[OK] Modèle sauvegardé")
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde modèle: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde modèle: {e}")
     
     def _load_model(self):
         """Charger le modèle existant"""
@@ -307,11 +318,11 @@ class ContinuousLearningEngine:
                 checkpoint = torch.load(self.model_path)
                 self.model.load_state_dict(checkpoint['model_state_dict'])
                 self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-                logger.info("✅ Modèle chargé")
+                logger.info("[OK] Modèle chargé")
             else:
                 logger.info("🆕 Nouveau modèle créé")
         except Exception as e:
-            logger.error(f"❌ Erreur chargement modèle: {e}")
+            logger.error(f"[ERROR] Erreur chargement modèle: {e}")
     
     def predict_sentiment(self, text: str) -> Dict[str, Any]:
         """Prédiction avec le modèle continu"""
@@ -358,7 +369,7 @@ class ContinuousLearningEngine:
                 }
                 
         except Exception as e:
-            logger.error(f"❌ Erreur prédiction continue: {e}")
+            logger.error(f"[ERROR] Erreur prédiction continue: {e}")
             # Fallback sur analyseur classique
             return self.sentiment_analyzer.analyze_sentiment_with_score(text)
 
@@ -376,7 +387,7 @@ class PassiveLearningScheduler:
             self.running = True
             self.thread = threading.Thread(target=self._scheduler_loop, daemon=True)
             self.thread.start()
-            logger.info("✅ Planificateur d'apprentissage passif démarré")
+            logger.info("[OK] Planificateur d'apprentissage passif démarré")
     
     def stop(self):
         """Arrêter le planificateur"""
@@ -400,7 +411,7 @@ class PassiveLearningScheduler:
                     time.sleep(1)
                     
             except Exception as e:
-                logger.error(f"❌ Erreur planificateur: {e}")
+                logger.error(f"[ERROR] Erreur planificateur: {e}")
                 time.sleep(60)  # Attendre 1 minute en cas d'erreur
 
 # Singleton pour l'engine d'apprentissage
@@ -409,21 +420,29 @@ _scheduler = None
 
 def get_learning_engine(db_manager: DatabaseManager, sentiment_analyzer: SentimentAnalyzer) -> ContinuousLearningEngine:
     """Obtenir l'instance singleton du learning engine"""
+    if not TORCH_AVAILABLE:
+        logger.warning("[WARN] PyTorch non disponible - learning engine désactivé")
+        return None
+
     global _learning_engine
-    
+
     if _learning_engine is None:
         _learning_engine = ContinuousLearningEngine(db_manager, sentiment_analyzer)
-    
+
     return _learning_engine
 
 def start_passive_learning(db_manager: DatabaseManager, sentiment_analyzer: SentimentAnalyzer):
     """Démarrer l'apprentissage passif"""
+    if not TORCH_AVAILABLE:
+        logger.warning("[WARN] PyTorch non disponible - apprentissage passif désactivé")
+        return None
+
     global _scheduler
-    
+
     learning_engine = get_learning_engine(db_manager, sentiment_analyzer)
     _scheduler = PassiveLearningScheduler(learning_engine)
     _scheduler.start()
-    
+
     return learning_engine
 
 def stop_passive_learning():

@@ -26,7 +26,7 @@ class GeoEntityIntegration:
         self.entity_extractor = entity_extractor
         self.entity_db = entity_db_manager
         
-        logger.info("✅ GeoEntityIntegration initialisé")
+        logger.info("[OK] GeoEntityIntegration initialisé")
     
     # =========================================================================
     # MÉTHODE PRINCIPALE - ANALYSE ENRICHIE
@@ -44,7 +44,7 @@ class GeoEntityIntegration:
             Liste de patterns enrichis avec entités géopolitiques
         """
         try:
-            logger.info(f"🔍 Analyse enrichie: {days} jours, min {min_countries} pays")
+            logger.info(f"[SEARCH] Analyse enrichie: {days} jours, min {min_countries} pays")
             
             # 1. Détecter les patterns transnationaux
             patterns = self.geo_analyzer.detect_transnational_patterns(
@@ -53,10 +53,10 @@ class GeoEntityIntegration:
             )
             
             if not patterns:
-                logger.warning("⚠️ Aucun pattern détecté")
+                logger.warning("[WARN] Aucun pattern détecté")
                 return []
             
-            logger.info(f"📊 {len(patterns)} patterns détectés, enrichissement en cours...")
+            logger.info(f"[DATA] {len(patterns)} patterns détectés, enrichissement en cours...")
             
             # 2. Enrichir chaque pattern avec des entités
             enriched_patterns = []
@@ -67,12 +67,12 @@ class GeoEntityIntegration:
             # 3. Calculer des statistiques globales
             enriched_patterns = self._add_global_statistics(enriched_patterns)
             
-            logger.info(f"✅ {len(enriched_patterns)} patterns enrichis")
+            logger.info(f"[OK] {len(enriched_patterns)} patterns enrichis")
             
             return enriched_patterns
             
         except Exception as e:
-            logger.error(f"❌ Erreur analyse enrichie: {e}")
+            logger.error(f"[ERROR] Erreur analyse enrichie: {e}")
             import traceback
             traceback.print_exc()
             return []
@@ -118,7 +118,7 @@ class GeoEntityIntegration:
             return pattern
             
         except Exception as e:
-            logger.error(f"❌ Erreur enrichissement pattern: {e}")
+            logger.error(f"[ERROR] Erreur enrichissement pattern: {e}")
             # Retourner le pattern original en cas d'erreur
             pattern['entities'] = {}
             pattern['entity_counts'] = {}
@@ -216,12 +216,12 @@ class GeoEntityIntegration:
                 }
             }
             
-            logger.info("✅ Analyse complète terminée")
+            logger.info("[OK] Analyse complète terminée")
             
             return report
             
         except Exception as e:
-            logger.error(f"❌ Erreur analyse complète: {e}")
+            logger.error(f"[ERROR] Erreur analyse complète: {e}")
             import traceback
             traceback.print_exc()
             return {}
@@ -281,7 +281,7 @@ class GeoEntityIntegration:
             logger.info(f"💾 Entités sauvegardées pour {saved_count} articles")
             
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde entités: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde entités: {e}")
     
     # =========================================================================
     # RECHERCHE ET FILTRAGE
@@ -324,12 +324,12 @@ class GeoEntityIntegration:
                             matching_patterns.append(pattern)
                             break
             
-            logger.info(f"🔍 {len(matching_patterns)} patterns trouvés pour '{entity_name}'")
+            logger.info(f"[SEARCH] {len(matching_patterns)} patterns trouvés pour '{entity_name}'")
             
             return matching_patterns
             
         except Exception as e:
-            logger.error(f"❌ Erreur recherche par entité: {e}")
+            logger.error(f"[ERROR] Erreur recherche par entité: {e}")
             return []
     
     def get_entity_timeline(
@@ -380,7 +380,7 @@ class GeoEntityIntegration:
             }
             
         except Exception as e:
-            logger.error(f"❌ Erreur timeline entité: {e}")
+            logger.error(f"[ERROR] Erreur timeline entité: {e}")
             return {}
     
     # =========================================================================
@@ -474,7 +474,7 @@ class GeoEntityIntegration:
             return graph
             
         except Exception as e:
-            logger.error(f"❌ Erreur relations entités: {e}")
+            logger.error(f"[ERROR] Erreur relations entités: {e}")
             import traceback
             traceback.print_exc()
             return {}
@@ -508,11 +508,11 @@ class GeoEntityIntegration:
             
             elif format == 'markdown':
                 # Générer un rapport Markdown
-                md = f"# 🌍 Rapport Géopolitique\n\n"
+                md = f"# [GLOBAL] Rapport Géopolitique\n\n"
                 md += f"**Date:** {analysis['analysis_date']}\n"
                 md += f"**Période:** {days} jours\n\n"
                 
-                md += "## 📊 Résumé\n\n"
+                md += "## [DATA] Résumé\n\n"
                 summary = analysis['summary']
                 md += f"- Articles analysés: **{summary['total_articles']}**\n"
                 md += f"- Pays: **{summary['countries_analyzed']}**\n"
@@ -521,7 +521,7 @@ class GeoEntityIntegration:
                 md += f"- Organisations uniques: **{summary['unique_organizations']}**\n"
                 md += f"- Personnalités uniques: **{summary['unique_persons']}**\n\n"
                 
-                md += "## 🔍 Top Patterns Transnationaux\n\n"
+                md += "## [SEARCH] Top Patterns Transnationaux\n\n"
                 for i, pattern in enumerate(analysis['patterns'][:10], 1):
                     md += f"### {i}. \"{pattern['pattern']}\"\n\n"
                     md += f"- Pays: {', '.join(pattern['countries'])}\n"
@@ -544,5 +544,5 @@ class GeoEntityIntegration:
                 return "Format non supporté"
             
         except Exception as e:
-            logger.error(f"❌ Erreur génération rapport: {e}")
+            logger.error(f"[ERROR] Erreur génération rapport: {e}")
             return f"Erreur: {str(e)}"

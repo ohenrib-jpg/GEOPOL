@@ -76,7 +76,7 @@ class DemographicDataService:
                 ON demographic_data(indicator_id, year)
             """)
             
-            logger.info("✅ Tables démographiques initialisées")
+            logger.info("[OK] Tables démographiques initialisées")
         except Exception as e:
             logger.error(f"Erreur init DB démographique: {e}")
 
@@ -101,7 +101,7 @@ class DemographicDataService:
             if filters:
                 params.update(filters)
             
-            logger.info(f"📊 Eurostat: {dataset_code}")
+            logger.info(f"[DATA] Eurostat: {dataset_code}")
             response = self.session.get(url, params=params, timeout=15)
             response.raise_for_status()
             
@@ -159,7 +159,7 @@ class DemographicDataService:
                     except (ValueError, TypeError):
                         continue
             
-            logger.info(f"✅ Eurostat: {len(results)} entrées parsées")
+            logger.info(f"[OK] Eurostat: {len(results)} entrées parsées")
             return results
             
         except Exception as e:
@@ -187,7 +187,7 @@ class DemographicDataService:
                 'detail': 'dataonly'
             }
             
-            logger.info(f"🏦 BCE: {flow_ref}")
+            logger.info(f"[BANK] BCE: {flow_ref}")
             response = self.session.get(url, params=params, timeout=15)
             response.raise_for_status()
             
@@ -232,7 +232,7 @@ class DemographicDataService:
                                 'unit': 'index'
                             })
             
-            logger.info(f"✅ BCE: {len(results)} entrées parsées")
+            logger.info(f"[OK] BCE: {len(results)} entrées parsées")
             return results
             
         except Exception as e:
@@ -261,7 +261,7 @@ class DemographicDataService:
                 'date': '2010:2024'
             }
             
-            logger.info(f"🌍 World Bank: {indicator}")
+            logger.info(f"[GLOBAL] World Bank: {indicator}")
             response = self.session.get(url, params=params, timeout=15)
             response.raise_for_status()
             
@@ -301,7 +301,7 @@ class DemographicDataService:
                     'unit': record.get('unit', '')
                 })
             
-            logger.info(f"✅ World Bank: {len(results)} entrées parsées")
+            logger.info(f"[OK] World Bank: {len(results)} entrées parsées")
             return results
             
         except Exception as e:
@@ -446,7 +446,7 @@ class DemographicDataService:
         stored = self.store_indicators(all_data)
         stats['total'] = stored
         
-        logger.info(f"📊 Collecte terminée: {stored} indicateurs stockés")
+        logger.info(f"[DATA] Collecte terminée: {stored} indicateurs stockés")
         
         return {
             'success': True,

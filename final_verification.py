@@ -5,13 +5,13 @@ from sentiment_analyzer import SentimentAnalyzer
 import time
 
 def final_verification():
-    print("🎯 VÉRIFICATION FINALE COMPLÈTE")
+    print("[TARGET] VÉRIFICATION FINALE COMPLÈTE")
     print("=" * 60)
     
     db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'geopolitics.db')
     
     # 1. Vérification base de données
-    print("🗃️  BASE DE DONNÉES:")
+    print("🗃  BASE DE DONNÉES:")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
@@ -27,7 +27,7 @@ def final_verification():
     critical_columns = ['analysis_model', 'sentiment_confidence', 'roberta_score', 'roberta_label']
     print("   Colonnes critiques:")
     for col in critical_columns:
-        status = "✅" if col in columns else "❌"
+        status = "[OK]" if col in columns else "[ERROR]"
         print(f"      {status} {col}")
     
     # Données
@@ -36,14 +36,14 @@ def final_verification():
     print(f"   📰 Articles: {articles_count}")
     
     cursor.execute("SELECT analysis_model, COUNT(*) FROM articles GROUP BY analysis_model")
-    print("   🤖 Modèles utilisés:")
+    print("   [AI] Modèles utilisés:")
     for model, count in cursor.fetchall():
         print(f"      {model}: {count} articles")
     
     conn.close()
     
     # 2. Vérification RoBERTa Tulpe
-    print("\n🤖 ROERTA TULPE:")
+    print("\n[AI] ROERTA TULPE:")
     analyzer = SentimentAnalyzer()
     time.sleep(2)
     
@@ -55,13 +55,13 @@ def final_verification():
     
     for name, text in test_cases:
         result = analyzer.analyze_sentiment_with_score(text)
-        print(f"   🔍 {name}:")
+        print(f"   [SEARCH] {name}:")
         print(f"      Type: {result['type']}")
         print(f"      Score: {result['score']:.3f}")
         print(f"      Modèle: {result['model']}")
     
     print("\n" + "=" * 60)
-    print("🚀 SYSTÈME PRÊT!")
+    print("[LAUNCH] SYSTÈME PRÊT!")
     print("   Vous pouvez maintenant redémarrer l'application Flask")
 
 if __name__ == "__main__":

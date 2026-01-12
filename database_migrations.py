@@ -18,7 +18,7 @@ class DatabaseMigrations:
     
     def run_all_migrations(self):
         """Exécute toutes les migrations nécessaires"""
-        logger.info("🔄 Démarrage des migrations...")
+        logger.info("[MIGRATION] Démarrage des migrations...")
         
         migrations = [
             ("01_add_bayesian_columns", self._add_bayesian_columns),
@@ -30,17 +30,17 @@ class DatabaseMigrations:
         for name, migration_func in migrations:
             try:
                 if self._should_run_migration(name):
-                    logger.info(f"▶️  Exécution migration: {name}")
+                    logger.info(f"[RUN] Exécution migration: {name}")
                     migration_func()
                     self._mark_migration_complete(name)
-                    logger.info(f"✅ Migration {name} terminée")
+                    logger.info(f"[OK] Migration {name} terminée")
                 else:
-                    logger.debug(f"⏭️  Migration {name} déjà appliquée")
+                    logger.debug(f"[SKIP] Migration {name} déjà appliquée")
             except Exception as e:
-                logger.error(f"❌ Erreur migration {name}: {e}")
+                logger.error(f"[ERROR] Erreur migration {name}: {e}")
                 raise
         
-        logger.info("✅ Toutes les migrations terminées")
+        logger.info("[OK] Toutes les migrations terminées")
     
     def _should_run_migration(self, migration_name: str) -> bool:
         """Vérifie si une migration doit être exécutée"""
@@ -105,7 +105,7 @@ class DatabaseMigrations:
                     logger.info(f"  ➕ Colonne ajoutée: {column_name}")
                 except Exception as e:
                     if "duplicate column" in str(e).lower():
-                        logger.debug(f"  ⏭️  Colonne {column_name} existe déjà")
+                        logger.debug(f"  [SKIP]  Colonne {column_name} existe déjà")
                     else:
                         raise
             
@@ -162,7 +162,7 @@ class DatabaseMigrations:
                     logger.info(f"  ➕ Index créé: {idx_name}")
                 except Exception as e:
                     if "already exists" in str(e).lower():
-                        logger.debug(f"  ⏭️  Index {idx_name} existe déjà")
+                        logger.debug(f"  [SKIP]  Index {idx_name} existe déjà")
                     else:
                         raise
             
@@ -193,7 +193,7 @@ class DatabaseMigrations:
                     logger.info(f"  ➕ Colonne ajoutée: {column_name}")
                 except Exception as e:
                     if "duplicate column" in str(e).lower():
-                        logger.debug(f"  ⏭️  Colonne {column_name} existe déjà")
+                        logger.debug(f"  [SKIP]  Colonne {column_name} existe déjà")
                     else:
                         raise
 

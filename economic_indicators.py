@@ -104,7 +104,7 @@ class EconomicIndicatorsManager:
         
         conn.commit()
         conn.close()
-        logger.info("✅ Tables indicateurs économiques initialisées")
+        logger.info("[OK] Tables indicateurs économiques initialisées")
     
     # ==========================================
     # YFINANCE - INDICATEURS FINANCIERS
@@ -144,12 +144,12 @@ class EconomicIndicatorsManager:
                     # Sauvegarder en base
                     self._save_financial_indicator(symbol, results[symbol])
                     
-                    logger.info(f"✅ Données récupérées pour {symbol}")
+                    logger.info(f"[OK] Données récupérées pour {symbol}")
                 else:
-                    logger.warning(f"⚠️ Pas de données pour {symbol}")
+                    logger.warning(f"[WARN] Pas de données pour {symbol}")
                     
             except Exception as e:
-                logger.error(f"❌ Erreur yFinance pour {symbol}: {e}")
+                logger.error(f"[ERROR] Erreur yFinance pour {symbol}: {e}")
                 results[symbol] = {'error': str(e)}
         
         return results
@@ -182,7 +182,7 @@ class EconomicIndicatorsManager:
             ))
             conn.commit()
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde {symbol}: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde {symbol}: {e}")
         finally:
             conn.close()
     
@@ -235,13 +235,13 @@ class EconomicIndicatorsManager:
                             self._save_wb_indicator(country, entry, indicator_code)
                     
                     results[country] = country_data
-                    logger.info(f"✅ Données Banque Mondiale pour {country}")
+                    logger.info(f"[OK] Données Banque Mondiale pour {country}")
                 else:
                     results[country] = []
-                    logger.warning(f"⚠️ Pas de données WB pour {country}")
+                    logger.warning(f"[WARN] Pas de données WB pour {country}")
                     
             except Exception as e:
-                logger.error(f"❌ Erreur Banque Mondiale {country}: {e}")
+                logger.error(f"[ERROR] Erreur Banque Mondiale {country}: {e}")
                 results[country] = {'error': str(e)}
         
         return results
@@ -267,7 +267,7 @@ class EconomicIndicatorsManager:
             ))
             conn.commit()
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde WB {country_code}: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde WB {country_code}: {e}")
         finally:
             conn.close()
     
@@ -312,7 +312,7 @@ class EconomicIndicatorsManager:
                 # Sauvegarder en base
                 self._save_sanction(sanction_data, entity)
             
-            logger.info(f"✅ {len(filtered_sanctions)} sanctions récupérées")
+            logger.info(f"[OK] {len(filtered_sanctions)} sanctions récupérées")
             
             return {
                 'total': len(filtered_sanctions),
@@ -321,7 +321,7 @@ class EconomicIndicatorsManager:
             }
             
         except Exception as e:
-            logger.error(f"❌ Erreur OpenSanctions: {e}")
+            logger.error(f"[ERROR] Erreur OpenSanctions: {e}")
             return {'error': str(e), 'sanctions': []}
     
     def _extract_name(self, entity: Dict) -> str:
@@ -378,7 +378,7 @@ class EconomicIndicatorsManager:
             ))
             conn.commit()
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde sanction: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde sanction: {e}")
         finally:
             conn.close()
     
@@ -406,7 +406,7 @@ class EconomicIndicatorsManager:
             ))
             conn.commit()
         except Exception as e:
-            logger.error(f"❌ Erreur sauvegarde série temporelle: {e}")
+            logger.error(f"[ERROR] Erreur sauvegarde série temporelle: {e}")
         finally:
             conn.close()
     

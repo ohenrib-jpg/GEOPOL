@@ -129,7 +129,7 @@ class Archiviste:
             'sort[]': 'downloads desc'
         }
         
-        logger.info(f"🔍 Archive.org: {search_query[:100]}...")
+        logger.info(f"[SEARCH] Archive.org: {search_query[:100]}...")
         
         # Tentatives avec retry
         for attempt in range(self.max_retries):
@@ -149,22 +149,22 @@ class Archiviste:
                 self._cache[cache_key] = items
                 self._cache_expiry[cache_key] = time.time() + self.cache_duration
                 
-                logger.info(f"✅ Archive.org: {len(items)} items trouvés")
+                logger.info(f"[OK] Archive.org: {len(items)} items trouvés")
                 return items
                 
             except requests.Timeout:
-                logger.warning(f"⏱️ Timeout tentative {attempt + 1}/{self.max_retries}")
+                logger.warning(f"⏱ Timeout tentative {attempt + 1}/{self.max_retries}")
                 if attempt < self.max_retries - 1:
                     time.sleep(2 ** attempt)  # Backoff exponentiel
             except requests.RequestException as e:
-                logger.error(f"❌ Erreur Archive.org (tentative {attempt + 1}): {e}")
+                logger.error(f"[ERROR] Erreur Archive.org (tentative {attempt + 1}): {e}")
                 if attempt < self.max_retries - 1:
                     time.sleep(2 ** attempt)
             except Exception as e:
-                logger.error(f"❌ Erreur inattendue: {e}")
+                logger.error(f"[ERROR] Erreur inattendue: {e}")
                 break
         
-        logger.error("❌ Échec après toutes les tentatives")
+        logger.error("[ERROR] Échec après toutes les tentatives")
         return []
     
     def extract_text_from_archive(self, item: Dict[str, Any]) -> str:
@@ -339,11 +339,11 @@ class Archiviste:
             # Sauvegarde
             self._save_historical_analysis(result)
             
-            logger.info(f"✅ Analyse complète: {len(analyzed_items)} items pour {period['name']}")
+            logger.info(f"[OK] Analyse complète: {len(analyzed_items)} items pour {period['name']}")
             return result
             
         except Exception as e:
-            logger.error(f"❌ Erreur analyse période: {e}")
+            logger.error(f"[ERROR] Erreur analyse période: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -521,7 +521,7 @@ class Archiviste:
             }
             
         except Exception as e:
-            logger.error(f"❌ Erreur comparaison: {e}")
+            logger.error(f"[ERROR] Erreur comparaison: {e}")
             return {'success': False, 'error': str(e)}
     
     def _compare_periods(self, current: Dict, historical: Dict, period_key: str) -> Dict[str, Any]:
@@ -634,5 +634,5 @@ def get_archiviste(db_manager: DatabaseManager) -> Archiviste:
     global _archiviste
     if _archiviste is None:
         _archiviste = Archiviste(db_manager)
-        logger.info("✅ Archiviste initialisé avec throttling et cache")
+        logger.info("[OK] Archiviste initialisé avec throttling et cache")
     return _archiviste

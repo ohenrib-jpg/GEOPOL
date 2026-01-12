@@ -1,476 +1,501 @@
 # Flask/gini_scraper.py
 """
-Scraper pour l'indice GINI (inégalités de revenus)
-Sources : Eurostat + Banque Mondiale
+Scraper amélioré pour l'indice GINI avec sources multiples
+Sources prioritaires: Eurostat API, Data.gouv.fr, World Bank
 """
 
 import logging
 import requests
+import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import json
 import os
 import re
+import csv
+from io import StringIO
 
 logger = logging.getLogger(__name__)
 
 
 class GINIScraper:
-    """Scraper pour l'indice GINI des inégalités"""
+    """Scraper amélioré pour l'indice GINI"""
     
-    # Sources multiples pour plus de robustesse
+    # Sources multiples avec priorités
     SOURCES = {
         'eurostat': {
+            'name': 'Eurostat',
             'url': "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ilc_di12",
-            'dataset': 'ilc_di12',
             'params': {
                 'format': 'JSON',
                 'lang': 'EN',
                 'geo': 'FR',
                 'precision': 1,
-                'time': '2023'  # Dernière année disponible
-            }
+                'lastTimePeriod': 10  # 10 dernières années
+            },
+            'priority': 1
+        },
+        'data_gouv': {
+            'name': 'Data.gouv.fr',
+            'url': "https://www.data.gouv.fr/fr/datasets/r/44d2fa1e-6fd9-4d1d-82b8-d72545d17dfa",
+            'type': 'csv',
+            'priority': 2
         },
         'worldbank': {
-            'url': "https://api.worldbank.org/v2/country/FR/indicator/SI.POV.GINI",
+            'name': 'Banque Mondiale',
+            'url': "https://api.worldbank.org/v2/country/FRA/indicator/SI.POV.GINI",
             'params': {
                 'format': 'json',
-                'per_page': 5  # 5 dernières années
-            }
+                'per_page': 20,
+                'date': '2010:2024'
+            },
+            'priority': 3
+        },
+        'oecd': {
+            'name': 'OECD',
+            'url': "https://stats.oecd.org/SDMX-JSON/data/IDD/.GINI.../FRA",
+            'params': {
+                'dimensionAtObservation': 'AllDimensions',
+                'detail': 'Full',
+                'startTime': 2010,
+                'endTime': 2024
+            },
+            'priority': 4
         }
     }
     
-    # Données fallback (mises à jour)
-    FALLBACK_DATA = {
-        'value': 29.8,  # GINI France 2022 (dernière disponible)
-        'period': '2022',
-        'name': 'Indice GINI (inégalités)',
-        'unit': 'Points (0-100)',
-        'description': 'Mesure des inégalités de revenus (0=égalité parfaite, 100=inégalité maximale)',
-        'source': 'INSEE 2022'
-    }
-    
-    def __init__(self, cache_file: str = 'instance/gini_cache.json'):
-        self.cache_file = cache_file
+    def __init__(self, cache_dir: str = 'instance/cache'):
+        self.cache_dir = cache_dir
+        self.cache_file = os.path.join(cache_dir, 'gini_data.json')
+        os.makedirs(cache_dir, exist_ok=True)
+        
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json,text/html,application/xhtml+xml',
-            'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json,text/csv',
+            'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8'
         })
-        logger.info("✅ GINIScraper initialisé avec sources multiples")
+        logger.info("[OK] GINIScraper amélioré initialisé")
     
-    def get_gini_data(self) -> Dict[str, Any]:
+    def get_gini_data(self, force_refresh: bool = False) -> Dict[str, Any]:
         """
-        Récupère l'indice GINI pour la France
-        Essai multiple de sources avec fallback intelligent
+        Récupère l'indice GINI avec système de cache intelligent
         """
-        # 1. Vérifier le cache
-        cached_data = self._load_from_cache()
-        if cached_data and self._is_cache_valid(cached_data):
-            logger.info("📦 Utilisation GINI depuis cache")
-            cached_data['source'] = cached_data.get('source', 'Cache')
-            cached_data['note'] = 'Données en cache (moins de 24h)'
-            return cached_data
+        # 1. Vérifier le cache (sauf si force_refresh)
+        if not force_refresh:
+            cached = self._load_cache()
+            if cached and self._is_cache_valid(cached):
+                logger.info("📦 Utilisation données GINI depuis cache")
+                return cached
         
-        # 2. Essayer Eurostat (source principale)
-        logger.info("📊 Tentative récupération GINI depuis Eurostat...")
-        eurostat_data = self._fetch_from_eurostat()
+        # 2. Essayer toutes les sources par ordre de priorité
+        sources_sorted = sorted(
+            self.SOURCES.items(),
+            key=lambda x: x[1].get('priority', 999)
+        )
         
-        if eurostat_data and eurostat_data.get('success'):
-            self._save_to_cache(eurostat_data)
-            logger.info("✅ GINI Eurostat récupéré avec succès")
-            return eurostat_data
+        latest_data = None
+        for source_key, source_config in sources_sorted:
+            try:
+                logger.info(f"[SEARCH] Tentative source: {source_config['name']}")
+                data = self._fetch_from_source(source_key, source_config)
+                
+                if data and self._validate_gini_data(data):
+                    if not latest_data or self._is_data_newer(data, latest_data):
+                        latest_data = data
+                        logger.info(f"[OK] Données valides de {source_config['name']}")
+                        
+                        # Si haute priorité et données récentes, on s'arrête
+                        if source_config.get('priority', 999) <= 2:
+                            break
+            except Exception as e:
+                logger.warning(f"[WARN] Erreur source {source_key}: {e}")
+                continue
         
-        # 3. Essayer Banque Mondiale (source secondaire)
-        logger.info("🌍 Tentative récupération GINI depuis Banque Mondiale...")
-        worldbank_data = self._fetch_from_worldbank()
+        # 3. Si aucune donnée fraîche, vérifier cache expiré
+        if not latest_data:
+            cached = self._load_cache()
+            if cached:
+                logger.warning("[WARN] Utilisation cache expiré")
+                cached['note'] = 'Cache expiré - sources indisponibles'
+                return cached
+            return self._get_fallback_data()
         
-        if worldbank_data and worldbank_data.get('success'):
-            self._save_to_cache(worldbank_data)
-            logger.info("✅ GINI Banque Mondiale récupéré avec succès")
-            return worldbank_data
+        # 4. Enrichir et sauvegarder les données
+        enriched_data = self._enrich_data(latest_data)
+        self._save_cache(enriched_data)
         
-        # 4. Essayer INSEE (via scraping)
-        logger.info("🏛️ Tentative récupération GINI depuis INSEE...")
-        insee_data = self._fetch_from_insee()
-        
-        if insee_data and insee_data.get('success'):
-            self._save_to_cache(insee_data)
-            logger.info("✅ GINI INSEE récupéré avec succès")
-            return insee_data
-        
-        # 5. Utiliser cache même expiré
-        if cached_data:
-            logger.info("📦 Utilisation cache expiré en secours")
-            cached_data['note'] = 'Cache expiré - toutes les sources ont échoué'
-            return cached_data
-        
-        # 6. Fallback final
-        logger.info("🔄 Utilisation données GINI fallback")
-        return self._get_fallback_data()
+        return enriched_data
     
-    def _fetch_from_eurostat(self) -> Optional[Dict[str, Any]]:
-        """Récupère GINI depuis Eurostat API"""
+    def _fetch_from_source(self, source_key: str, config: Dict) -> Optional[Dict]:
+        """Récupère les données depuis une source spécifique"""
         try:
-            source = self.SOURCES['eurostat']
+            if source_key == 'eurostat':
+                return self._fetch_eurostat(config)
+            elif source_key == 'data_gouv':
+                return self._fetch_data_gouv(config)
+            elif source_key == 'worldbank':
+                return self._fetch_worldbank(config)
+            elif source_key == 'oecd':
+                return self._fetch_oecd(config)
+        except Exception as e:
+            logger.error(f"Erreur source {source_key}: {e}")
+            return None
+    
+    def _fetch_eurostat(self, config: Dict) -> Optional[Dict]:
+        """Récupère depuis Eurostat API"""
+        try:
             response = self.session.get(
-                source['url'],
-                params=source['params'],
-                timeout=15,
-                verify=True
+                config['url'],
+                params=config.get('params', {}),
+                timeout=10
             )
             
             if response.status_code == 200:
                 data = response.json()
-                return self._parse_eurostat_response(data)
-            else:
-                logger.warning(f"⚠️ Eurostat status {response.status_code}")
-                return None
-                
+                return self._parse_eurostat(data)
         except Exception as e:
-            logger.error(f"❌ Erreur Eurostat: {e}")
-            return None
+            logger.error(f"Eurostat error: {e}")
+        return None
     
-    def _parse_eurostat_response(self, data: Dict) -> Optional[Dict[str, Any]]:
-        """Parse la réponse Eurostat"""
+    def _parse_eurostat(self, data: Dict) -> Optional[Dict]:
+        """Parse les données Eurostat"""
         try:
-            # Structure de réponse Eurostat typique
             values = data.get('value', {})
-            dimensions = data.get('dimension', {})
+            dimensions = data.get('dimension', {}).get('time', {}).get('category', {}).get('index', {})
             
-            if not values:
+            if not values or not dimensions:
                 return None
             
-            # Extraire les valeurs et périodes
-            gini_values = []
+            # Convertir les indexes en années
+            year_mapping = {idx: year for year, idx in dimensions.items()}
             
-            # Parcourir les valeurs
-            for key, value in values.items():
+            # Récupérer toutes les valeurs
+            gini_values = []
+            for idx_str, value in values.items():
                 try:
-                    # Trouver la période correspondante
-                    period_idx = int(key)
-                    
-                    # Chercher la période dans les dimensions
-                    time_index = data.get('dimension', {}).get('time', {}).get('category', {}).get('index', {})
-                    period = None
-                    for p, idx in time_index.items():
-                        if idx == period_idx:
-                            period = p
-                            break
-                    
-                    if period and value:
+                    idx = int(idx_str)
+                    year = year_mapping.get(str(idx))
+                    if year and value:
                         gini_values.append({
-                            'period': period,
+                            'year': int(year),
                             'value': float(value)
                         })
-                except (ValueError, KeyError):
+                except:
                     continue
             
             if not gini_values:
                 return None
             
-            # Trier par période (la plus récente d'abord)
-            gini_values.sort(key=lambda x: x['period'], reverse=True)
+            # Trier et retourner les plus récentes
+            gini_values.sort(key=lambda x: x['year'], reverse=True)
             
-            latest = gini_values[0]
-            previous = gini_values[1] if len(gini_values) > 1 else latest
-            
-            # Calculer les variations
-            change = latest['value'] - previous['value']
-            change_percent = (change / previous['value'] * 100) if previous['value'] != 0 else 0
-            
-            return {
-                'success': True,
-                'id': 'eurostat_gini',
-                'name': 'Indice GINI (inégalités)',
-                'value': round(latest['value'], 1),
-                'previous_value': round(previous['value'], 1),
-                'change': round(change, 2),
-                'change_percent': round(change_percent, 2),
-                'unit': 'Points (0-100)',
-                'period': latest['period'],
-                'previous_period': previous['period'],
-                'source': 'Eurostat (UE)',
-                'dataset': 'ilc_di12',
-                'description': 'Coefficient de GINI - Mesure des inégalités de revenus disponibles',
-                'category': 'inequality',
-                'reliability': 'official',
-                'last_update': datetime.now().isoformat(),
-                'interpretation': self._interpret_gini(latest['value']),
-                'note': 'Données officielles Eurostat'
+            result = {
+                'values': gini_values[:5],  # 5 dernières années
+                'source': 'Eurostat',
+                'retrieved_at': datetime.now().isoformat()
             }
             
+            return result
+            
         except Exception as e:
-            logger.error(f"❌ Erreur parsing Eurostat: {e}")
+            logger.error(f"Parse Eurostat error: {e}")
             return None
     
-    def _fetch_from_worldbank(self) -> Optional[Dict[str, Any]]:
-        """Récupère GINI depuis Banque Mondiale"""
+    def _fetch_data_gouv(self, config: Dict) -> Optional[Dict]:
+        """Récupère depuis Data.gouv.fr"""
         try:
-            source = self.SOURCES['worldbank']
+            response = self.session.get(config['url'], timeout=10)
+            
+            if response.status_code == 200:
+                if config.get('type') == 'csv':
+                    # Lire le CSV
+                    csv_content = StringIO(response.text)
+                    reader = csv.DictReader(csv_content)
+                    
+                    gini_values = []
+                    for row in reader:
+                        # Chercher les colonnes pertinentes
+                        for key, value in row.items():
+                            if 'gini' in key.lower() and value:
+                                try:
+                                    year_match = re.search(r'\d{4}', key)
+                                    year = int(year_match.group()) if year_match else None
+                                    
+                                    if year and 2000 <= year <= 2025:
+                                        gini_values.append({
+                                            'year': year,
+                                            'value': float(value.replace(',', '.'))
+                                        })
+                                except:
+                                    continue
+                    
+                    if gini_values:
+                        gini_values.sort(key=lambda x: x['year'], reverse=True)
+                        return {
+                            'values': gini_values[:5],
+                            'source': 'Data.gouv.fr',
+                            'retrieved_at': datetime.now().isoformat()
+                        }
+        
+        except Exception as e:
+            logger.error(f"Data.gouv error: {e}")
+        
+        return None
+    
+    def _fetch_worldbank(self, config: Dict) -> Optional[Dict]:
+        """Récupère depuis World Bank"""
+        try:
             response = self.session.get(
-                source['url'],
-                params=source['params'],
-                timeout=15,
-                verify=True
+                config['url'],
+                params=config.get('params', {}),
+                timeout=10
             )
             
             if response.status_code == 200:
                 data = response.json()
-                return self._parse_worldbank_response(data)
-            else:
-                logger.warning(f"⚠️ Banque Mondiale status {response.status_code}")
-                return None
                 
+                if len(data) > 1 and isinstance(data[1], list):
+                    indicators = data[1]
+                    
+                    gini_values = []
+                    for item in indicators:
+                        if item.get('value'):
+                            try:
+                                gini_values.append({
+                                    'year': int(item.get('date')),
+                                    'value': float(item.get('value'))
+                                })
+                            except:
+                                continue
+                    
+                    if gini_values:
+                        gini_values.sort(key=lambda x: x['year'], reverse=True)
+                        return {
+                            'values': gini_values[:5],
+                            'source': 'World Bank',
+                            'retrieved_at': datetime.now().isoformat()
+                        }
+        
         except Exception as e:
-            logger.error(f"❌ Erreur Banque Mondiale: {e}")
-            return None
+            logger.error(f"World Bank error: {e}")
+        
+        return None
     
-    def _parse_worldbank_response(self, data: list) -> Optional[Dict[str, Any]]:
-        """Parse la réponse Banque Mondiale"""
+    def _fetch_oecd(self, config: Dict) -> Optional[Dict]:
+        """Récupère depuis OECD API"""
         try:
-            if not data or len(data) < 2:
-                return None
-            
-            indicators = data[1]  # Les données sont dans le deuxième élément
-            
-            if not indicators:
-                return None
-            
-            # Filtrer les années avec données valides
-            valid_years = []
-            for item in indicators:
-                if item.get('value') is not None:
-                    try:
-                        valid_years.append({
-                            'year': int(item.get('date')),
-                            'value': float(item.get('value'))
-                        })
-                    except (ValueError, TypeError):
-                        continue
-            
-            if not valid_years:
-                return None
-            
-            # Trier par année (décroissant)
-            valid_years.sort(key=lambda x: x['year'], reverse=True)
-            
-            latest = valid_years[0]
-            previous = valid_years[1] if len(valid_years) > 1 else latest
-            
-            # Calculer les variations
-            change = latest['value'] - previous['value']
-            change_percent = (change / previous['value'] * 100) if previous['value'] != 0 else 0
-            
-            return {
-                'success': True,
-                'id': 'worldbank_gini',
-                'name': 'Indice GINI (inégalités)',
-                'value': round(latest['value'], 1),
-                'previous_value': round(previous['value'], 1),
-                'change': round(change, 2),
-                'change_percent': round(change_percent, 2),
-                'unit': 'Points (0-100)',
-                'period': str(latest['year']),
-                'previous_period': str(previous['year']),
-                'source': 'Banque Mondiale',
-                'description': 'Coefficient de GINI - Mesure des inégalités de revenus',
-                'category': 'inequality',
-                'reliability': 'official',
-                'last_update': datetime.now().isoformat(),
-                'interpretation': self._interpret_gini(latest['value']),
-                'note': 'Données Banque Mondiale'
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Erreur parsing Banque Mondiale: {e}")
-            return None
-    
-    def _fetch_from_insee(self) -> Optional[Dict[str, Any]]:
-        """Essaie de récupérer GINI depuis INSEE"""
-        try:
-            # URL INSEE pour les inégalités
-            insee_url = "https://www.insee.fr/fr/statistiques/serie/010599953"
-            
-            response = self.session.get(insee_url, timeout=15, verify=True)
+            response = self.session.get(
+                config['url'],
+                params=config.get('params', {}),
+                timeout=10
+            )
             
             if response.status_code == 200:
-                # Recherche simple de valeurs GINI dans la page
-                content = response.text
+                data = response.json()
                 
-                # Patterns pour trouver GINI
-                patterns = [
-                    r'Gini.*?(\d+[,\.]\d+)',
-                    r'gini.*?(\d+[,\.]\d+)',
-                    r'(\d+[,\.]\d+).*?coefficient.*?Gini',
-                    r'(\d+[,\.]\d+).*?indice.*?Gini'
-                ]
-                
-                for pattern in patterns:
-                    match = re.search(pattern, content, re.IGNORECASE)
-                    if match:
-                        try:
-                            value = float(match.group(1).replace(',', '.'))
-                            if 20 <= value <= 40:  # Plage raisonnable pour GINI
-                                current_year = datetime.now().year
-                                return {
-                                    'success': True,
-                                    'id': 'insee_gini',
-                                    'name': 'Indice GINI (inégalités)',
-                                    'value': round(value, 1),
-                                    'previous_value': round(value, 1),
-                                    'change': 0,
-                                    'change_percent': 0,
-                                    'unit': 'Points (0-100)',
-                                    'period': str(current_year - 1),  # Année précédente
-                                    'source': 'INSEE scraping',
-                                    'description': 'Coefficient de GINI estimé',
-                                    'category': 'inequality',
-                                    'reliability': 'estimated',
-                                    'last_update': datetime.now().isoformat(),
-                                    'interpretation': self._interpret_gini(value),
-                                    'note': 'Valeur estimée depuis site INSEE'
-                                }
-                        except (ValueError, TypeError):
-                            continue
-            return None
-            
+                # Parse JSON complexe de l'OCDE
+                gini_values = []
+                try:
+                    observations = data.get('dataSets', [{}])[0].get('observations', {})
+                    
+                    for key, value in observations.items():
+                        parts = key.split(':')
+                        if len(parts) >= 3 and value:
+                            try:
+                                year = 2010 + int(parts[1])  # Ajuster selon la structure
+                                gini_values.append({
+                                    'year': year,
+                                    'value': float(value[0])
+                                })
+                            except:
+                                continue
+                    
+                    if gini_values:
+                        gini_values.sort(key=lambda x: x['year'], reverse=True)
+                        return {
+                            'values': gini_values[:5],
+                            'source': 'OECD',
+                            'retrieved_at': datetime.now().isoformat()
+                        }
+                except:
+                    pass
+        
         except Exception as e:
-            logger.error(f"❌ Erreur INSEE scraping: {e}")
-            return None
+            logger.error(f"OECD error: {e}")
+        
+        return None
+    
+    def _validate_gini_data(self, data: Dict) -> bool:
+        """Valide les données GINI"""
+        try:
+            if not data.get('values'):
+                return False
+            
+            # Vérifier au moins une valeur
+            values = data['values']
+            if not values or len(values) == 0:
+                return False
+            
+            # Vérifier la plage des valeurs
+            for item in values:
+                value = item.get('value')
+                if not (0 <= value <= 100):
+                    return False
+            
+            return True
+        except:
+            return False
+    
+    def _is_data_newer(self, new_data: Dict, old_data: Dict) -> bool:
+        """Compare la fraîcheur des données"""
+        try:
+            new_latest = max(item['year'] for item in new_data['values'])
+            old_latest = max(item['year'] for item in old_data['values'])
+            return new_latest > old_latest
+        except:
+            return True
+    
+    def _enrich_data(self, raw_data: Dict) -> Dict[str, Any]:
+        """Enrichit les données avec des métadonnées"""
+        values = raw_data['values']
+        
+        if len(values) >= 2:
+            latest = values[0]
+            previous = values[1]
+            
+            change = latest['value'] - previous['value']
+            change_percent = (change / previous['value'] * 100) if previous['value'] != 0 else 0
+        else:
+            latest = values[0]
+            previous = latest
+            change = 0
+            change_percent = 0
+        
+        return {
+            'success': True,
+            'id': 'gini_index',
+            'name': 'Indice GINI (inégalités de revenus)',
+            'value': round(latest['value'], 1),
+            'previous_value': round(previous['value'], 1),
+            'change': round(change, 2),
+            'change_percent': round(change_percent, 1),
+            'unit': 'Points (0-100)',
+            'period': str(latest['year']),
+            'previous_period': str(previous['year']),
+            'source': raw_data['source'],
+            'description': 'Coefficient de GINI mesurant les inégalités de revenus',
+            'category': 'inequality',
+            'reliability': 'official',
+            'last_update': raw_data['retrieved_at'],
+            'interpretation': self._interpret_gini(latest['value']),
+            'historical_values': values,
+            'note': f'Données {raw_data["source"]} - Actualisé quotidiennement'
+        }
     
     def _interpret_gini(self, value: float) -> str:
         """Interprète la valeur du GINI"""
-        value = float(value)
         if value < 25:
-            return "Inégalités très faibles (pays très égalitaires)"
+            return "Inégalités très faibles (société égalitaire)"
         elif value < 30:
-            return "Inégalités faibles à modérées (pays développés typiques)"
+            return "Inégalités faibles (pays nordiques typiques)"
         elif value < 35:
-            return "Inégalités modérées"
+            return "Inégalités modérées (France, Allemagne)"
         elif value < 40:
-            return "Inégalités élevées"
+            return "Inégalités élevées (USA, UK)"
         else:
-            return "Inégalités très élevées"
+            return "Inégalités très élevées (pays émergents)"
     
-    def _load_from_cache(self) -> Optional[Dict]:
-        """Charge depuis le cache JSON"""
+    def _load_cache(self) -> Optional[Dict]:
+        """Charge depuis le cache"""
         try:
-            if not os.path.exists(self.cache_file):
-                return None
-            
-            with open(self.cache_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            # Vérifier la structure de base
-            if isinstance(data, dict) and data.get('value') is not None:
-                return data
-            return None
-            
-        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-            logger.warning(f"Erreur chargement cache: {e}")
-            return None
+            if os.path.exists(self.cache_file):
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                if data.get('last_update'):
+                    cache_time = datetime.fromisoformat(data['last_update'])
+                    if datetime.now() - cache_time < timedelta(days=1):
+                        return data
+        except Exception as e:
+            logger.warning(f"Cache load error: {e}")
+        
+        return None
     
-    def _save_to_cache(self, data: Dict):
+    def _save_cache(self, data: Dict):
         """Sauvegarde dans le cache"""
         try:
-            # Créer le dossier si nécessaire
-            cache_dir = os.path.dirname(self.cache_file)
-            if cache_dir and not os.path.exists(cache_dir):
-                os.makedirs(cache_dir, exist_ok=True)
-            
             with open(self.cache_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            logger.info("💾 Cache GINI sauvegardé")
+                json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            logger.error(f"Erreur sauvegarde cache: {e}")
+            logger.error(f"Cache save error: {e}")
     
     def _is_cache_valid(self, cached_data: Dict) -> bool:
         """Vérifie si le cache est valide (< 24h)"""
         try:
-            last_update = cached_data.get('last_update')
-            if not last_update:
-                return False
-            
-            cache_time = datetime.fromisoformat(last_update)
-            age = datetime.now() - cache_time
-            return age < timedelta(hours=24)
-        except (ValueError, TypeError, KeyError):
+            last_update = datetime.fromisoformat(cached_data['last_update'])
+            return datetime.now() - last_update < timedelta(hours=24)
+        except:
             return False
     
     def _get_fallback_data(self) -> Dict[str, Any]:
-        """Retourne les données de secours"""
-        fb = self.FALLBACK_DATA
+        """Données de secours avec historique"""
+        historical = [
+            {'year': 2022, 'value': 29.8},
+            {'year': 2021, 'value': 29.3},
+            {'year': 2020, 'value': 29.5},
+            {'year': 2019, 'value': 29.2},
+            {'year': 2018, 'value': 28.9}
+        ]
         
         return {
             'success': True,
             'id': 'fallback_gini',
-            'name': fb['name'],
-            'value': fb['value'],
-            'previous_value': fb['value'],
-            'change': 0,
-            'change_percent': 0,
-            'unit': fb['unit'],
-            'period': fb['period'],
-            'source': fb['source'],
-            'description': fb['description'],
+            'name': 'Indice GINI (inégalités)',
+            'value': 29.8,
+            'previous_value': 29.3,
+            'change': 0.5,
+            'change_percent': 1.7,
+            'unit': 'Points (0-100)',
+            'period': '2022',
+            'previous_period': '2021',
+            'source': 'INSEE - Données de référence',
+            'description': 'Coefficient de GINI - Mesure des inégalités de revenus',
             'category': 'inequality',
-            'reliability': 'fallback',
+            'reliability': 'estimated',
             'last_update': datetime.now().isoformat(),
-            'interpretation': self._interpret_gini(fb['value']),
-            'note': 'Données de référence - sources temporairement indisponibles'
+            'interpretation': self._interpret_gini(29.8),
+            'historical_values': historical,
+            'note': 'Données de référence - sources primaires temporairement indisponibles'
         }
     
     def force_refresh(self) -> Dict[str, Any]:
-        """Force le rafraîchissement (ignore cache)"""
-        logger.info("🔄 Rafraîchissement forcé GINI")
-        
-        # Essayer toutes les sources
-        eurostat_data = self._fetch_from_eurostat()
-        if eurostat_data:
-            self._save_to_cache(eurostat_data)
-            return eurostat_data
-        
-        worldbank_data = self._fetch_from_worldbank()
-        if worldbank_data:
-            self._save_to_cache(worldbank_data)
-            return worldbank_data
-        
-        return self._get_fallback_data()
+        """Force le rafraîchissement des données"""
+        return self.get_gini_data(force_refresh=True)
 
 
-# Test du module
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+    logging.basicConfig(level=logging.INFO)
     
     scraper = GINIScraper()
     data = scraper.get_gini_data()
     
-    print("=" * 60)
-    print("📊 INDICE GINI (Inégalités)")
-    print("=" * 60)
+    print("\n" + "="*60)
+    print("[DATA] INDICE GINI - DONNÉES AMÉLIORÉES")
+    print("="*60)
     
     if data.get('success'):
         print(f"\n{data['name']}: {data['value']} {data['unit']}")
-        print(f"Période: {data['period']}")
+        print(f"Période: {data['period']} (précédent: {data['previous_period']})")
         print(f"Source: {data['source']}")
-        print(f"Fiabilité: {data.get('reliability', 'N/A')}")
-        print(f"Interprétation: {data.get('interpretation', 'N/A')}")
+        print(f"Variation: {data['change']:+} points ({data['change_percent']:+}%)")
+        print(f"Interprétation: {data['interpretation']}")
         
-        if 'change' in data and data['change'] != 0:
-            change_sign = "+" if data['change'] > 0 else ""
-            print(f"Variation: {change_sign}{data['change']} points")
+        print(f"\n[CHART] Historique récent:")
+        for item in data.get('historical_values', [])[:3]:
+            print(f"  {item['year']}: {item['value']}")
         
-        if 'note' in data:
-            print(f"Note: {data['note']}")
-        
-        print(f"\nDernière mise à jour: {data.get('last_update', 'N/A')}")
+        print(f"\n🕒 Dernière mise à jour: {data['last_update'][:16].replace('T', ' ')}")
+        print(f"[NOTE] Note: {data.get('note', '')}")
     else:
-        print("❌ Erreur récupération données")
+        print("[ERROR] Erreur de récupération")
